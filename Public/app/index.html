@@ -67,24 +67,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Encontros de Mulheres</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root,[data-theme="light"]{
-    /* ── MychurchFlow Design System — Tema Claro ── */
-    --bg:#F5F0FF;--surface:#FAF7FF;--surface2:#E3DAF2;
-    --bg2:#EDE6F9;--bg3:#E3DAF2;
-    --gold:#B8830E;--gold2:#C9952A;--gold-pale:#FDF3E0;--gold-light:#E8B84B;--gold-dim:#FDF3E0;
-    --brown:#1A1428;--brown-mid:#5E507A;
-    --rose:#B05A6E;--rose-light:#F5E6EA;
-    --sage:#2A7A52;--sage-light:#E0F5EC;
-    --purple:#7B5EA7;--purple2:#6B4E97;--lavender:#7B5EA7;--lavender2:#5A3D8A;
-    --text:#1A1428;--text-mid:#5E507A;--text-soft:#A099BC;
-    --border:#D5CCE8;--locked:#A099BC;--locked-bg:#EDE6F9;
-    --shadow:0 4px 20px rgba(123,94,167,.14);--shadow-sm:0 2px 8px rgba(123,94,167,.08);
-    --banner-grad:linear-gradient(135deg,#7B5EA7 0%,#9B7CC7 100%);
-    --gerar-grad:linear-gradient(135deg,#7B5EA7 0%,#9B7CC7 100%);
-    --bonus-grad:linear-gradient(135deg,#7B5EA7 0%,#C9952A 100%);
-    --upsell-grad:linear-gradient(135deg,#1A1030 0%,#241840 100%);
-    --glow:rgba(123,94,167,0.08);
+<link rel="stylesheet" href="./assets/css/app.css">
+</head>
+<body>
+
+<!-- ══════════════ LOGIN ══════════════ -->
   }
   [data-theme="dark"]{
     /* ── MychurchFlow Design System — Tema Escuro ── */
@@ -813,16 +800,14 @@
   .din-filter-select{flex:1;min-width:110px;padding:7px 10px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface2);font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:600;color:var(--text);cursor:pointer;appearance:none;-webkit-appearance:none;}
   .din-filter-select:focus{outline:none;border-color:var(--purple);}
   .din-filter-clear{padding:7px 12px;border-radius:10px;border:1.5px solid var(--border);background:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;color:var(--rose);cursor:pointer;white-space:nowrap;}
-</style>
-</head>
-<body>
+
 
 <!-- ══════════════ LOGIN ══════════════ -->
 <div class="login-screen active" id="login-screen">
 
   <!-- Barra superior -->
   <div class="login-topbar">
-    <a href="https://mychurchflow.app" class="login-back-btn">← Site</a>
+    <button class="login-back-btn" onclick="window.history.back()">← Site</button>
     <div class="login-lang" id="login-lang">
       <button class="login-lang-trigger" id="login-lang-trigger" onclick="toggleLoginLang()">
         <img class="lf-img" id="login-flag-img" src="https://flagcdn.com/w40/br.png" alt="BR">
@@ -2152,14 +2137,8 @@
 
   <!-- MODAL PLANO DO ENCONTRO (visualizar) -->
 
-<script>
-// ── FORWARD DECLARATIONS (previne TDZ — variáveis usadas antes da definição completa) ──
-var TRANSLATIONS = null;
-var currentLang = 'pt';
-function t(key, fallback){
-  try{ return TRANSLATIONS?.[currentLang]?.[key] || TRANSLATIONS?.['pt']?.[key] || fallback || key; }
-  catch(e){ return fallback || key; }
-}
+<!-- JavaScript loaded externally -->
+  
 // ── DATA ──
 const dinamicas = [
   {id:1,titulo:'O Escudo da Fé',categoria:'Fé',tempo:'20 min',materiais:'Escudo de papelão e papéis',objetivo:'Compreender que a fé nos protege espiritualmente',passos:['Prepare um escudo de papelão para o grupo','Cada mulher escreve um desafio que enfrenta num papel','Cola o papel no escudo simbolizando que a fé a protege','Compartilhe com o grupo como a fé tem sido seu escudo','Encerre com oração pedindo proteção de Deus'],aplicacao:'Deus é nosso escudo em tempos difíceis. A fé não elimina os desafios, mas nos protege deles. (Ef 6:16)'},
@@ -8922,6 +8901,8 @@ carregarModulosAdmin();
   const _fcl=document.getElementById('fav-count-label'); if(_fcl) _fcl.textContent=`${favorites.length} salvos`;
   document.getElementById('painel-dinamica').style.flexDirection='column';
 })();
-aplicarIdioma();</script>
+aplicarIdioma();
+
+<script src="./assets/js/app.js" defer></script>
 </body>
 </html>
