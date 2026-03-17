@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plano Completo — MychurchFlow.app</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --bg: #0F0E0C;
+    --surface: #181614;
+    --surface2: #201E1B;
+    --gold: #D4A843;
+    --gold-dim: #8A6C28;
+    --text: #F0EBE0;
+    --muted: #7A736A;
+    --border: #2A2620;
+    --green: #3D9970;
+    --green-light: #34D399;
+    --red: #C0392B;
+    --blue: #2E86C1;
+    --cream: #0F0E0C;
+    --dark: #F0EBE0;
+    --brown: #78350F;
+    --gold-light: #FDE68A;
+    --white: #201E1B;
+    --border-color: #2A2620;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-weight: 300; line-height: 1.6; }
+  .page { max-width: 920px; margin: 0 auto; padding: 60px 40px; }
+
+  /* HEADER */
+  header { margin-bottom: 48px; padding-bottom: 36px; border-bottom: 1px solid var(--border); }
+  .eyebrow { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); font-weight: 500; margin-bottom: 14px; }
+  h1 { font-family: 'Syne', sans-serif; font-size: 44px; font-weight: 800; line-height: 1.1; color: var(--text); margin-bottom: 10px; }
+  h1 span { color: var(--gold); }
+  .subtitle { color: var(--muted); font-size: 15px; }
+
+  /* MAIN TABS */
+  .main-tabs { display: flex; gap: 4px; margin-bottom: 48px; border-bottom: 1px solid var(--border); overflow-x: auto; }
+  .main-tab { background: none; border: none; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 400; padding: 10px 20px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; }
+  .main-tab:hover { color: var(--text); }
+  .main-tab.active { color: var(--gold); border-bottom-color: var(--gold); font-weight: 500; }
+  .main-panel { display: none; }
+  .main-panel.active { display: block; }
+
+  /* SUB TABS */
+  .sub-tabs { display: flex; gap: 4px; margin-bottom: 36px; border-bottom: 1px solid var(--border); }
+  .sub-tab { background: none; border: none; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 8px 16px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .sub-tab:hover { color: var(--text); }
+  .sub-tab.active { color: var(--gold); border-bottom-color: var(--gold); font-weight: 500; }
+  .sub-panel { display: none; }
+  .sub-panel.active { display: block; }
+
+  /* ===== MONETIZACAO STYLES ===== */
+  .label { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); font-weight: 500; margin-bottom: 12px; }
+  h2 { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 400; color: var(--text); }
+  .section { margin-bottom: 56px; }
+  .section-header { display: flex; align-items: baseline; gap: 16px; margin-bottom: 24px; }
+  .section-line { flex: 1; height: 1px; background: var(--border); }
+  .funnel { display: flex; flex-direction: column; gap: 4px; margin-bottom: 40px; }
+  .funnel-step { background: var(--white); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; }
+  .funnel-step.highlight { border-color: var(--gold); background: #2A2218; }
+  .step-num { width: 28px; height: 28px; border-radius: 50%; background: #3D3733; color: var(--dark); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; flex-shrink: 0; }
+  .funnel-step.highlight .step-num { background: var(--gold); color: #1C1917; }
+  .step-info { flex: 1; }
+  .step-name { font-weight: 500; font-size: 15px; }
+  .step-desc { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .step-price { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--dark); font-weight: 700; }
+  .arrow { text-align: center; color: var(--border-color); font-size: 18px; padding: 2px 0; }
+  .products-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+  .product-card { background: var(--white); border: 1px solid var(--border-color); border-radius: 10px; padding: 20px; position: relative; }
+  .product-card.entry { border-color: var(--gold); background: #2A2218; }
+  .product-tag { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); font-weight: 500; margin-bottom: 8px; }
+  .product-tag.bump { color: var(--muted); }
+  .product-tag.upsell { color: var(--green-light); }
+  .product-name { font-weight: 500; font-size: 14px; color: var(--dark); margin-bottom: 12px; line-height: 1.4; }
+  .product-price { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--dark); }
+  .plans-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .plan-card { background: var(--white); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; }
+  .plan-card.featured { border-color: var(--gold); border-width: 2px; }
+  .plan-header { padding: 24px 24px 20px; border-bottom: 1px solid var(--border-color); }
+  .plan-card.featured .plan-header { background: #D4A843; border-bottom: none; }
+  .plan-card.featured .plan-name { color: #1C1917; }
+  .plan-card.featured .plan-tagline { color: #44301A; }
+  .plan-card.featured .price-period { color: #5C3D1E; }
+  .plan-card.featured .price-value { color: #1C1917; }
+  .plan-card.featured .price-divider { background: #C47D0E; }
+  .plan-name { font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 4px; color: var(--text); }
+  .plan-tagline { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+  .plan-prices { display: flex; gap: 20px; align-items: flex-end; }
+  .price-period { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+  .price-value { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--dark); }
+  .price-divider { width: 1px; height: 32px; background: var(--border-color); margin-bottom: 4px; }
+  .plan-body { padding: 20px 24px 24px; }
+  .plan-section-title { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 500; margin-bottom: 10px; margin-top: 16px; }
+  .plan-section-title:first-child { margin-top: 0; }
+  .feature-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; font-size: 14px; color: var(--dark); }
+  .feature-item .check { width: 16px; height: 16px; border-radius: 50%; background: #064E3B; color: var(--green-light); display: flex; align-items: center; justify-content: center; font-size: 9px; flex-shrink: 0; margin-top: 2px; font-weight: 700; }
+  .feature-item .dash { width: 16px; height: 16px; border-radius: 50%; background: #2E2A27; color: #6B7280; display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; margin-top: 2px; }
+  .badge { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 500; letter-spacing: 0.05em; margin-left: 6px; vertical-align: middle; }
+  .badge-gold { background: #3D2E0A; color: #F59E0B; }
+  .comparison { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .comparison th { text-align: left; padding: 10px 16px; font-weight: 500; font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border-color); }
+  .comparison th:not(:first-child) { text-align: center; }
+  .comparison td { padding: 12px 16px; border-bottom: 1px solid var(--border-color); color: var(--dark); }
+  .comparison td:not(:first-child) { text-align: center; }
+  .comparison tr:last-child td { border-bottom: none; }
+  .comparison tr:hover td { background: #222120; }
+  .tick { color: var(--green-light); font-weight: 700; font-size: 16px; }
+  .cross { color: #44403C; font-size: 16px; }
+  .note { background: var(--white); border: 1px solid var(--border-color); border-left: 3px solid var(--gold); border-radius: 0 8px 8px 0; padding: 16px 20px; font-size: 14px; color: var(--muted); margin-top: 24px; }
+  .note strong { color: var(--dark); font-weight: 500; }
+
+  /* ===== FINANCEIRO STYLES ===== */
+  .fin-section-title { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; margin-top: 40px; }
+  .fin-section-title:first-child { margin-top: 0; }
+  .premissas-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: 10px; margin-bottom: 40px; }
+  .premissa-card { background: var(--white); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px 16px; }
+  .premissa-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .premissa-value { font-size: 15px; font-weight: 500; color: var(--dark); }
+  .fin-table { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 40px; }
+  .fin-table th { text-align: left; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); padding: 8px 14px; border-bottom: 1px solid var(--border-color); }
+  .fin-table th:last-child { text-align: right; }
+  .fin-table td { padding: 11px 14px; border-bottom: 1px solid var(--border-color); color: var(--dark); }
+  .fin-table td:last-child { text-align: right; font-weight: 500; }
+  .fin-table tr:last-child td { border-bottom: none; }
+  .fin-table .subtotal td { background: #222120; font-weight: 500; }
+  .fin-table .row-red td:last-child { color: #F87171; }
+  .fin-table .row-green td:last-child { color: var(--green-light); }
+  .fin-table .row-total td { font-weight: 500; font-size: 15px; }
+  .tag-tool { display: inline-block; font-size: 10px; padding: 1px 7px; border-radius: 20px; background: #2A2218; color: var(--gold); font-weight: 500; margin-left: 6px; vertical-align: middle; }
+  .scenarios-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 40px; }
+  .sc-card { background: var(--white); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; }
+  .sc-card.best { border-color: var(--green-light); border-width: 2px; }
+  .sc-tag { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .sc-card.best .sc-tag { color: var(--green-light); }
+  .sc-name { font-size: 15px; font-weight: 500; margin-bottom: 14px; }
+  .sc-row { display: flex; justify-content: space-between; font-size: 13px; padding: 3px 0; color: var(--muted); }
+  .sc-row span:last-child { color: var(--dark); font-weight: 500; }
+  .sc-divider { border: none; border-top: 1px solid var(--border-color); margin: 10px 0; }
+  .sc-result { display: flex; justify-content: space-between; font-size: 15px; font-weight: 500; }
+  .sc-result .profit { color: var(--green-light); }
+  .sc-result .loss { color: #F87171; }
+  .chart-container { position: relative; height: 240px; margin-bottom: 40px; }
+  .chart-legend { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 10px; font-size: 12px; color: var(--muted); }
+  .chart-legend span { display: flex; align-items: center; gap: 6px; }
+  .chart-legend .dot { width: 10px; height: 10px; border-radius: 2px; }
+  .fin-note { font-size: 13px; color: var(--muted); padding: 14px 18px; border-left: 3px solid var(--gold); background: #2A2218; border-radius: 0 8px 8px 0; }
+  .fin-note strong { color: var(--dark); font-weight: 500; }
+
+  /* ===== ROADMAP STYLES ===== */
+  .rm-summary { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin-bottom: 1.5rem; }
+  .rm-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; }
+  .rm-label { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .rm-value { font-size: 20px; font-weight: 500; }
+  .rm-value.green { color: var(--green-light); }
+  .rm-value.warn { color: #EF9F27; }
+  .phase { border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; margin-bottom: 1rem; background: var(--surface); }
+  .phase-header { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 1.25rem; }
+  .phase-num { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 500; flex-shrink: 0; }
+  .phase-num.prep { background: var(--surface2); color: var(--muted); }
+  .phase-num.validate { background: #2A1800; color: #EF9F27; }
+  .phase-num.scale { background: #00200F; color: var(--green-light); }
+  .phase-num.grow { background: #00102A; color: #5DADE2; }
+  .phase-meta { flex: 1; }
+  .phase-period { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+  .phase-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  .phase-subtitle { font-size: 13px; color: var(--muted); }
+  .phase-budget { text-align: right; flex-shrink: 0; }
+  .budget-label { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+  .budget-value { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; }
+  .phase-body { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  .col-title { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 10px; }
+  .task { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 7px; font-size: 13px; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
+  .dot-gray { background: #44403C; }
+  .dot-warn { background: #EF9F27; }
+  .dot-green { background: #1D9E75; }
+  .dot-blue { background: #378ADD; }
+  .dot-red { background: #E24B4A; }
+  .meta-row { display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0; border-bottom: 1px solid var(--border); }
+  .meta-row:last-child { border-bottom: none; }
+  .meta-row span:first-child { color: var(--muted); }
+  .meta-row .green { color: var(--green-light); font-weight: 500; }
+  .meta-row .red { color: #F87171; font-weight: 500; }
+  .meta-row .warn { color: #EF9F27; font-weight: 500; }
+  .meta-row .bold { font-weight: 500; }
+  .rm-alert { font-size: 13px; color: var(--muted); padding: 10px 14px; border-left: 2px solid #EF9F27; background: #1A1000; border-radius: 0 8px 8px 0; margin-top: 1.25rem; }
+  .rm-alert strong { color: var(--text); font-weight: 500; }
+  .rm-arrow { text-align: center; color: var(--muted); font-size: 18px; padding: 4px 0; }
+  .metrics-block { background: var(--surface2); border-radius: 8px; padding: 1rem 1.25rem; margin-top: 1.25rem; }
+  .metrics-title { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 12px; }
+  .metrics-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; }
+  .metric-item { padding: 10px 12px; border-radius: 8px; background: var(--surface); border: 1px solid var(--border); }
+  .metric-name { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .metric-kill { font-size: 12px; font-weight: 500; color: #F87171; margin-bottom: 2px; }
+  .metric-keep { font-size: 12px; font-weight: 500; color: var(--green-light); }
+  .decision-block { border: 1px solid var(--border); border-radius: 16px; padding: 1.25rem; margin-bottom: 1rem; background: var(--surface); }
+  .decision-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 1rem; }
+  .decision-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .decision-col-title { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+  .decision-col-title.red { color: #F87171; }
+  .decision-col-title.green { color: var(--green-light); }
+  .decision-item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 7px; font-size: 13px; color: var(--text); }
+
+  /* ===== CRIATIVOS STYLES ===== */
+  .creative { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; margin-bottom: 32px; overflow: hidden; }
+  .creative-header { padding: 24px 28px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+  .creative-num { font-family: 'Syne', sans-serif; font-size: 48px; font-weight: 800; color: var(--border); line-height: 1; flex-shrink: 0; }
+  .creative-meta { flex: 1; }
+  .creative-tag { display: inline-block; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; padding: 3px 10px; border-radius: 20px; margin-bottom: 8px; }
+  .tag-imagem { background: #2A1F0A; color: var(--gold); }
+  .tag-video { background: #0A1F2A; color: #5DADE2; }
+  .tag-ugc { background: #0A2A1A; color: #52BE80; }
+  .tag-ia { background: #1A0A2A; color: #BB8FCE; }
+  .creative-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .creative-angle { font-size: 13px; color: var(--muted); }
+  .format-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+  .format-badge { font-size: 10px; padding: 3px 8px; border-radius: 4px; background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+  .creative-body { display: grid; grid-template-columns: 1fr 1fr; }
+  .creative-col { padding: 24px 28px; }
+  .creative-col:first-child { border-right: 1px solid var(--border); }
+  .col-label { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500; color: var(--muted); margin-bottom: 14px; }
+  .estrutura { display: flex; flex-direction: column; gap: 10px; }
+  .bloco { border-radius: 8px; padding: 12px 14px; }
+  .bloco-gancho { background: #1A1000; border-left: 3px solid var(--gold); }
+  .bloco-dor { background: #1A0800; border-left: 3px solid #C0392B; }
+  .bloco-solucao { background: #001A08; border-left: 3px solid var(--green); }
+  .bloco-cta { background: #00081A; border-left: 3px solid #2E86C1; }
+  .bloco-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; margin-bottom: 4px; }
+  .bloco-gancho .bloco-label { color: var(--gold); }
+  .bloco-dor .bloco-label { color: #C0392B; }
+  .bloco-solucao .bloco-label { color: var(--green); }
+  .bloco-cta .bloco-label { color: #2E86C1; }
+  .bloco-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+  .roteiro { display: flex; flex-direction: column; gap: 8px; }
+  .cena { display: flex; gap: 12px; }
+  .cena-num { width: 22px; height: 22px; border-radius: 50%; background: var(--surface2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 500; color: var(--muted); flex-shrink: 0; margin-top: 2px; }
+  .cena-content { flex: 1; }
+  .cena-time { font-size: 10px; color: var(--muted); margin-bottom: 2px; }
+  .cena-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+  .cena-note { font-size: 11px; color: var(--muted); font-style: italic; margin-top: 2px; }
+  .copy-block { background: var(--surface2); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+  .copy-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; color: var(--muted); margin-bottom: 8px; }
+  .copy-text { font-size: 13px; color: var(--text); line-height: 1.6; white-space: pre-line; }
+  .full-section { padding: 24px 28px; border-top: 1px solid var(--border); }
+
+
+  /* ===== INTERNACIONAL STYLES ===== */
+  .market-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; margin-bottom: 2rem; }
+  .market-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+  .market-card.featured { border: 2px solid var(--green-light); }
+  .market-header { padding: 16px 18px 14px; border-bottom: 1px solid var(--border); }
+  .market-flag { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .market-name { font-size: 18px; font-weight: 500; margin-bottom: 6px; }
+  .market-badge { display: inline-block; font-size: 10px; padding: 2px 10px; border-radius: 20px; font-weight: 500; }
+  .mbadge-br { background: #0A1F2A; color: #5DADE2; }
+  .mbadge-es { background: #2A1800; color: #EF9F27; }
+  .mbadge-en { background: #001A08; color: var(--green-light); }
+  .market-body { padding: 14px 18px; }
+  .mrow { display: flex; justify-content: space-between; font-size: 13px; padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .mrow:last-child { border-bottom: none; }
+  .mrow span:first-child { color: var(--muted); }
+  .mrow span:last-child { font-weight: 500; color: var(--text); }
+  .mrow .green { color: var(--green-light); }
+  .mrow .warn { color: #EF9F27; }
+  .intl-section-title { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; margin-top: 40px; }
+  .intl-section-title:first-child { margin-top: 0; }
+  .intl-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 2rem; }
+  .intl-table th { text-align: left; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); padding: 8px 14px; border-bottom: 1px solid var(--border); }
+  .intl-table th:not(:first-child) { text-align: center; }
+  .intl-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text); }
+  .intl-table td:not(:first-child) { text-align: center; font-weight: 500; }
+  .intl-table tr:last-child td { border-bottom: none; }
+  .intl-table .row-highlight td { background: #222120; }
+  .intl-table .tag-br { color: #5DADE2; }
+  .intl-table .tag-es { color: #EF9F27; }
+  .intl-table .tag-en { color: var(--green-light); }
+  .obstacle-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.5rem; }
+  .obstacle-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+  .obstacle-title { font-size: 12px; font-weight: 500; margin-bottom: 10px; }
+  .obstacle-title.warn { color: #EF9F27; }
+  .obstacle-title.green { color: var(--green-light); }
+  .obstacle-item { display: flex; gap: 8px; font-size: 13px; margin-bottom: 6px; color: var(--muted); }
+  .obstacle-item .odot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; margin-top: 7px; }
+  .intl-alert { font-size: 13px; color: var(--muted); padding: 14px 18px; border-left: 3px solid #EF9F27; background: #1A1000; border-radius: 0 8px 8px 0; margin-bottom: 1.5rem; }
+  .intl-alert strong { color: var(--text); font-weight: 500; }
+  .intl-chart-wrap { position: relative; height: 240px; margin-bottom: 2rem; }
+  .intl-legend { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 10px; font-size: 12px; color: var(--muted); }
+  .intl-legend span { display: flex; align-items: center; gap: 6px; }
+  .intl-legend .ldot { width: 10px; height: 10px; border-radius: 2px; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; }
+
+  @media (max-width: 640px) {
+    .page { padding: 32px 20px; }
+    h1 { font-size: 30px; }
+    .plans-grid { grid-template-columns: 1fr; }
+    .phase-body { grid-template-columns: 1fr; }
+    .creative-body { grid-template-columns: 1fr; }
+    .creative-col:first-child { border-right: none; border-bottom: 1px solid var(--border); }
+    .rm-summary { grid-template-columns: 1fr 1fr; }
+    .scenarios-grid { grid-template-columns: 1fr; }
+    .metrics-grid { grid-template-columns: 1fr 1fr; }
+    .decision-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="eyebrow">MychurchFlow.app — Documento Estratégico</div>
+    <h1>Plano <span>Completo</span><br>de Negócio</h1>
+    <p class="subtitle">Monetização · Financeiro · Roadmap de Tráfego · Criativos — Março 2026</p>
+  </header>
+
+  <nav class="main-tabs">
+    <button class="main-tab active" onclick="switchMain('monetizacao', this)">Monetização</button>
+    <button class="main-tab" onclick="switchMain('financeiro', this)">Financeiro</button>
+    <button class="main-tab" onclick="switchMain('roadmap', this)">Roadmap de Tráfego</button>
+    <button class="main-tab" onclick="switchMain('criativos', this)">Criativos</button>
+    <button class="main-tab" onclick="switchMain('internacional', this)">Mercados Internacionais</button>
+  </nav>
+
+  <!-- MONETIZACAO -->
+  <div id="main-monetizacao" class="main-panel active">
+<!-- FUNIL -->
+  <div class="section">
+    <div class="section-header">
+      <h2>Funil de Vendas</h2>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="funnel">
+      <div class="funnel-step">
+        <div class="step-num">1</div>
+        <div class="step-info">
+          <div class="step-name">Anúncio</div>
+          <div class="step-desc">Meta Ads — público líder de grupos de mulheres de igreja</div>
+        </div>
+      </div>
+      <div class="arrow">↓</div>
+      <div class="funnel-step">
+        <div class="step-num">2</div>
+        <div class="step-info">
+          <div class="step-name">Landing Page</div>
+          <div class="step-desc">Apresentação do app — demonstração das funcionalidades</div>
+        </div>
+      </div>
+      <div class="arrow">↓</div>
+      <div class="funnel-step highlight">
+        <div class="step-num">3</div>
+        <div class="step-info">
+          <div class="step-name">Checkout — Combo Principal</div>
+          <div class="step-desc">200+ Dinâmicas + Planejador + Bônus + Order Bumps</div>
+        </div>
+        <div class="step-price">R$19,90</div>
+      </div>
+      <div class="arrow">↓</div>
+      <div class="funnel-step highlight">
+        <div class="step-num">4</div>
+        <div class="step-info">
+          <div class="step-name">Upsell 1 — 50 Encontros Completos</div>
+          <div class="step-desc">Oferta pós-pagamento</div>
+        </div>
+        <div class="step-price">R$24,90</div>
+      </div>
+      <div class="arrow">↓</div>
+      <div class="funnel-step highlight">
+        <div class="step-num">5</div>
+        <div class="step-info">
+          <div class="step-name">Upsell 2 — Devocional</div>
+          <div class="step-desc">Oferta pós-pagamento</div>
+        </div>
+        <div class="step-price">R$12,90</div>
+      </div>
+      <div class="arrow">↓</div>
+      <div class="funnel-step">
+        <div class="step-num">6</div>
+        <div class="step-info">
+          <div class="step-name">Acesso ao App</div>
+          <div class="step-desc">Login criado automaticamente — e-mail com credenciais</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUTOS FIXOS -->
+  <div class="section">
+    <div class="section-header">
+      <h2>Produtos Fixos</h2>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="products-grid">
+      <div class="product-card entry" style="grid-column: span 2;">
+        <div class="product-tag">Combo de entrada obrigatório</div>
+        <div class="product-name">200+ Dinâmicas + Planejador de Encontros + Bônus</div>
+        <div class="product-price">R$19,90 <span style="font-size:13px;font-weight:300;color:var(--muted);">— separado seria R$29,80</span></div>
+      </div>
+      <div class="product-card">
+        <div class="product-tag bump">Order Bump</div>
+        <div class="product-name">50 Quebra-Gelos Cristãos</div>
+        <div class="product-price">R$9,90</div>
+      </div>
+      <div class="product-card">
+        <div class="product-tag bump">Order Bump</div>
+        <div class="product-name">100 Perguntas Poderosas</div>
+        <div class="product-price">R$9,90</div>
+      </div>
+      <div class="product-card">
+        <div class="product-tag bump">Order Bump</div>
+        <div class="product-name">30 Estudos Bíblicos Curtos</div>
+        <div class="product-price">R$9,90</div>
+      </div>
+      <div class="product-card">
+        <div class="product-tag upsell">Upsell</div>
+        <div class="product-name">50 Encontros Completos</div>
+        <div class="product-price">R$24,90</div>
+      </div>
+      <div class="product-card">
+        <div class="product-tag upsell">Upsell</div>
+        <div class="product-name">Devocional para Mulheres</div>
+        <div class="product-price">R$12,90</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ASSINATURAS -->
+  <div class="section">
+    <div class="section-header">
+      <h2>Assinaturas</h2>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="plans-grid">
+
+      <div class="plan-card">
+        <div class="plan-header">
+          <div class="plan-name">Essencial</div>
+          <div class="plan-tagline">Para a líder que quer organização e conteúdo novo</div>
+          <div class="plan-prices">
+            <div class="price-block">
+              <div class="price-period">Mensal</div>
+              <div class="price-value">R$9,90</div>
+            </div>
+            <div class="price-divider"></div>
+            <div class="price-block">
+              <div class="price-period">Anual</div>
+              <div class="price-value">R$89,90</div>
+            </div>
+          </div>
+        </div>
+        <div class="plan-body">
+          <div class="plan-section-title">Módulos inclusos</div>
+          <div class="feature-item"><span class="check">✓</span> 50 Quebra-Gelos</div>
+          <div class="feature-item"><span class="check">✓</span> 100 Perguntas Poderosas</div>
+          <div class="feature-item"><span class="check">✓</span> 30 Estudos Bíblicos</div>
+          <div class="plan-section-title">Exclusivo de assinatura</div>
+          <div class="feature-item"><span class="check">✓</span> Calendário de encontros</div>
+          <div class="feature-item"><span class="check">✓</span> Modelos de convite (WhatsApp e stories)</div>
+          <div class="feature-item"><span class="check">✓</span> Relatório do grupo</div>
+          <div class="plan-section-title">Funcionalidades</div>
+          <div class="feature-item"><span class="check">✓</span> Planejador sem limite</div>
+          <div class="feature-item"><span class="check">✓</span> Gerador aleatório</div>
+          <div class="feature-item"><span class="check">✓</span> Novos produtos <span class="badge badge-gold">30 dias de atraso</span></div>
+          <div class="feature-item"><span class="dash">—</span> <span style="color:#9CA3AF">Gerador com IA</span></div>
+          <div class="feature-item"><span class="dash">—</span> <span style="color:#9CA3AF">Encontros completos</span></div>
+          <div class="feature-item"><span class="dash">—</span> <span style="color:#9CA3AF">Devocional incluso</span></div>
+        </div>
+      </div>
+
+      <div class="plan-card featured">
+        <div class="plan-header">
+          <div class="plan-name">Líder</div>
+          <div class="plan-tagline">Para a líder engajada que quer tudo pronto</div>
+          <div class="plan-prices">
+            <div class="price-block">
+              <div class="price-period">Mensal</div>
+              <div class="price-value">R$24,90</div>
+            </div>
+            <div class="price-divider"></div>
+            <div class="price-block">
+              <div class="price-period">Anual</div>
+              <div class="price-value">R$199,90</div>
+            </div>
+          </div>
+        </div>
+        <div class="plan-body">
+          <div class="plan-section-title">Módulos inclusos</div>
+          <div class="feature-item"><span class="check">✓</span> 50 Quebra-Gelos</div>
+          <div class="feature-item"><span class="check">✓</span> 100 Perguntas Poderosas</div>
+          <div class="feature-item"><span class="check">✓</span> 30 Estudos Bíblicos</div>
+          <div class="feature-item"><span class="check">✓</span> 50 Encontros Completos</div>
+          <div class="feature-item"><span class="check">✓</span> Devocional</div>
+          <div class="plan-section-title">Exclusivo de assinatura</div>
+          <div class="feature-item"><span class="check">✓</span> Calendário de encontros</div>
+          <div class="feature-item"><span class="check">✓</span> Modelos de convite (WhatsApp e stories)</div>
+          <div class="feature-item"><span class="check">✓</span> Relatório do grupo</div>
+          <div class="feature-item"><span class="check">✓</span> Banco de orações temáticas</div>
+          <div class="feature-item"><span class="check">✓</span> Guia de liderança mensal</div>
+          <div class="feature-item"><span class="check">✓</span> Certificado de liderança digital</div>
+          <div class="plan-section-title">Funcionalidades</div>
+          <div class="feature-item"><span class="check">✓</span> Planejador sem limite</div>
+          <div class="feature-item"><span class="check">✓</span> Gerador com IA <span class="badge badge-gold">exclusivo</span></div>
+          <div class="feature-item"><span class="check">✓</span> Novos produtos no lançamento</div>
+          <div class="feature-item"><span class="check">✓</span> Acesso antecipado a novidades</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="note">
+      <strong>Entrada obrigatória:</strong> para acessar o app e qualquer assinatura, a cliente precisa comprar o <strong>Combo Principal (R$19,90)</strong> — 200+ Dinâmicas + Planejador + Bônus. Todos os compradores ganham acesso ao app e ao gerador aleatório.
+    </div>
+  </div>
+
+  <!-- TABELA COMPARATIVA -->
+  <div class="section">
+    <div class="section-header">
+      <h2>Comparativo de Valor</h2>
+      <div class="section-line"></div>
+    </div>
+
+    <table class="comparison">
+      <thead>
+        <tr>
+          <th>Produto / Funcionalidade</th>
+          <th>Preço fixo</th>
+          <th>Essencial</th>
+          <th>Líder</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Combo (Dinâmicas + Planejador)</td>
+          <td>R$19,90</td>
+          <td><span style="color:#6B7280;font-size:13px">obrigatório</span></td>
+          <td><span style="color:#6B7280;font-size:13px">obrigatório</span></td>
+        </tr>
+        <tr>
+          <td>50 Quebra-Gelos</td>
+          <td>R$9,90</td>
+          <td><span class="tick">✓</span></td>
+          <td><span class="tick">✓</span></td>
+        </tr>
+        <tr>
+          <td>100 Perguntas</td>
+          <td>R$9,90</td>
+          <td><span class="tick">✓</span></td>
+          <td><span class="tick">✓</span></td>
+        </tr>
+        <tr>
+          <td>30 Estudos Bíblicos</td>
+          <td>R$9,90</td>
+          <td><span class="tick">✓</span></td>
+          <td><span class="tick">✓</span></td>
+        </tr>
+        <tr>
+          <td>50 Encontros Completos</td>
+          <td>R$24,90</td>
+          <td><span class="cross">—</span></td>
+          <td><span class="tick">✓</span></td>
+        </tr>
+        <tr>
+          <td>Devocional</td>
+          <td>R$12,90</td>
+          <td><span class="cross">—</span></td>
+          <td><span class="tick">✓</span></td>
+        </tr>
+        <tr style="background:#222120;">
+          <td colspan="4" style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);padding:10px 16px 6px;">Exclusivo de assinatura</td>
+        </tr>
+        <tr>
+          <td>Calendário de encontros</td>
+          <td><span class="cross">—</span></td>
+          <td><span class="tick">✓</span></td>
+          <td><span class="tick">✓</span></td>
+        </tr>
+        <tr>
+          <td>Modelos de convite</td>
+          <td><span class="cross">—</span></td>
+          <td><span class="tick">✓</span></td>
+          <td><span class="tick">✓</span></td>
+        </tr>
+        <tr>
+          <td>Relatório do grupo</td>
+          <td><span class="cross">—</span></td>
+          <td><span class="tick">✓</span></td>
+          <td><span class="tick">✓</span></td>
+        </tr>
+        <tr>
+          <td>Banco de orações temáticas</td>
+          <td><span class="cross">—</span></td>
+          <td><span class="cross">—</span></td>
+          <td><span class="tick">✓</span></td>
+        </tr>
+        <tr>
+          <td>Guia de liderança mensal</td>
+          <td><span class="cross">—</span></td>
+          <td><span class="cross">—</span></td>
+          <td><span class="tick">✓</span></td>
+        </tr>
+        <tr>
+          <td>Certificado de liderança</td>
+          <td><span class="cross">—</span></td>
+          <td><span class="cross">—</span></td>
+          <td><span class="tick">✓</span></td>
+        </tr>
+        <tr>
+          <td>Gerador com IA</td>
+          <td><span class="cross">—</span></td>
+          <td><span class="cross">—</span></td>
+          <td><span class="tick">✓</span></td>
+        </tr>
+        <tr style="background:#222120;">
+          <td><strong>Investimento anual</strong></td>
+          <td><strong>R$106,50</strong></td>
+          <td><strong>R$89,90/ano</strong></td>
+          <td><strong>R$199,90/ano</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>
+    <span>App Dinâmicas para Mulheres Cristãs</span>
+    <span>Versão 3.0 — Março 2026</span>
+  </footer>
+  </div>
+
+  <!-- FINANCEIRO -->
+  <div id="main-financeiro" class="main-panel">
+<div class="fin-section-title">premissas do cálculo</div>
+    <div class="premissas-grid">
+      <div class="premissa-card"><div class="premissa-label">Orçamento inicial (validação)</div><div class="premissa-value">R$ 500,00</div></div>
+      <div class="premissa-card"><div class="premissa-label">CPA histórico</div><div class="premissa-value">R$ 10,00</div></div>
+      <div class="premissa-card"><div class="premissa-label">Taxa EfiBank (Pix API)</div><div class="premissa-value">1,19% / transação</div></div>
+      <div class="premissa-card"><div class="premissa-label">Taxa GGCheckout (est.)</div><div class="premissa-value">2% / transação</div></div>
+      <div class="premissa-card"><div class="premissa-label">Total taxas por venda</div><div class="premissa-value">3,19%</div></div>
+    </div>
+
+    <div class="fin-section-title">custos fixos mensais</div>
+    <table class="fin-table">
+      <thead><tr><th>Item</th><th>Categoria</th><th>Valor/mês</th></tr></thead>
+      <tbody>
+        <tr><td>Meta Ads (validação)</td><td>Tráfego</td><td>R$ 500,00</td></tr>
+        <tr><td>Claude AI Pro</td><td>Ferramenta <span class="tag-tool">já assina</span></td><td>R$ 110,00</td></tr>
+        <tr><td>UTMFY</td><td>Ferramenta <span class="tag-tool">já assina</span></td><td>R$ 100,00</td></tr>
+        <tr><td>Canva Pro</td><td>Ferramenta <span class="tag-tool">já assina</span></td><td>R$ 35,00</td></tr>
+        <tr><td>CapCut Pro</td><td>Ferramenta <span class="tag-tool">já assina</span></td><td>R$ 35,00</td></tr>
+        <tr><td>Railway (backend + PostgreSQL)</td><td>Infraestrutura</td><td>R$ 30,00</td></tr>
+        <tr><td>Netlify (landing page)</td><td>Infraestrutura</td><td>R$ 0,00</td></tr>
+        <tr><td>Domínio mychurchflow.app</td><td>Infraestrutura</td><td>R$ 7,33</td></tr>
+        <tr><td>Resend (e-mail automático)</td><td>Infraestrutura</td><td>R$ 0,00</td></tr>
+        <tr><td>API Claude (IA app)</td><td>Infraestrutura</td><td>R$ 50,00</td></tr>
+        <tr class="subtotal"><td colspan="2">Total custos fixos</td><td>R$ 867,33</td></tr>
+      </tbody>
+    </table>
+
+    <div class="fin-section-title">custo variável por venda</div>
+    <table class="fin-table">
+      <thead><tr><th>Taxa</th><th>Cálculo (venda R$ 19,90)</th><th>Valor</th></tr></thead>
+      <tbody>
+        <tr><td>EfiBank Pix</td><td>1,19% × R$ 19,90</td><td>R$ 0,24</td></tr>
+        <tr><td>GGCheckout</td><td>2% × R$ 19,90</td><td>R$ 0,40</td></tr>
+        <tr class="subtotal"><td colspan="2">Total por venda</td><td>R$ 0,64 (3,19%)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="fin-section-title">cenários mensais — mês 1 (sem assinantes)</div>
+    <div class="scenarios-grid">
+      <div class="sc-card">
+        <div class="sc-tag">Pessimista</div>
+        <div class="sc-name">CPA R$15 — 20 vendas</div>
+        <div class="sc-row"><span>Combo (20 × R$19,90)</span><span>R$ 398,00</span></div>
+        <div class="sc-row"><span>Order bumps (30%)</span><span>R$ 59,70</span></div>
+        <div class="sc-row"><span>Upsells (10%)</span><span>R$ 37,40</span></div>
+        <div class="sc-row"><span>Faturamento bruto</span><span>R$ 495,10</span></div>
+        <div class="sc-row"><span>Taxas (3,19%)</span><span>- R$ 15,79</span></div>
+        <div class="sc-row"><span>Custos fixos</span><span>- R$ 867,33</span></div>
+        <hr class="sc-divider">
+        <div class="sc-result"><span>Resultado</span><span class="loss">- R$ 388,02</span></div>
+      </div>
+      <div class="sc-card best">
+        <div class="sc-tag">Realista</div>
+        <div class="sc-name">CPA R$10 — 30 vendas</div>
+        <div class="sc-row"><span>Combo (30 × R$19,90)</span><span>R$ 597,00</span></div>
+        <div class="sc-row"><span>Order bumps (40%)</span><span>R$ 118,80</span></div>
+        <div class="sc-row"><span>Upsells (15%)</span><span>R$ 84,15</span></div>
+        <div class="sc-row"><span>Faturamento bruto</span><span>R$ 799,95</span></div>
+        <div class="sc-row"><span>Taxas (3,19%)</span><span>- R$ 25,52</span></div>
+        <div class="sc-row"><span>Custos fixos</span><span>- R$ 867,33</span></div>
+        <hr class="sc-divider">
+        <div class="sc-result"><span>Resultado</span><span class="loss">- R$ 92,90</span></div>
+      </div>
+      <div class="sc-card">
+        <div class="sc-tag">Otimista</div>
+        <div class="sc-name">CPA R$8 — 37 vendas</div>
+        <div class="sc-row"><span>Combo (37 × R$19,90)</span><span>R$ 736,30</span></div>
+        <div class="sc-row"><span>Order bumps (50%)</span><span>R$ 183,75</span></div>
+        <div class="sc-row"><span>Upsells (20%)</span><span>R$ 140,70</span></div>
+        <div class="sc-row"><span>Faturamento bruto</span><span>R$ 1.060,75</span></div>
+        <div class="sc-row"><span>Taxas (3,19%)</span><span>- R$ 33,84</span></div>
+        <div class="sc-row"><span>Custos fixos</span><span>- R$ 867,33</span></div>
+        <hr class="sc-divider">
+        <div class="sc-result"><span>Resultado</span><span class="profit">+ R$ 159,58</span></div>
+      </div>
+    </div>
+
+    <div class="fin-section-title">impacto das assinaturas — mês 3 (cenário realista)</div>
+    <table class="fin-table">
+      <thead><tr><th>Fonte de receita</th><th>Volume estimado</th><th>Valor</th></tr></thead>
+      <tbody>
+        <tr><td>Vendas novas (produtos fixos)</td><td>30 vendas × ARPU R$26</td><td>R$ 780,00</td></tr>
+        <tr><td>Assinantes Essencial</td><td>15 × R$ 9,90</td><td>R$ 148,50</td></tr>
+        <tr><td>Assinantes Líder</td><td>8 × R$ 24,90</td><td>R$ 199,20</td></tr>
+        <tr class="subtotal"><td colspan="2">Faturamento bruto</td><td>R$ 1.127,70</td></tr>
+        <tr class="row-red"><td colspan="2">Taxas + custos fixos</td><td>- R$ 903,33</td></tr>
+        <tr class="row-green row-total"><td colspan="2">Lucro estimado mês 3</td><td>+ R$ 224,37</td></tr>
+      </tbody>
+    </table>
+
+    <div class="fin-section-title">projeção de receita — 6 meses (cenário realista)</div>
+    <div class="chart-legend">
+      <span><span class="dot" style="background:#1D9E75;"></span>Faturamento</span>
+      <span><span class="dot" style="background:#F87171;"></span>Custos totais</span>
+      <span><span class="dot" style="background:#378ADD;"></span>Lucro líquido</span>
+    </div>
+    <div class="chart-container">
+      <canvas id="growthChart"></canvas>
+    </div>
+
+    <div class="fin-note"><strong>Orçamento de validação:</strong> R$ 500 concentrados nos primeiros 8-10 dias (4 conjuntos × R$15/dia). Após validação, o budget mensal cai para R$ 300-400 com o hero creative rodando. Os cenários abaixo refletem o mês de validação completo.<br><br>
+      <strong>Nota:</strong> As ferramentas (R$ 280/mês) já são custos que você tem independente do negócio. O impacto real no negócio é menor do que parece. Confirme a taxa exata do GGCheckout antes do lançamento — não foi possível encontrar o valor oficial publicamente.
+    </div>
+
+    <footer style="margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); display: flex; justify-content: space-between;">
+      <span>App Dinâmicas para Mulheres Cristãs</span>
+      <span>Versão 3.0 — Março 2026</span>
+    </footer>
+  </div>
+
+  <!-- ROADMAP -->
+  <div id="main-roadmap" class="main-panel">
+    <div class="rm-summary">
+      <div class="rm-card"><div class="rm-label">Estrutura ABO</div><div class="rm-value">4 conjuntos</div></div>
+      <div class="rm-card"><div class="rm-label">Orçamento/dia</div><div class="rm-value warn">R$ 60/dia</div></div>
+      <div class="rm-card"><div class="rm-label">Verba inicial</div><div class="rm-value warn">R$ 500</div></div>
+      <div class="rm-card"><div class="rm-label">Dias até validar</div><div class="rm-value green">8-10 dias</div></div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-num prep">0</div>
+        <div class="phase-meta">
+          <div class="phase-period">Pré-lançamento — 2 a 3 semanas</div>
+          <div class="phase-title">Preparação</div>
+          <div class="phase-subtitle">Zero anúncio antes de tudo estar funcionando</div>
+        </div>
+        <div class="phase-budget"><div class="budget-label">Gasto</div><div class="budget-value">R$ 0</div></div>
+      </div>
+      <div class="phase-body">
+        <div>
+          <div class="col-title">Produto e entrega</div>
+          <div class="task"><div class="dot dot-gray"></div>App funcionando — login, acesso, módulos</div>
+          <div class="task"><div class="dot dot-gray"></div>Checkout integrado GGCheckout + EfiBank</div>
+          <div class="task"><div class="dot dot-gray"></div>E-mail automático via Resend funcionando</div>
+          <div class="task"><div class="dot dot-gray"></div>Landing page no ar — mychurchflow.app</div>
+          <div class="task"><div class="dot dot-gray"></div>Pixel do Meta instalado e eventos configurados</div>
+          <div class="task"><div class="dot dot-gray"></div>UTMs configurados no UTMFY</div>
+        </div>
+        <div>
+          <div class="col-title">Criativos a produzir</div>
+          <div class="task"><div class="dot dot-gray"></div>2 imagens (feed + stories)</div>
+          <div class="task"><div class="dot dot-gray"></div>2 vídeos curtos 15-30s</div>
+          <div class="task"><div class="dot dot-gray"></div>Ângulos diferentes — dor, curiosidade, prova, resultado</div>
+          <div class="task"><div class="dot dot-gray"></div>Copy escrita para cada anúncio</div>
+          <div class="task"><div class="dot dot-gray"></div>Usar conta e pixel com histórico anterior</div>
+          <div class="task"><div class="dot dot-gray"></div>Público: mulheres 25-50, interesse em igreja/ministério</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rm-arrow">↓</div>
+
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-num validate">1</div>
+        <div class="phase-meta">
+          <div class="phase-period">Dias 1 a 10 — validação</div>
+          <div class="phase-title">Teste de criativos</div>
+          <div class="phase-subtitle">4 conjuntos ABO × R$15/dia — objetivo: achar o vencedor</div>
+        </div>
+        <div class="phase-budget"><div class="budget-label">Gasto estimado</div><div class="budget-value">R$ 500-600</div></div>
+      </div>
+      <div class="phase-body">
+        <div>
+          <div class="col-title">Estrutura da campanha</div>
+          <div class="task"><div class="dot dot-warn"></div>Conjunto 1 — Imagem A (dor: falta de ideias)</div>
+          <div class="task"><div class="dot dot-warn"></div>Conjunto 2 — Imagem B (dor: grupo perdendo interesse)</div>
+          <div class="task"><div class="dot dot-warn"></div>Conjunto 3 — Vídeo UGC/narrado</div>
+          <div class="task"><div class="dot dot-warn"></div>Conjunto 4 — Vídeo demonstração do app</div>
+          <div class="task"><div class="dot dot-warn"></div>1 campanha de conversão — evento: compra</div>
+          <div class="task"><div class="dot dot-warn"></div>Público amplo — deixa o algoritmo trabalhar</div>
+          <div class="task"><div class="dot dot-warn"></div>Não mexer nos primeiros 3 dias por conjunto</div>
+        </div>
+        <div>
+          <div class="col-title">Metas do período</div>
+          <div class="meta-row"><span>Vendas esperadas</span><span class="warn">8 a 15</span></div>
+          <div class="meta-row"><span>CPA esperado</span><span class="warn">R$ 35-60</span></div>
+          <div class="meta-row"><span>Retorno estimado</span><span class="warn">R$ 200-390</span></div>
+          <div class="meta-row"><span>Verba líquida queimada</span><span class="red">~R$ 300</span></div>
+          <div class="meta-row"><span>Objetivo real</span><span class="bold">Identificar hero creative</span></div>
+        </div>
+      </div>
+
+      <div class="metrics-block">
+        <div class="metrics-title">Métricas para avaliar cada criativo — quando pausar ou manter</div>
+        <div class="metrics-grid">
+          <div class="metric-item">
+            <div class="metric-name">CPA (custo por compra)</div>
+            <div class="metric-kill">Pausar: acima de R$ 25</div>
+            <div class="metric-keep">Manter: abaixo de R$ 18</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-name">CTR (clique no anúncio)</div>
+            <div class="metric-kill">Pausar: abaixo de 1%</div>
+            <div class="metric-keep">Manter: acima de 2%</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-name">CPM (custo por 1k impressões)</div>
+            <div class="metric-kill">Preocupar: acima de R$ 40</div>
+            <div class="metric-keep">Bom: abaixo de R$ 25</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-name">Taxa de conversão (LP)</div>
+            <div class="metric-kill">Pausar: abaixo de 3%</div>
+            <div class="metric-keep">Manter: acima de 5%</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-name">Hook rate (3s view)</div>
+            <div class="metric-kill">Pausar: abaixo de 25%</div>
+            <div class="metric-keep">Manter: acima de 40%</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-name">ROAS</div>
+            <div class="metric-kill">Pausar: abaixo de 1,5</div>
+            <div class="metric-keep">Escalar: acima de 2,5</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rm-alert"><strong>Regra de ouro:</strong> não pausar antes de 3 dias e R$45 gastos por conjunto. O algoritmo precisa de tempo para aprender — decisão prematura desperdiça o investimento inicial.</div>
+    </div>
+
+    <div class="rm-arrow">↓</div>
+
+    <div class="decision-block">
+      <div class="decision-title">Decisão após os 10 dias</div>
+      <div class="decision-grid">
+        <div>
+          <div class="decision-col-title red">Pausar o criativo se:</div>
+          <div class="decision-item"><div class="dot dot-red"></div>CPA acima de R$ 25 após R$ 45+ gastos</div>
+          <div class="decision-item"><div class="dot dot-red"></div>CTR abaixo de 1% consistentemente</div>
+          <div class="decision-item"><div class="dot dot-red"></div>0 vendas após R$ 60 gastos</div>
+          <div class="decision-item"><div class="dot dot-red"></div>Hook rate abaixo de 20%</div>
+          <div class="decision-item"><div class="dot dot-red"></div>ROAS abaixo de 1,0</div>
+        </div>
+        <div>
+          <div class="decision-col-title green">Manter e escalar se:</div>
+          <div class="decision-item"><div class="dot dot-green"></div>CPA abaixo de R$ 18</div>
+          <div class="decision-item"><div class="dot dot-green"></div>CTR acima de 2%</div>
+          <div class="decision-item"><div class="dot dot-green"></div>2+ vendas nos primeiros R$ 60</div>
+          <div class="decision-item"><div class="dot dot-green"></div>Hook rate acima de 35%</div>
+          <div class="decision-item"><div class="dot dot-green"></div>ROAS acima de 2,0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rm-arrow">↓</div>
+
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-num scale">2</div>
+        <div class="phase-meta">
+          <div class="phase-period">Dia 11 em diante — otimização</div>
+          <div class="phase-title">Escala do vencedor</div>
+          <div class="phase-subtitle">Pausar os ruins, concentrar verba no hero creative</div>
+        </div>
+        <div class="phase-budget"><div class="budget-label">Orçamento/dia</div><div class="budget-value">R$ 20-30</div></div>
+      </div>
+      <div class="phase-body">
+        <div>
+          <div class="col-title">Estratégia</div>
+          <div class="task"><div class="dot dot-green"></div>Pausar 2-3 conjuntos perdedores</div>
+          <div class="task"><div class="dot dot-green"></div>Subir vencedor para R$20-25/dia</div>
+          <div class="task"><div class="dot dot-green"></div>Subir no máximo 20% a cada 3 dias</div>
+          <div class="task"><div class="dot dot-green"></div>Testar 1-2 variações do criativo vencedor</div>
+          <div class="task"><div class="dot dot-green"></div>Ativar remarketing para quem visitou a LP</div>
+        </div>
+        <div>
+          <div class="col-title">Metas</div>
+          <div class="meta-row"><span>Vendas/mês</span><span class="green">25 a 35</span></div>
+          <div class="meta-row"><span>CPA alvo</span><span class="green">R$ 8-15</span></div>
+          <div class="meta-row"><span>Faturamento estimado</span><span class="green">R$ 800-1.100</span></div>
+          <div class="meta-row"><span>Resultado</span><span class="green">Lucro consistente</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rm-arrow">↓</div>
+
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-num grow">3</div>
+        <div class="phase-meta">
+          <div class="phase-period">Mês 2-3 em diante</div>
+          <div class="phase-title">Crescimento</div>
+          <div class="phase-subtitle">Reinvestir lucro + banco de criativos em rotação</div>
+        </div>
+        <div class="phase-budget"><div class="budget-label">Orçamento/dia</div><div class="budget-value">R$ 30-60+</div></div>
+      </div>
+      <div class="phase-body">
+        <div>
+          <div class="col-title">Estratégia</div>
+          <div class="task"><div class="dot dot-blue"></div>Reinvestir 50% do lucro em tráfego</div>
+          <div class="task"><div class="dot dot-blue"></div>Produzir novos criativos antes da fadiga</div>
+          <div class="task"><div class="dot dot-blue"></div>Converter compradores em assinantes</div>
+          <div class="task"><div class="dot dot-blue"></div>Testar campanha de retenção de assinantes</div>
+        </div>
+        <div>
+          <div class="col-title">Metas</div>
+          <div class="meta-row"><span>Vendas/mês</span><span class="green">35-50+</span></div>
+          <div class="meta-row"><span>Assinantes ativos</span><span class="green">30-60+</span></div>
+          <div class="meta-row"><span>Receita recorrente</span><span class="green">R$ 500+/mês</span></div>
+          <div class="meta-row"><span>Lucro estimado</span><span class="green">R$ 800-1.400/mês</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CRIATIVOS -->
+  <div id="main-criativos" class="main-panel">
+    <div class="sub-tabs">
+      <button class="sub-tab active" onclick="switchSub('imagens', this)">Imagens (2)</button>
+      <button class="sub-tab" onclick="switchSub('videos', this)">Vídeos (2)</button>
+      <button class="sub-tab" onclick="switchSub('copy', this)">Copy de Campanha</button>
+    </div>
+    <div id="sub-imagens" class="sub-panel active"><!-- IMAGEM 1 -->
+    <div class="creative">
+      <div class="creative-header">
+        <div class="creative-num">01</div>
+        <div class="creative-meta">
+          <span class="creative-tag tag-imagem">Imagem</span>
+          <div class="creative-title">A líder que nunca sabe o que fazer</div>
+          <div class="creative-angle">Ângulo: dor da falta de ideias + solução visual</div>
+        </div>
+        <div class="format-badges">
+          <span class="format-badge">Feed</span>
+          <span class="format-badge">Reels</span>
+          <span class="format-badge">Stories</span>
+          <span class="format-badge">Explorar</span>
+        </div>
+      </div>
+      <div class="creative-body">
+        <div class="creative-col">
+          <div class="col-label">Estrutura do criativo</div>
+          <div class="estrutura">
+            <div class="bloco bloco-gancho">
+              <div class="bloco-label">Gancho (headline)</div>
+              <div class="bloco-text">"Você lidera um grupo de mulheres mas fica em branco na hora de planejar o encontro?"</div>
+            </div>
+            <div class="bloco bloco-dor">
+              <div class="bloco-label">Dor</div>
+              <div class="bloco-text">Mostrar tela de celular com WhatsApp — mensagem: "Oi líderes, alguém tem ideia pro encontro de hoje?"</div>
+            </div>
+            <div class="bloco bloco-solucao">
+              <div class="bloco-label">Solução</div>
+              <div class="bloco-text">Print do app mostrando as 200+ dinâmicas organizadas por categoria. Visual limpo, profissional.</div>
+            </div>
+            <div class="bloco bloco-cta">
+              <div class="bloco-label">CTA</div>
+              <div class="bloco-text">"200+ dinâmicas prontas no seu celular. Acesse agora por R$19,90"</div>
+            </div>
+          </div>
+        </div>
+        <div class="creative-col">
+          <div class="col-label">Orientações visuais</div>
+          <div class="estrutura">
+            <div class="bloco" style="background:var(--surface2); border-left: 3px solid var(--border);">
+              <div class="bloco-label" style="color:var(--muted);">Formato</div>
+              <div class="bloco-text">1:1 para feed, 9:16 para stories. Fundo escuro ou foto de mulher olhando o celular.</div>
+            </div>
+            <div class="bloco" style="background:var(--surface2); border-left: 3px solid var(--border);">
+              <div class="bloco-label" style="color:var(--muted);">Elemento principal</div>
+              <div class="bloco-text">Mockup do app em tela de celular. Mostrar a tela de dinâmicas com categorias visíveis.</div>
+            </div>
+            <div class="bloco" style="background:var(--surface2); border-left: 3px solid var(--border);">
+              <div class="bloco-label" style="color:var(--muted);">Texto na imagem</div>
+              <div class="bloco-text">Headline em destaque + número "200+" grande. Evitar texto pequeno demais.</div>
+            </div>
+            <div class="bloco" style="background:var(--surface2); border-left: 3px solid var(--border);">
+              <div class="bloco-label" style="color:var(--muted);">Paleta sugerida</div>
+              <div class="bloco-text">Tons terrosos/dourados — remete à fé, acolhimento. Evitar azul corporativo.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- IMAGEM 2 -->
+    <div class="creative">
+      <div class="creative-header">
+        <div class="creative-num">02</div>
+        <div class="creative-meta">
+          <span class="creative-tag tag-imagem">Imagem</span>
+          <div class="creative-title">Grupo que dispersa e perde o interesse</div>
+          <div class="creative-angle">Ângulo: medo de perder o grupo + autoridade como líder</div>
+        </div>
+        <div class="format-badges">
+          <span class="format-badge">Feed</span>
+          <span class="format-badge">Reels</span>
+          <span class="format-badge">Stories</span>
+          <span class="format-badge">Explorar</span>
+        </div>
+      </div>
+      <div class="creative-body">
+        <div class="creative-col">
+          <div class="col-label">Estrutura do criativo</div>
+          <div class="estrutura">
+            <div class="bloco bloco-gancho">
+              <div class="bloco-label">Gancho (headline)</div>
+              <div class="bloco-text">"Seu grupo de mulheres está perdendo o entusiasmo?"</div>
+            </div>
+            <div class="bloco bloco-dor">
+              <div class="bloco-label">Dor</div>
+              <div class="bloco-text">Imagem de grupo silencioso, olhares dispersos — ou texto sobreposto: "sempre as mesmas dinâmicas, sempre o mesmo grupo entediado"</div>
+            </div>
+            <div class="bloco bloco-solucao">
+              <div class="bloco-label">Solução</div>
+              <div class="bloco-text">Contraste visual: grupo engajado, sorrindo, participando. Badge "encontros que elas pedem pra repetir"</div>
+            </div>
+            <div class="bloco bloco-cta">
+              <div class="bloco-label">CTA</div>
+              <div class="bloco-text">"Dinâmicas, estudos e encontros completos num só app. R$19,90"</div>
+            </div>
+          </div>
+        </div>
+        <div class="creative-col">
+          <div class="col-label">Orientações visuais</div>
+          <div class="estrutura">
+            <div class="bloco" style="background:var(--surface2); border-left: 3px solid var(--border);">
+              <div class="bloco-label" style="color:var(--muted);">Conceito visual</div>
+              <div class="bloco-text">Antes/depois dividido — lado esquerdo grupo sem energia, lado direito grupo animado com celular na mão.</div>
+            </div>
+            <div class="bloco" style="background:var(--surface2); border-left: 3px solid var(--border);">
+              <div class="bloco-label" style="color:var(--muted);">Elemento de prova</div>
+              <div class="bloco-text">Adicionar número: "mais de 200 dinâmicas para nunca repetir". Números vendem.</div>
+            </div>
+            <div class="bloco" style="background:var(--surface2); border-left: 3px solid var(--border);">
+              <div class="bloco-label" style="color:var(--muted);">Tom</div>
+              <div class="bloco-text">Empático, não alarmista. A líder não é culpada — ela só precisa de uma ferramenta melhor.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+    <div id="sub-videos" class="sub-panel"><!-- VÍDEO 1 — UGC/Narrado -->
+    <div class="creative">
+      <div class="creative-header">
+        <div class="creative-num">03</div>
+        <div class="creative-meta">
+          <span class="creative-tag tag-video">Vídeo</span>
+          <span class="creative-tag tag-ugc" style="margin-left:4px;">UGC / Narrado</span>
+          <div class="creative-title">A líder falando direto pra câmera</div>
+          <div class="creative-angle">Ângulo: identificação + prova social — "eu era assim antes"</div>
+        </div>
+        <div class="format-badges">
+          <span class="format-badge">Reels 9:16</span>
+          <span class="format-badge">Stories</span>
+          <span class="format-badge">Explorar</span>
+          <span class="format-badge">15-30s</span>
+        </div>
+      </div>
+      <div class="creative-body">
+        <div class="creative-col">
+          <div class="col-label">Roteiro completo</div>
+          <div class="roteiro">
+            <div class="cena">
+              <div class="cena-num">1</div>
+              <div class="cena-content">
+                <div class="cena-time">0s — 3s | GANCHO</div>
+                <div class="cena-text">"Eu passava horas tentando planejar o encontro do grupo e sempre terminava com a mesma dinâmica chata."</div>
+                <div class="cena-note">Câmera frontal, rosto expressivo, tom confessional. Sem edição pesada.</div>
+              </div>
+            </div>
+            <div class="cena">
+              <div class="cena-num">2</div>
+              <div class="cena-content">
+                <div class="cena-time">3s — 8s | DOR</div>
+                <div class="cena-text">"As meninas adoravam no começo... mas com o tempo o grupo foi esfriando. Eu me sentia péssima como líder."</div>
+                <div class="cena-note">Tom sincero, pausado. Olhar direto para a câmera.</div>
+              </div>
+            </div>
+            <div class="cena">
+              <div class="cena-num">3</div>
+              <div class="cena-content">
+                <div class="cena-time">8s — 18s | SOLUÇÃO</div>
+                <div class="cena-text">"Aí eu encontrei o MychurchFlow — são mais de 200 dinâmicas, estudos bíblicos, quebra-gelos, tudo num app só."</div>
+                <div class="cena-note">Virar o celular para a câmera mostrando o app. Dedo navegando pela tela.</div>
+              </div>
+            </div>
+            <div class="cena">
+              <div class="cena-num">4</div>
+              <div class="cena-content">
+                <div class="cena-time">18s — 25s | RESULTADO</div>
+                <div class="cena-text">"Meu grupo nunca foi tão engajado. As meninas já me pediram pra marcar o próximo encontro."</div>
+                <div class="cena-note">Sorriso genuíno. Pode mostrar print de mensagem do grupo se tiver.</div>
+              </div>
+            </div>
+            <div class="cena">
+              <div class="cena-num">5</div>
+              <div class="cena-content">
+                <div class="cena-time">25s — 30s | CTA</div>
+                <div class="cena-text">"Tá no link — por menos de R$20 você transforma seus encontros."</div>
+                <div class="cena-note">Apontar para baixo (link na bio/swipe up). Falar com urgência suave.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="creative-col">
+          <div class="col-label">Direção de produção</div>
+          <div class="estrutura">
+            <div class="bloco" style="background:var(--surface2); border-left: 3px solid var(--border);">
+              <div class="bloco-label" style="color:var(--muted);">Personagem</div>
+              <div class="bloco-text">Você mesmo(a) ou uma mulher real que seja líder. Autenticidade importa mais que produção perfeita.</div>
+            </div>
+            <div class="bloco" style="background:var(--surface2); border-left: 3px solid var(--border);">
+              <div class="bloco-label" style="color:var(--muted);">Ambiente</div>
+              <div class="bloco-text">Casa, ambiente aconchegante. Iluminação natural. Sem fundo branco de estúdio.</div>
+            </div>
+            <div class="bloco" style="background:var(--surface2); border-left: 3px solid var(--border);">
+              <div class="bloco-label" style="color:var(--muted);">Edição (CapCut)</div>
+              <div class="bloco-text">Corte rápido entre falas. Legenda automática ativa. Música suave ao fundo. Zoom sutil no rosto nos momentos de dor.</div>
+            </div>
+            <div class="bloco" style="background:var(--surface2); border-left: 3px solid var(--border);">
+              <div class="bloco-label" style="color:var(--muted);">Texto na tela</div>
+              <div class="bloco-text">Gancho em texto grande nos primeiros 3s para quem assiste sem som. "Você planeja encontros pra mulheres?"</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VÍDEO 2 — IA / Mostrando o app -->
+    <div class="creative">
+      <div class="creative-header">
+        <div class="creative-num">04</div>
+        <div class="creative-meta">
+          <span class="creative-tag tag-video">Vídeo</span>
+          <span class="creative-tag tag-ia" style="margin-left:4px;">IA / Screen</span>
+          <div class="creative-title">Mostrando o app em ação</div>
+          <div class="creative-angle">Ângulo: curiosidade + demonstração do produto — "veja como funciona"</div>
+        </div>
+        <div class="format-badges">
+          <span class="format-badge">Reels 9:16</span>
+          <span class="format-badge">Stories</span>
+          <span class="format-badge">Feed</span>
+          <span class="format-badge">15-20s</span>
+        </div>
+      </div>
+      <div class="creative-body">
+        <div class="creative-col">
+          <div class="col-label">Roteiro completo</div>
+          <div class="roteiro">
+            <div class="cena">
+              <div class="cena-num">1</div>
+              <div class="cena-content">
+                <div class="cena-time">0s — 3s | GANCHO</div>
+                <div class="cena-text">TEXTO NA TELA: "Esse app tá mudando os encontros de mulheres nas igrejas 👀"</div>
+                <div class="cena-note">Narração em voz off ou IA. Tom de curiosidade, quase de "descoberta".</div>
+              </div>
+            </div>
+            <div class="cena">
+              <div class="cena-num">2</div>
+              <div class="cena-content">
+                <div class="cena-time">3s — 8s | DEMONSTRAÇÃO 1</div>
+                <div class="cena-text">"São mais de 200 dinâmicas organizadas por tema — relacionamento, fé, autoconhecimento..."</div>
+                <div class="cena-note">Screen recording do celular navegando nas categorias. Dedo deslizando rápido.</div>
+              </div>
+            </div>
+            <div class="cena">
+              <div class="cena-num">3</div>
+              <div class="cena-content">
+                <div class="cena-time">8s — 13s | DEMONSTRAÇÃO 2</div>
+                <div class="cena-text">"Tem quebra-gelo, estudo bíblico, planejador de encontro completo — tudo num só lugar."</div>
+                <div class="cena-note">Mostrar diferentes seções do app em cortes rápidos de 1-2s cada.</div>
+              </div>
+            </div>
+            <div class="cena">
+              <div class="cena-num">4</div>
+              <div class="cena-content">
+                <div class="cena-time">13s — 17s | PROVA</div>
+                <div class="cena-text">"Líderes de todo o Brasil já estão usando pra transformar seus grupos."</div>
+                <div class="cena-note">Se tiver print de avaliações ou mensagens, mostrar aqui.</div>
+              </div>
+            </div>
+            <div class="cena">
+              <div class="cena-num">5</div>
+              <div class="cena-content">
+                <div class="cena-time">17s — 20s | CTA</div>
+                <div class="cena-text">"Acesse por R$19,90 — link abaixo."</div>
+                <div class="cena-note">Tela do app com botão de compra visível. Seta animada apontando para baixo.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="creative-col">
+          <div class="col-label">Direção de produção</div>
+          <div class="estrutura">
+            <div class="bloco" style="background:var(--surface2); border-left: 3px solid var(--border);">
+              <div class="bloco-label" style="color:var(--muted);">Narração</div>
+              <div class="bloco-text">Voz off gerada por IA (ElevenLabs) ou gravada. Tom animado, rápido. Não pode soar robótico demais.</div>
+            </div>
+            <div class="bloco" style="background:var(--surface2); border-left: 3px solid var(--border);">
+              <div class="bloco-label" style="color:var(--muted);">Gravação da tela</div>
+              <div class="bloco-text">Screen recording do app no celular. Usar moldura de celular no CapCut para deixar mais visual.</div>
+            </div>
+            <div class="bloco" style="background:var(--surface2); border-left: 3px solid var(--border);">
+              <div class="bloco-label" style="color:var(--muted);">Ritmo</div>
+              <div class="bloco-text">Cortes a cada 1-2s. Música com energia média. Legendas em destaque nos momentos de número/prova.</div>
+            </div>
+            <div class="bloco" style="background:var(--surface2); border-left: 3px solid var(--border);">
+              <div class="bloco-label" style="color:var(--muted);">Texto em destaque</div>
+              <div class="bloco-text">"200+ dinâmicas" e "R$19,90" aparecem em texto grande na tela durante o vídeo.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+    <div id="sub-copy" class="sub-panel"><div class="creative" style="margin-bottom:24px;">
+      <div class="creative-header">
+        <div class="creative-meta">
+          <div class="creative-title">Copy principal — conjuntos 1 e 2 (imagens)</div>
+          <div class="creative-angle">Tom: direto, empático, urgência suave</div>
+        </div>
+      </div>
+      <div class="full-section">
+        <div class="copy-block">
+          <div class="copy-label">Versão A — dor da falta de ideias</div>
+          <div class="copy-text">Você lidera mulheres na igreja mas toda semana fica sem saber o que fazer no encontro?
+
+Isso é mais comum do que parece. A maioria das líderes passa horas buscando dinâmicas no Google, no Pinterest, no YouTube — e termina repetindo sempre as mesmas atividades.
+
+O MychurchFlow resolve isso.
+
+São mais de 200 dinâmicas, quebra-gelos, perguntas poderosas e estudos bíblicos num app simples, organizado e sempre no seu celular.
+
+Planejar o encontro da semana leva menos de 5 minutos.
+
+👉 Acesse por R$19,90 — link no botão abaixo.</div>
+        </div>
+        <div class="copy-block">
+          <div class="copy-label">Versão B — dor do grupo perdendo o interesse</div>
+          <div class="copy-text">Se seu grupo de mulheres está perdendo o entusiasmo, provavelmente não é culpa sua.
+
+É que encontros repetitivos cansam. E sem variedade de dinâmicas, atividades e temas, qualquer grupo esfria.
+
+O MychurchFlow tem mais de 200 dinâmicas prontas, organizadas por tema, além de quebra-gelos, estudos e um planejador de encontros completo.
+
+Líderes que usam relatam grupos mais engajados, encontros mais vivos e muito menos estresse na preparação.
+
+R$19,90 para transformar seus encontros. 👇</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="creative" style="margin-bottom:24px;">
+      <div class="creative-header">
+        <div class="creative-meta">
+          <div class="creative-title">Copy principal — conjuntos 3 e 4 (vídeos)</div>
+          <div class="creative-angle">Tom: curiosidade, descoberta, prova</div>
+        </div>
+      </div>
+      <div class="full-section">
+        <div class="copy-block">
+          <div class="copy-label">Versão C — vídeo UGC</div>
+          <div class="copy-text">Eu liderava um grupo de mulheres e sempre sentia que podia fazer mais pelos encontros.
+
+Hoje uso o MychurchFlow — mais de 200 dinâmicas, estudos, quebra-gelos e um planejador completo num app só.
+
+Meu grupo nunca foi tão engajado. 🙏
+
+Está disponível por R$19,90 — link abaixo pra conhecer.</div>
+        </div>
+        <div class="copy-block">
+          <div class="copy-label">Versão D — vídeo demonstração</div>
+          <div class="copy-text">Esse app está mudando os encontros de grupos de mulheres cristãs no Brasil.
+
+200+ dinâmicas, quebra-gelos, estudos bíblicos e planejador de encontro — tudo num lugar só.
+
+Simples, rápido e sempre no seu celular.
+
+R$19,90 para acessar tudo. 👇</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="creative">
+      <div class="creative-header">
+        <div class="creative-meta">
+          <div class="creative-title">Headlines para teste A/B</div>
+          <div class="creative-angle">Usar como texto primário ou sobreposição na imagem</div>
+        </div>
+      </div>
+      <div class="full-section">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div class="copy-block" style="margin-bottom:0;">
+            <div class="copy-label">Focadas em dor</div>
+            <div class="copy-text">"Cansada de sempre repetir as mesmas dinâmicas?"
+
+"Seu grupo merece encontros mais vivos."
+
+"Toda líder já ficou em branco na hora de planejar."
+
+"Encontro sem energia é sinal que falta ferramenta certa."</div>
+          </div>
+          <div class="copy-block" style="margin-bottom:0;">
+            <div class="copy-label">Focadas em solução</div>
+            <div class="copy-text">"200+ dinâmicas prontas no seu celular."
+
+"Planeje o encontro em menos de 5 minutos."
+
+"O app das líderes de grupos de mulheres."
+
+"Tudo que você precisa pra liderar com confiança."</div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <footer>
+    <span>MychurchFlow.app — Plano Completo</span>
+    <span>Versão 1.0 — Março 2026</span>
+  </footer>
+
+</div>
+
+  <!-- INTERNACIONAL -->
+  <div id="main-internacional" class="main-panel">
+
+    <div class="intl-section-title">CPM e custo por venda por mercado</div>
+    <div class="market-grid">
+      <div class="market-card">
+        <div class="market-header">
+          <div class="market-flag">Mercado atual</div>
+          <div class="market-name">Brasil 🇧🇷</div>
+          <span class="market-badge mbadge-br">PT</span>
+        </div>
+        <div class="market-body">
+          <div class="mrow"><span>CPM médio</span><span>~$2,63 (R$15)</span></div>
+          <div class="mrow"><span>Preço combo</span><span>R$19,90</span></div>
+          <div class="mrow"><span>CPA histórico</span><span class="warn">R$8-15</span></div>
+          <div class="mrow"><span>ARPU médio</span><span>R$26</span></div>
+          <div class="mrow"><span>Gateway</span><span>EfiBank + GGCheckout</span></div>
+          <div class="mrow"><span>Margem por venda</span><span class="green">~R$10-18</span></div>
+        </div>
+      </div>
+      <div class="market-card">
+        <div class="market-header">
+          <div class="market-flag">Expansão — Latino (mês 3)</div>
+          <div class="market-name">México + Colômbia 🇲🇽🇨🇴</div>
+          <span class="market-badge mbadge-es">ES</span>
+        </div>
+        <div class="market-body">
+          <div class="mrow"><span>CPM médio</span><span>~$2,00-3,92</span></div>
+          <div class="mrow"><span>Preço combo</span><span class="warn">$4,99 (~R$30)</span></div>
+          <div class="mrow"><span>CPA estimado</span><span class="warn">$3-6</span></div>
+          <div class="mrow"><span>ARPU estimado</span><span>$6-8</span></div>
+          <div class="mrow"><span>Gateway</span><span>Stripe</span></div>
+          <div class="mrow"><span>Margem por venda</span><span class="green">~$1,50-3</span></div>
+        </div>
+      </div>
+      <div class="market-card featured">
+        <div class="market-header">
+          <div class="market-flag">Expansão — Alto valor (mês 4+)</div>
+          <div class="market-name">Estados Unidos 🇺🇸</div>
+          <span class="market-badge mbadge-en">EN</span>
+        </div>
+        <div class="market-body">
+          <div class="mrow"><span>CPM médio</span><span>~$10-15</span></div>
+          <div class="mrow"><span>Preço combo</span><span class="green">$9,99 (~R$60)</span></div>
+          <div class="mrow"><span>CPA estimado</span><span class="warn">$8-15</span></div>
+          <div class="mrow"><span>ARPU estimado</span><span>$13-16</span></div>
+          <div class="mrow"><span>Gateway</span><span>Stripe</span></div>
+          <div class="mrow"><span>Margem por venda</span><span class="green">~$1-5</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="intl-section-title">comparativo de receita — 30 vendas/mês por mercado</div>
+    <table class="intl-table">
+      <thead>
+        <tr><th>Mercado</th><th>Preço unitário</th><th>30 vendas</th><th>ARPU c/ bumps</th><th>Faturamento</th><th>Budget/mês</th><th>Lucro est.</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="tag-br">Brasil 🇧🇷</span></td>
+          <td>R$19,90</td><td>R$597</td><td>R$26</td><td>R$780</td><td>R$500</td><td style="color:var(--green-light)">R$110+</td>
+        </tr>
+        <tr>
+          <td><span class="tag-es">ES México/Col 🇲🇽</span></td>
+          <td>$4,99</td><td>$149,70</td><td>$6,50</td><td>$195</td><td>$100</td><td style="color:#EF9F27">$30-50</td>
+        </tr>
+        <tr>
+          <td><span class="tag-en">EUA 🇺🇸</span></td>
+          <td>$9,99</td><td>$299,70</td><td>$13</td><td>$390</td><td>$150</td><td style="color:var(--green-light)">$80-120</td>
+        </tr>
+        <tr class="row-highlight">
+          <td><strong>Total combinado (mês 6)</strong></td>
+          <td>—</td><td>—</td><td>—</td><td><strong>~R$3.200</strong></td><td><strong>~R$1.800</strong></td><td style="color:var(--green-light)"><strong>~R$1.400+</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="intl-section-title">projeção de faturamento acumulado — 6 meses</div>
+    <div class="intl-legend">
+      <span><span class="ldot" style="background:#378ADD;"></span>Brasil (R$)</span>
+      <span><span class="ldot" style="background:#EF9F27;"></span>ES Latino (R$)</span>
+      <span><span class="ldot" style="background:#1D9E75;"></span>EN EUA (R$)</span>
+    </div>
+    <div class="intl-chart-wrap">
+      <canvas id="intlChart"></canvas>
+    </div>
+
+    <div class="intl-section-title">o que precisa para rodar ES e EN</div>
+    <div class="obstacle-grid">
+      <div class="obstacle-card">
+        <div class="obstacle-title warn">Obstáculos técnicos</div>
+        <div class="obstacle-item"><div class="odot" style="background:#EF9F27;"></div>Stripe para receber em USD/MXN — EfiBank não funciona fora do Brasil</div>
+        <div class="obstacle-item"><div class="odot" style="background:#EF9F27;"></div>Preços em dólar no checkout com lógica de moeda por país</div>
+        <div class="obstacle-item"><div class="odot" style="background:#EF9F27;"></div>Pixel separado ou eventos por mercado para não misturar dados</div>
+        <div class="obstacle-item"><div class="odot" style="background:#EF9F27;"></div>Criativos traduzidos para ES e EN — copy + roteiro de vídeo</div>
+      </div>
+      <div class="obstacle-card">
+        <div class="obstacle-title green">Vantagens únicas</div>
+        <div class="obstacle-item"><div class="odot" style="background:#1D9E75;"></div>CPM muito mais barato no ES — alcance maior com menos dinheiro</div>
+        <div class="obstacle-item"><div class="odot" style="background:#1D9E75;"></div>Mercado EN paga muito mais por produto — $9,99 vs R$19,90</div>
+        <div class="obstacle-item"><div class="odot" style="background:#1D9E75;"></div>Nicho cristão feminino é enorme nos EUA — público muito engajado</div>
+        <div class="obstacle-item"><div class="odot" style="background:#1D9E75;"></div>Quase zero concorrência direta com esse formato de app</div>
+      </div>
+    </div>
+
+    <div class="intl-alert">
+      <strong>Sequência recomendada:</strong> Valide e lucre no Brasil primeiro (mês 1-2). Abra ES com $100/mês de teste (mês 3) após tradução do app. Lance EN só depois de ter criativos em inglês prontos e Stripe configurado (mês 4+). Não abra todos ao mesmo tempo — divide atenção e orçamento sem dados suficientes.
+    </div>
+
+    <footer style="margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); display: flex; justify-content: space-between;">
+      <span>MychurchFlow.app — Mercados Internacionais</span>
+      <span>Março 2026</span>
+    </footer>
+
+  </div><!-- /main-internacional -->
+
+<script>
+  function switchMain(id, btn) {
+    document.querySelectorAll('.main-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('main-' + id).classList.add('active');
+    btn.classList.add('active');
+    if (id === 'financeiro' && !window.chartBuilt) {
+      window.chartBuilt = true;
+      setTimeout(buildChart, 100);
+    }
+    if (id === 'internacional' && !window.intlChartBuilt) {
+      window.intlChartBuilt = true;
+      setTimeout(buildIntlChart, 100);
+    }
+  }
+
+  function switchSub(id, btn) {
+    document.querySelectorAll('.sub-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('sub-' + id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  function buildChart() {
+    const canvas = document.getElementById('growthChart');
+    if (!canvas) return;
+    new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels: ['Mês 1', 'Mês 2', 'Mês 3', 'Mês 4', 'Mês 5', 'Mês 6'],
+        datasets: [
+          { label: 'Faturamento', data: [800, 920, 1128, 1350, 1580, 1840], backgroundColor: '#1D9E75', borderRadius: 4 },
+          { label: 'Custos totais', data: [689, 689, 700, 710, 720, 735], backgroundColor: '#F87171', borderRadius: 4 },
+          { label: 'Lucro líquido', data: [111, 231, 428, 640, 860, 1105], backgroundColor: '#378ADD', borderRadius: 4 }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#7A736A', font: { size: 12 } }, grid: { display: false } },
+          y: { ticks: { color: '#7A736A', font: { size: 12 }, callback: v => 'R$ ' + v.toLocaleString('pt-BR') }, grid: { color: 'rgba(122,115,106,0.1)' } }
+        }
+      }
+    });
+  }
+  function buildIntlChart() {
+    const canvas = document.getElementById('intlChart');
+    if (!canvas) return;
+    new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels: ['Mês 1', 'Mês 2', 'Mês 3', 'Mês 4', 'Mês 5', 'Mês 6'],
+        datasets: [
+          { label: 'Brasil', data: [800, 920, 1128, 1350, 1580, 1840], backgroundColor: '#378ADD', borderRadius: 4 },
+          { label: 'ES Latino', data: [0, 0, 300, 480, 620, 780], backgroundColor: '#EF9F27', borderRadius: 4 },
+          { label: 'EN EUA', data: [0, 0, 0, 600, 900, 1200], backgroundColor: '#1D9E75', borderRadius: 4 }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { stacked: true, ticks: { color: '#7A736A', font: { size: 12 } }, grid: { display: false } },
+          y: { stacked: true, ticks: { color: '#7A736A', font: { size: 12 }, callback: v => 'R$ ' + v.toLocaleString('pt-BR') }, grid: { color: 'rgba(122,115,106,0.1)' } }
+        }
+      }
+    });
+  }
+</script>
+</body>
+</html>

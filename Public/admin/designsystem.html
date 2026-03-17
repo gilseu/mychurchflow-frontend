@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design System — MychurchFlow</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  [data-theme="dark"]{
+    --bg:#0D0B12;--bg2:#120F1A;--bg3:#1A1625;--surface:#201C2E;--border:#2E2842;
+    --text:#F0ECF8;--text2:#9E96B8;--text3:#5E5678;
+    --purple:#7B5EA7;--purple2:#9B7CC7;--lavender:#C4B5E8;--lavender2:#E8E0F8;
+    --gold:#C9952A;--gold2:#E8B84B;--gold-dim:#2A1F08;
+    --green:#2A7A52;--green-light:#3DAA73;
+    --rose:#C47A8A;
+    --glow:rgba(123,94,167,0.15);
+  }
+  [data-theme="light"]{
+    --bg:#F5F0FF;--bg2:#EDE6F9;--bg3:#E3DAF2;--surface:#FAF7FF;--border:#D5CCE8;
+    --text:#1A1428;--text2:#5E507A;--text3:#A099BC;
+    --purple:#7B5EA7;--purple2:#6B4E97;--lavender:#7B5EA7;--lavender2:#5A3D8A;
+    --gold:#B8830E;--gold2:#C9952A;--gold-dim:#FDF3E0;
+    --green:#1A5C3A;--green-light:#2A7A52;
+    --rose:#B05A6E;
+    --glow:rgba(123,94,167,0.08);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-weight:300;line-height:1.7;-webkit-font-smoothing:antialiased;}
+
+  nav{position:sticky;top:0;z-index:100;padding:12px 20px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+  .nav-logo{font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;font-size:15px;color:var(--text);}
+  .nav-logo span{color:var(--purple2);}
+  .theme-btn{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:5px 12px;cursor:pointer;font-size:11px;color:var(--text2);font-family:'Plus Jakarta Sans',sans-serif;transition:all .2s;}
+
+  .page{max-width:860px;margin:0 auto;padding:40px 20px 80px;}
+
+  header{padding-bottom:40px;border-bottom:1px solid var(--border);margin-bottom:48px;}
+  .eyebrow{font-size:10px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold2);margin-bottom:10px;}
+  h1{font-family:'Cormorant Garamond',serif;font-size:clamp(36px,8vw,56px);font-weight:600;line-height:1.1;letter-spacing:-0.01em;margin-bottom:10px;}
+  h1 em{font-style:italic;color:var(--purple2);}
+  .header-sub{font-size:14px;color:var(--text2);max-width:480px;}
+
+  .section{margin-bottom:56px;}
+  .section-title{font-size:11px;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold2);margin-bottom:20px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  h2{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;color:var(--text);margin-bottom:16px;}
+
+  /* COLOR SWATCHES */
+  .colors-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+  .color-group{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+  .color-group-title{padding:12px 16px;font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);border-bottom:1px solid var(--border);}
+  .swatches{padding:12px;display:flex;flex-direction:column;gap:8px;}
+  .swatch{display:flex;align-items:center;gap:10px;border-radius:8px;padding:8px 10px;}
+  .swatch-dot{width:32px;height:32px;border-radius:8px;flex-shrink:0;border:1px solid rgba(255,255,255,0.1);}
+  .swatch-info{flex:1;}
+  .swatch-name{font-size:12px;font-weight:500;color:var(--text);}
+  .swatch-hex{font-size:11px;color:var(--text3);font-family:monospace;}
+  .swatch-use{font-size:10px;color:var(--text3);margin-top:1px;}
+
+  /* TYPOGRAPHY */
+  .type-samples{display:flex;flex-direction:column;gap:20px;}
+  .type-sample{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;}
+  .type-meta{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;}
+  .type-preview-h1{font-family:'Cormorant Garamond',serif;font-size:clamp(32px,8vw,52px);font-weight:600;line-height:1.1;color:var(--text);}
+  .type-preview-h1 em{font-style:italic;color:var(--purple2);}
+  .type-preview-h2{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;color:var(--text);}
+  .type-preview-h2 em{font-style:italic;color:var(--purple2);}
+  .type-preview-label{font-size:10px;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold2);}
+  .type-preview-body{font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:300;color:var(--text2);line-height:1.7;}
+  .type-preview-strong{font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:500;color:var(--text);}
+  .type-preview-small{font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;color:var(--text3);}
+  .type-spec{margin-top:8px;font-size:11px;color:var(--text3);font-family:monospace;background:var(--bg3);padding:6px 10px;border-radius:6px;}
+
+  /* COMPONENTS */
+  .components-grid{display:flex;flex-direction:column;gap:12px;}
+  .component-row{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;}
+  .comp-label{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:12px;}
+  .comp-preview{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+
+  /* BUTTONS */
+  .btn-primary{background:linear-gradient(135deg,#7B5EA7 0%,#9B7CC7 100%);color:#F0ECF8;border:none;border-radius:12px;padding:12px 22px;font-size:14px;font-weight:500;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;}
+  .btn-secondary{background:transparent;color:var(--purple2);border:1px solid var(--purple);border-radius:12px;padding:12px 22px;font-size:14px;font-weight:500;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;}
+  .btn-ghost{background:var(--bg3);color:var(--text2);border:1px solid var(--border);border-radius:20px;padding:8px 16px;font-size:12px;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;}
+  .btn-cta{background:var(--gold);color:#FFF8EC;border:none;border-radius:12px;padding:12px 22px;font-size:14px;font-weight:500;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;}
+
+  /* BADGES */
+  .badge-purple{display:inline-block;background:var(--glow);border:1px solid var(--purple);border-radius:20px;padding:4px 12px;font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--lavender);}
+  .badge-gold{display:inline-block;background:var(--gold-dim);border:1px solid var(--gold);border-radius:20px;padding:4px 12px;font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold2);}
+  .badge-green{display:inline-block;background:#001A08;border:1px solid var(--green);border-radius:20px;padding:4px 12px;font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--green-light);}
+  .badge-rose{display:inline-block;background:#1A0810;border:1px solid var(--rose);border-radius:20px;padding:4px 12px;font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--rose);}
+
+  /* CARDS */
+  .card-default{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;}
+  .card-featured{background:var(--surface);border:2px solid var(--purple);border-radius:14px;padding:16px;}
+  .card-gold{background:var(--surface);border:1px solid var(--gold);border-radius:14px;padding:16px;}
+
+  /* SPACING */
+  .spacing-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+  .spacing-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;}
+  .spacing-bar{background:var(--purple);border-radius:4px;margin-bottom:6px;}
+  .spacing-label{font-size:11px;color:var(--text2);}
+  .spacing-value{font-size:12px;font-weight:500;font-family:monospace;color:var(--text);}
+
+  /* GRADIENTS */
+  .gradient-samples{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .grad-item{height:80px;border-radius:12px;display:flex;align-items:flex-end;padding:10px 12px;}
+  .grad-label{font-size:11px;font-weight:500;color:rgba(255,255,255,0.8);}
+
+  /* RULES */
+  .rules-list{display:flex;flex-direction:column;gap:8px;}
+  .rule-item{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;gap:12px;}
+  .rule-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
+  .rule-text strong{display:block;font-size:13px;font-weight:500;margin-bottom:2px;}
+  .rule-text span{font-size:12px;color:var(--text2);}
+
+  .divider{height:1px;background:var(--border);margin:40px 0;}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">My<span>Church</span>Flow · <span style="color:var(--text3);font-weight:300;">Design System</span></div>
+  <button class="theme-btn" onclick="toggleTheme()"><span id="ticon">☀</span> <span id="tlabel">Claro</span></button>
+</nav>
+
+<div class="page">
+
+  <header>
+    <div class="eyebrow">MychurchFlow · v1.0 · Março 2026</div>
+    <h1>Design <em>System</em></h1>
+    <p class="header-sub">Guia completo de cores, tipografia, componentes e regras visuais para uso consistente no app e na landing page.</p>
+  </header>
+
+  <!-- CORES -->
+  <div class="section">
+    <div class="section-title">01 · Paleta de Cores</div>
+    <div class="colors-grid">
+
+      <div class="color-group">
+        <div class="color-group-title">Roxo — Cor primária</div>
+        <div class="swatches">
+          <div class="swatch"><div class="swatch-dot" style="background:#7B5EA7;"></div><div class="swatch-info"><div class="swatch-name">Purple</div><div class="swatch-hex">#7B5EA7</div><div class="swatch-use">Botões, bordas destaque, ícones</div></div></div>
+          <div class="swatch"><div class="swatch-dot" style="background:#9B7CC7;"></div><div class="swatch-info"><div class="swatch-name">Purple 2</div><div class="swatch-hex">#9B7CC7</div><div class="swatch-use">Hover, títulos em itálico, preços</div></div></div>
+          <div class="swatch"><div class="swatch-dot" style="background:#C4B5E8;"></div><div class="swatch-info"><div class="swatch-name">Lavender</div><div class="swatch-hex">#C4B5E8</div><div class="swatch-use">Texto em fundos escuros</div></div></div>
+          <div class="swatch"><div class="swatch-dot" style="background:#E8E0F8;"></div><div class="swatch-info"><div class="swatch-name">Lavender 2</div><div class="swatch-hex">#E8E0F8</div><div class="swatch-use">Títulos em headers escuros</div></div></div>
+          <div class="swatch"><div class="swatch-dot" style="background:rgba(123,94,167,0.15);border:1px dashed #7B5EA7;"></div><div class="swatch-info"><div class="swatch-name">Glow</div><div class="swatch-hex">rgba(123,94,167,0.15)</div><div class="swatch-use">Efeitos de brilho, backgrounds sutis</div></div></div>
+        </div>
+      </div>
+
+      <div class="color-group">
+        <div class="color-group-title">Dourado — Cor de acento</div>
+        <div class="swatches">
+          <div class="swatch"><div class="swatch-dot" style="background:#C9952A;"></div><div class="swatch-info"><div class="swatch-name">Gold</div><div class="swatch-hex">#C9952A</div><div class="swatch-use">Labels, bordas de bônus</div></div></div>
+          <div class="swatch"><div class="swatch-dot" style="background:#E8B84B;"></div><div class="swatch-info"><div class="swatch-name">Gold 2</div><div class="swatch-hex">#E8B84B</div><div class="swatch-use">Eyebrows, estrelas, destaques</div></div></div>
+          <div class="swatch"><div class="swatch-dot" style="background:#2A1F08;"></div><div class="swatch-info"><div class="swatch-name">Gold Dim</div><div class="swatch-hex">#2A1F08</div><div class="swatch-use">Background de badges dourados</div></div></div>
+        </div>
+      </div>
+
+      <div class="color-group">
+        <div class="color-group-title">Fundos — Tema escuro</div>
+        <div class="swatches">
+          <div class="swatch"><div class="swatch-dot" style="background:#0D0B12;border:1px solid #2E2842;"></div><div class="swatch-info"><div class="swatch-name">BG</div><div class="swatch-hex">#0D0B12</div><div class="swatch-use">Fundo principal da página</div></div></div>
+          <div class="swatch"><div class="swatch-dot" style="background:#120F1A;border:1px solid #2E2842;"></div><div class="swatch-info"><div class="swatch-name">BG2</div><div class="swatch-hex">#120F1A</div><div class="swatch-use">Seções alternadas</div></div></div>
+          <div class="swatch"><div class="swatch-dot" style="background:#1A1625;border:1px solid #2E2842;"></div><div class="swatch-info"><div class="swatch-name">BG3</div><div class="swatch-hex">#1A1625</div><div class="swatch-use">Badges, inputs, elementos internos</div></div></div>
+          <div class="swatch"><div class="swatch-dot" style="background:#201C2E;border:1px solid #2E2842;"></div><div class="swatch-info"><div class="swatch-name">Surface</div><div class="swatch-hex">#201C2E</div><div class="swatch-use">Cards, modais, painéis</div></div></div>
+          <div class="swatch"><div class="swatch-dot" style="background:#2E2842;"></div><div class="swatch-info"><div class="swatch-name">Border</div><div class="swatch-hex">#2E2842</div><div class="swatch-use">Bordas, divisores, separadores</div></div></div>
+        </div>
+      </div>
+
+      <div class="color-group">
+        <div class="color-group-title">Fundos — Tema claro</div>
+        <div class="swatches">
+          <div class="swatch"><div class="swatch-dot" style="background:#F5F0FF;border:1px solid #D5CCE8;"></div><div class="swatch-info"><div class="swatch-name">BG</div><div class="swatch-hex">#F5F0FF</div><div class="swatch-use">Fundo principal — lavanda suave</div></div></div>
+          <div class="swatch"><div class="swatch-dot" style="background:#EDE6F9;border:1px solid #D5CCE8;"></div><div class="swatch-info"><div class="swatch-name">BG2</div><div class="swatch-hex">#EDE6F9</div><div class="swatch-use">Seções alternadas</div></div></div>
+          <div class="swatch"><div class="swatch-dot" style="background:#E3DAF2;border:1px solid #D5CCE8;"></div><div class="swatch-info"><div class="swatch-name">BG3</div><div class="swatch-hex">#E3DAF2</div><div class="swatch-use">Badges, inputs</div></div></div>
+          <div class="swatch"><div class="swatch-dot" style="background:#FAF7FF;border:1px solid #D5CCE8;"></div><div class="swatch-info"><div class="swatch-name">Surface</div><div class="swatch-hex">#FAF7FF</div><div class="swatch-use">Cards, painéis</div></div></div>
+          <div class="swatch"><div class="swatch-dot" style="background:#D5CCE8;"></div><div class="swatch-info"><div class="swatch-name">Border</div><div class="swatch-hex">#D5CCE8</div><div class="swatch-use">Bordas, divisores</div></div></div>
+        </div>
+      </div>
+
+      <div class="color-group">
+        <div class="color-group-title">Texto</div>
+        <div class="swatches">
+          <div class="swatch"><div class="swatch-dot" style="background:#F0ECF8;"></div><div class="swatch-info"><div class="swatch-name">Text (dark)</div><div class="swatch-hex">#F0ECF8</div><div class="swatch-use">Texto principal no tema escuro</div></div></div>
+          <div class="swatch"><div class="swatch-dot" style="background:#1A1428;border:1px solid #D5CCE8;"></div><div class="swatch-info"><div class="swatch-name">Text (light)</div><div class="swatch-hex">#1A1428</div><div class="swatch-use">Texto principal no tema claro</div></div></div>
+          <div class="swatch"><div class="swatch-dot" style="background:#9E96B8;"></div><div class="swatch-info"><div class="swatch-name">Text 2</div><div class="swatch-hex">#9E96B8</div><div class="swatch-use">Subtítulos, descrições, legendas</div></div></div>
+          <div class="swatch"><div class="swatch-dot" style="background:#5E5678;"></div><div class="swatch-info"><div class="swatch-name">Text 3</div><div class="swatch-hex">#5E5678</div><div class="swatch-use">Placeholders, metadados, hints</div></div></div>
+        </div>
+      </div>
+
+      <div class="color-group">
+        <div class="color-group-title">Semânticas</div>
+        <div class="swatches">
+          <div class="swatch"><div class="swatch-dot" style="background:#3DAA73;"></div><div class="swatch-info"><div class="swatch-name">Green Light</div><div class="swatch-hex">#3DAA73</div><div class="swatch-use">Sucesso, check, gratuito</div></div></div>
+          <div class="swatch"><div class="swatch-dot" style="background:#2A7A52;"></div><div class="swatch-info"><div class="swatch-name">Green</div><div class="swatch-hex">#2A7A52</div><div class="swatch-use">Background de itens grátis</div></div></div>
+          <div class="swatch"><div class="swatch-dot" style="background:#C47A8A;"></div><div class="swatch-info"><div class="swatch-name">Rose</div><div class="swatch-hex">#C47A8A</div><div class="swatch-use">Produtos premium, destaques especiais</div></div></div>
+          <div class="swatch"><div class="swatch-dot" style="background:#F87171;"></div><div class="swatch-info"><div class="swatch-name">Red</div><div class="swatch-hex">#F87171</div><div class="swatch-use">Erros, antes/depois negativo</div></div></div>
+          <div class="swatch"><div class="swatch-dot" style="background:#25D366;"></div><div class="swatch-info"><div class="swatch-name">WhatsApp</div><div class="swatch-hex">#25D366</div><div class="swatch-use">Exclusivo para botão WhatsApp</div></div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- TIPOGRAFIA -->
+  <div class="section">
+    <div class="section-title">02 · Tipografia</div>
+    <div class="type-samples">
+
+      <div class="type-sample">
+        <div class="type-meta">Display / H1 — Cormorant Garamond</div>
+        <div class="type-preview-h1">Encontros que<br><em>tocam o coração</em></div>
+        <div class="type-spec">font-family: 'Cormorant Garamond', serif · font-size: clamp(38px, 10vw, 72px) · font-weight: 600 · line-height: 1.1 · letter-spacing: -0.01em · em em itálico = cor var(--purple2)</div>
+      </div>
+
+      <div class="type-sample">
+        <div class="type-meta">H2 — Cormorant Garamond</div>
+        <div class="type-preview-h2">Feito pra você, <em>líder dedicada</em></div>
+        <div class="type-spec">font-family: 'Cormorant Garamond', serif · font-size: clamp(28px, 8vw, 48px) · font-weight: 600 · line-height: 1.15 · em em itálico = cor var(--purple2)</div>
+      </div>
+
+      <div class="type-sample">
+        <div class="type-meta">Eyebrow / Label — Plus Jakarta Sans</div>
+        <div class="type-preview-label">Para quem é</div>
+        <div class="type-spec">font-family: 'Plus Jakarta Sans', sans-serif · font-size: 10px · font-weight: 500 · letter-spacing: 0.15em · text-transform: uppercase · color: var(--gold2)</div>
+      </div>
+
+      <div class="type-sample">
+        <div class="type-meta">Body — Plus Jakarta Sans</div>
+        <div class="type-preview-body">Tudo que você precisa para liderar com confiança, organizado num único lugar. Interface simples, bonita e pensada para usar no celular.</div>
+        <div class="type-spec">font-family: 'Plus Jakarta Sans', sans-serif · font-size: 14px · font-weight: 300 · line-height: 1.7 · color: var(--text2)</div>
+      </div>
+
+      <div class="type-sample">
+        <div class="type-meta">Body Strong — Plus Jakarta Sans</div>
+        <div class="type-preview-strong">Você lidera mulheres na igreja</div>
+        <div class="type-spec">font-family: 'Plus Jakarta Sans', sans-serif · font-size: 13-15px · font-weight: 500 · color: var(--text)</div>
+      </div>
+
+      <div class="type-sample">
+        <div class="type-meta">Small / Meta — Plus Jakarta Sans</div>
+        <div class="type-preview-small">pagamento único via Pix · acesso imediato · Garantia de 7 dias</div>
+        <div class="type-spec">font-family: 'Plus Jakarta Sans', sans-serif · font-size: 11px · font-weight: 300-400 · color: var(--text3)</div>
+      </div>
+
+      <div class="type-sample">
+        <div class="type-meta">Preço — Cormorant Garamond</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:56px;font-weight:600;color:var(--purple2);line-height:1;"><sub style="font-size:20px;vertical-align:super;">R$</sub>19<sub style="font-size:20px;vertical-align:super;">,90</sub></div>
+        <div class="type-spec">font-family: 'Cormorant Garamond', serif · font-size: 60px · font-weight: 600 · color: var(--purple2) · sub: font-size: 20px · vertical-align: super</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- COMPONENTES -->
+  <div class="section">
+    <div class="section-title">03 · Componentes</div>
+    <div class="components-grid">
+
+      <div class="component-row">
+        <div class="comp-label">Botões</div>
+        <div class="comp-preview">
+          <button class="btn-primary">Primário →</button>
+          <button class="btn-secondary">Secundário</button>
+          <button class="btn-ghost">Ghost</button>
+          <button class="btn-cta">CTA Dourado →</button>
+        </div>
+        <div style="margin-top:10px;font-size:11px;color:var(--text3);font-family:monospace;background:var(--bg3);padding:8px 10px;border-radius:6px;">
+          Primário: gradient(135deg, #7B5EA7 → #9B7CC7) · border-radius: 12px · padding: 12-16px 22-40px<br>
+          CTA Nav: background var(--purple) · border-radius: 20px (pílula)<br>
+          Ghost: background var(--bg3) · border: 1px solid var(--border) · border-radius: 20px
+        </div>
+      </div>
+
+      <div class="component-row">
+        <div class="comp-label">Badges / Pills</div>
+        <div class="comp-preview">
+          <span class="badge-purple">✦ App novo</span>
+          <span class="badge-gold">🎁 Bônus grátis</span>
+          <span class="badge-green">✓ Grátis</span>
+          <span class="badge-rose">✨ Premium</span>
+        </div>
+        <div style="margin-top:10px;font-size:11px;color:var(--text3);font-family:monospace;background:var(--bg3);padding:8px 10px;border-radius:6px;">
+          font-size: 10px · font-weight: 500 · letter-spacing: 0.08em · text-transform: uppercase<br>
+          border-radius: 20px (sempre pílula) · padding: 4px 12px<br>
+          Cor do texto sempre combina com a borda
+        </div>
+      </div>
+
+      <div class="component-row">
+        <div class="comp-label">Cards</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div class="card-default"><div style="font-size:13px;font-weight:500;">Card padrão</div><div style="font-size:12px;color:var(--text2);margin-top:2px;">border: 1px solid var(--border) · border-radius: 14px</div></div>
+          <div class="card-featured"><div style="font-size:13px;font-weight:500;color:var(--purple2);">Card destaque (featured)</div><div style="font-size:12px;color:var(--text2);margin-top:2px;">border: 2px solid var(--purple) · border-radius: 14px</div></div>
+          <div class="card-gold"><div style="font-size:13px;font-weight:500;color:var(--gold2);">Card bônus</div><div style="font-size:12px;color:var(--text2);margin-top:2px;">border: 1px solid var(--gold) · border-radius: 14px</div></div>
+        </div>
+      </div>
+
+      <div class="component-row">
+        <div class="comp-label">Gradientes</div>
+        <div class="gradient-samples">
+          <div class="grad-item" style="background:linear-gradient(135deg,#7B5EA7 0%,#9B7CC7 100%);"><span class="grad-label">CTA Principal</span></div>
+          <div class="grad-item" style="background:linear-gradient(135deg,#1A1030 0%,#241840 100%);"><span class="grad-label">Header Oferta</span></div>
+          <div class="grad-item" style="background:radial-gradient(ellipse at center,rgba(123,94,167,0.15) 0%,transparent 70%);border:1px solid var(--border);"><span class="grad-label" style="color:var(--text2);">Glow Hero</span></div>
+          <div class="grad-item" style="background:linear-gradient(135deg,var(--purple) 0%,var(--gold) 100%);"><span class="grad-label">Texto em itálico h1</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ESPAÇAMENTOS -->
+  <div class="section">
+    <div class="section-title">04 · Espaçamentos e Bordas</div>
+    <div class="spacing-grid">
+      <div class="spacing-item"><div class="spacing-bar" style="height:4px;width:4px;border-radius:2px;"></div><div class="spacing-label">Border radius pequeno</div><div class="spacing-value">6-8px</div></div>
+      <div class="spacing-item"><div class="spacing-bar" style="height:8px;width:8px;border-radius:4px;"></div><div class="spacing-label">Border radius médio</div><div class="spacing-value">12px (cards internos)</div></div>
+      <div class="spacing-item"><div class="spacing-bar" style="height:12px;width:12px;border-radius:6px;"></div><div class="spacing-label">Border radius grande</div><div class="spacing-value">14px (cards principais)</div></div>
+      <div class="spacing-item"><div class="spacing-bar" style="height:16px;width:16px;border-radius:8px;"></div><div class="spacing-label">Border radius XL</div><div class="spacing-value">20px (modais, offer box)</div></div>
+      <div class="spacing-item"><div class="spacing-bar" style="height:20px;border-radius:10px;"></div><div class="spacing-label">Border radius pílula</div><div class="spacing-value">9999px (badges, nav CTA)</div></div>
+      <div class="spacing-item"><div class="spacing-bar" style="height:1px;background:var(--border);border-radius:0;margin-bottom:8px;"></div><div class="spacing-label">Borda padrão</div><div class="spacing-value">1px solid var(--border)</div></div>
+      <div class="spacing-item"><div class="spacing-label">Padding seção (mobile)</div><div class="spacing-value">52px 20px</div></div>
+      <div class="spacing-item"><div class="spacing-label">Padding card</div><div class="spacing-value">16-22px</div></div>
+      <div class="spacing-item"><div class="spacing-label">Gap entre cards</div><div class="spacing-value">10-12px</div></div>
+      <div class="spacing-item"><div class="spacing-label">Max width conteúdo</div><div class="spacing-value">860px</div></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- REGRAS DE DESIGN -->
+  <div class="section">
+    <div class="section-title">05 · Regras e Princípios</div>
+    <div class="rules-list">
+      <div class="rule-item"><div class="rule-icon">✍️</div><div class="rule-text"><strong>Títulos sempre em Cormorant Garamond</strong><span>H1 e H2 usam sempre esta fonte. Palavras-chave emocionais vão em itálico com cor var(--purple2). Nunca usar negrito em títulos.</span></div></div>
+      <div class="rule-item"><div class="rule-icon">📝</div><div class="rule-text"><strong>Corpo sempre em Plus Jakarta Sans weight 300</strong><span>Corpo leve (300) transmite elegância. Use weight 500 apenas para títulos de cards e itens de lista importantes.</span></div></div>
+      <div class="rule-item"><div class="rule-icon">🎨</div><div class="rule-text"><strong>Roxo é a cor primária, dourado é o acento</strong><span>Nunca use ambos no mesmo elemento. Roxo = ação/destaque. Dourado = bônus/valor/preço especial. Rose = premium.</span></div></div>
+      <div class="rule-item"><div class="rule-icon">🌙</div><div class="rule-text"><strong>Suporte obrigatório aos dois temas</strong><span>Todo elemento deve funcionar no tema escuro e claro. Nunca usar cor fixa — sempre variáveis CSS. Fundo claro usa lavanda suave, não branco puro.</span></div></div>
+      <div class="rule-item"><div class="rule-icon">📱</div><div class="rule-text"><strong>Mobile-first absoluto</strong><span>Todo layout começa em coluna única. Grids 2×2 para números. Cards em lista vertical. Padding mínimo de 20px nas laterais.</span></div></div>
+      <div class="rule-item"><div class="rule-icon">✨</div><div class="rule-text"><strong>Efeito glow apenas em hero e CTA final</strong><span>O radial-gradient de glow (rgba purple 0.15) é usado com moderação — só em momentos de impacto emocional. Não usar em cards comuns.</span></div></div>
+      <div class="rule-item"><div class="rule-icon">💜</div><div class="rule-text"><strong>Cards featured usam borda 2px roxa</strong><span>Borda simples (1px) para cards neutros. Borda dupla (2px var(--purple)) para o card ou plano em destaque. Nunca mudar o fundo — só a borda muda.</span></div></div>
+      <div class="rule-item"><div class="rule-icon">🔤</div><div class="rule-text"><strong>Labels sempre em maiúsculo e dourado</strong><span>Eyebrows e section labels: font-size 10-11px, letter-spacing 0.15em, text-transform uppercase, color var(--gold2). Nunca em roxo.</span></div></div>
+      <div class="rule-item"><div class="rule-icon">🌸</div><div class="rule-text"><strong>Emojis como ícones funcionais</strong><span>Emojis são usados em lugar de ícones SVG para ícones de cards e módulos. Tamanho 17-20px. Nunca usar emoji como decoração em texto corrido.</span></div></div>
+      <div class="rule-item"><div class="rule-icon">⚡</div><div class="rule-text"><strong>Animações suaves e com propósito</strong><span>fade-in com translateY(14px) para elementos ao entrar na tela. Pulse no botão VSL. Hover com transform scale(1.08) no WhatsApp. Nada piscante ou chamativo.</span></div></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- FONTES GOOGLE -->
+  <div class="section">
+    <div class="section-title">06 · Imports e Referências</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:12px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;">Google Fonts Import</div>
+      <div style="font-family:monospace;font-size:12px;color:var(--text2);background:var(--bg3);padding:12px;border-radius:8px;line-height:1.8;">
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap');
+      </div>
+      <div style="margin-top:16px;font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;">CSS Variables — template</div>
+      <div style="font-family:monospace;font-size:11px;color:var(--text2);background:var(--bg3);padding:12px;border-radius:8px;line-height:2;">
+        --purple: #7B5EA7;<br>
+        --purple2: #9B7CC7;<br>
+        --lavender: #C4B5E8;<br>
+        --gold: #C9952A;<br>
+        --gold2: #E8B84B;<br>
+        --rose: #C47A8A;<br>
+        --green-light: #3DAA73;<br>
+        --bg: #0D0B12; (dark) / #F5F0FF; (light)<br>
+        --surface: #201C2E; (dark) / #FAF7FF; (light)<br>
+        --border: #2E2842; (dark) / #D5CCE8; (light)
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function toggleTheme(){
+    const h=document.documentElement,dark=h.getAttribute('data-theme')==='dark';
+    h.setAttribute('data-theme',dark?'light':'dark');
+    document.getElementById('ticon').textContent=dark?'☽':'☀';
+    document.getElementById('tlabel').textContent=dark?'Escuro':'Claro';
+  }
+</script>
+</body>
+</html>
