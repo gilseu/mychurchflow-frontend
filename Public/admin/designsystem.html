@@ -1,125 +1,21 @@
 <!DOCTYPE html>
 <html lang="pt-BR" data-theme="dark">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Design System — MychurchFlow</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-  [data-theme="dark"]{
-    --bg:#0D0B12;--bg2:#120F1A;--bg3:#1A1625;--surface:#201C2E;--border:#2E2842;
-    --text:#F0ECF8;--text2:#9E96B8;--text3:#5E5678;
-    --purple:#7B5EA7;--purple2:#9B7CC7;--lavender:#C4B5E8;--lavender2:#E8E0F8;
-    --gold:#C9952A;--gold2:#E8B84B;--gold-dim:#2A1F08;
-    --green:#2A7A52;--green-light:#3DAA73;
-    --rose:#C47A8A;
-    --glow:rgba(123,94,167,0.15);
-  }
-  [data-theme="light"]{
-    --bg:#F5F0FF;--bg2:#EDE6F9;--bg3:#E3DAF2;--surface:#FAF7FF;--border:#D5CCE8;
-    --text:#1A1428;--text2:#5E507A;--text3:#A099BC;
-    --purple:#7B5EA7;--purple2:#6B4E97;--lavender:#7B5EA7;--lavender2:#5A3D8A;
-    --gold:#B8830E;--gold2:#C9952A;--gold-dim:#FDF3E0;
-    --green:#1A5C3A;--green-light:#2A7A52;
-    --rose:#B05A6E;
-    --glow:rgba(123,94,167,0.08);
-  }
-  *{margin:0;padding:0;box-sizing:border-box;}
-  body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-weight:300;line-height:1.7;-webkit-font-smoothing:antialiased;}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design System — MychurchFlow</title>
 
-  nav{position:sticky;top:0;z-index:100;padding:12px 20px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-  .nav-logo{font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;font-size:15px;color:var(--text);}
-  .nav-logo span{color:var(--purple2);}
-  .theme-btn{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:5px 12px;cursor:pointer;font-size:11px;color:var(--text2);font-family:'Plus Jakarta Sans',sans-serif;transition:all .2s;}
+  <!-- Fontes Google -->
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-  .page{max-width:860px;margin:0 auto;padding:40px 20px 80px;}
-
-  header{padding-bottom:40px;border-bottom:1px solid var(--border);margin-bottom:48px;}
-  .eyebrow{font-size:10px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold2);margin-bottom:10px;}
-  h1{font-family:'Cormorant Garamond',serif;font-size:clamp(36px,8vw,56px);font-weight:600;line-height:1.1;letter-spacing:-0.01em;margin-bottom:10px;}
-  h1 em{font-style:italic;color:var(--purple2);}
-  .header-sub{font-size:14px;color:var(--text2);max-width:480px;}
-
-  .section{margin-bottom:56px;}
-  .section-title{font-size:11px;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold2);margin-bottom:20px;padding-bottom:10px;border-bottom:1px solid var(--border);}
-  h2{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;color:var(--text);margin-bottom:16px;}
-
-  /* COLOR SWATCHES */
-  .colors-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
-  .color-group{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
-  .color-group-title{padding:12px 16px;font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);border-bottom:1px solid var(--border);}
-  .swatches{padding:12px;display:flex;flex-direction:column;gap:8px;}
-  .swatch{display:flex;align-items:center;gap:10px;border-radius:8px;padding:8px 10px;}
-  .swatch-dot{width:32px;height:32px;border-radius:8px;flex-shrink:0;border:1px solid rgba(255,255,255,0.1);}
-  .swatch-info{flex:1;}
-  .swatch-name{font-size:12px;font-weight:500;color:var(--text);}
-  .swatch-hex{font-size:11px;color:var(--text3);font-family:monospace;}
-  .swatch-use{font-size:10px;color:var(--text3);margin-top:1px;}
-
-  /* TYPOGRAPHY */
-  .type-samples{display:flex;flex-direction:column;gap:20px;}
-  .type-sample{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;}
-  .type-meta{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;}
-  .type-preview-h1{font-family:'Cormorant Garamond',serif;font-size:clamp(32px,8vw,52px);font-weight:600;line-height:1.1;color:var(--text);}
-  .type-preview-h1 em{font-style:italic;color:var(--purple2);}
-  .type-preview-h2{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;color:var(--text);}
-  .type-preview-h2 em{font-style:italic;color:var(--purple2);}
-  .type-preview-label{font-size:10px;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold2);}
-  .type-preview-body{font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:300;color:var(--text2);line-height:1.7;}
-  .type-preview-strong{font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:500;color:var(--text);}
-  .type-preview-small{font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;color:var(--text3);}
-  .type-spec{margin-top:8px;font-size:11px;color:var(--text3);font-family:monospace;background:var(--bg3);padding:6px 10px;border-radius:6px;}
-
-  /* COMPONENTS */
-  .components-grid{display:flex;flex-direction:column;gap:12px;}
-  .component-row{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;}
-  .comp-label{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:12px;}
-  .comp-preview{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
-
-  /* BUTTONS */
-  .btn-primary{background:linear-gradient(135deg,#7B5EA7 0%,#9B7CC7 100%);color:#F0ECF8;border:none;border-radius:12px;padding:12px 22px;font-size:14px;font-weight:500;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;}
-  .btn-secondary{background:transparent;color:var(--purple2);border:1px solid var(--purple);border-radius:12px;padding:12px 22px;font-size:14px;font-weight:500;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;}
-  .btn-ghost{background:var(--bg3);color:var(--text2);border:1px solid var(--border);border-radius:20px;padding:8px 16px;font-size:12px;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;}
-  .btn-cta{background:var(--gold);color:#FFF8EC;border:none;border-radius:12px;padding:12px 22px;font-size:14px;font-weight:500;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;}
-
-  /* BADGES */
-  .badge-purple{display:inline-block;background:var(--glow);border:1px solid var(--purple);border-radius:20px;padding:4px 12px;font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--lavender);}
-  .badge-gold{display:inline-block;background:var(--gold-dim);border:1px solid var(--gold);border-radius:20px;padding:4px 12px;font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold2);}
-  .badge-green{display:inline-block;background:#001A08;border:1px solid var(--green);border-radius:20px;padding:4px 12px;font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--green-light);}
-  .badge-rose{display:inline-block;background:#1A0810;border:1px solid var(--rose);border-radius:20px;padding:4px 12px;font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--rose);}
-
-  /* CARDS */
-  .card-default{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;}
-  .card-featured{background:var(--surface);border:2px solid var(--purple);border-radius:14px;padding:16px;}
-  .card-gold{background:var(--surface);border:1px solid var(--gold);border-radius:14px;padding:16px;}
-
-  /* SPACING */
-  .spacing-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
-  .spacing-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;}
-  .spacing-bar{background:var(--purple);border-radius:4px;margin-bottom:6px;}
-  .spacing-label{font-size:11px;color:var(--text2);}
-  .spacing-value{font-size:12px;font-weight:500;font-family:monospace;color:var(--text);}
-
-  /* GRADIENTS */
-  .gradient-samples{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-  .grad-item{height:80px;border-radius:12px;display:flex;align-items:flex-end;padding:10px 12px;}
-  .grad-label{font-size:11px;font-weight:500;color:rgba(255,255,255,0.8);}
-
-  /* RULES */
-  .rules-list{display:flex;flex-direction:column;gap:8px;}
-  .rule-item{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;gap:12px;}
-  .rule-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
-  .rule-text strong{display:block;font-size:13px;font-weight:500;margin-bottom:2px;}
-  .rule-text span{font-size:12px;color:var(--text2);}
-
-  .divider{height:1px;background:var(--border);margin:40px 0;}
-</style>
+  <!-- CSS -->
+  <link rel="stylesheet" href="./assets/css/designsystem.css">
 </head>
 <body>
 
 <nav>
   <div class="nav-logo">My<span>Church</span>Flow · <span style="color:var(--text3);font-weight:300;">Design System</span></div>
-  <button class="theme-btn" onclick="toggleTheme()"><span id="ticon">☀</span> <span id="tlabel">Claro</span></button>
+  <button class="theme-btn" id="btnTheme"><span id="ticon">☀</span> <span id="tlabel">Claro</span></button>
 </nav>
 
 <div class="page">
@@ -378,13 +274,6 @@
 
 </div>
 
-<script>
-  function toggleTheme(){
-    const h=document.documentElement,dark=h.getAttribute('data-theme')==='dark';
-    h.setAttribute('data-theme',dark?'light':'dark');
-    document.getElementById('ticon').textContent=dark?'☽':'☀';
-    document.getElementById('tlabel').textContent=dark?'Escuro':'Claro';
-  }
-</script>
+<script src="./assets/js/designsystem.js" defer></script>
 </body>
 </html>

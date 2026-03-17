@@ -1,168 +1,50 @@
 <!DOCTYPE html>
 <html lang="pt-BR" data-theme="dark">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Painel Admin — MyChurchFlow</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Admin — MyChurchFlow</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,600&family=Plus+Jakarta+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <!-- Fontes Google -->
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,600&family=Plus+Jakarta+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 
-<style>
-:root{
-  --bg:#0D0B12;
-  --surface:#201C2E;
-  --border:#2E2842;
-  --text:#F0ECF8;
-  --text2:#9E96B8;
-  --purple:#7B5EA7;
-  --purple2:#9B7CC7;
-}
-
-*{margin:0;padding:0;box-sizing:border-box;}
-
-body{
-  background:var(--bg);
-  color:var(--text);
-  font-family:'Plus Jakarta Sans',sans-serif;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
-}
-
-/* Container */
-.container{
-  width:100%;
-  max-width:420px;
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:28px;
-  text-align:center;
-}
-
-/* Title */
-h1{
-  font-family:'Cormorant Garamond',serif;
-  font-size:36px;
-  margin-bottom:10px;
-}
-
-h1 em{
-  color:var(--purple2);
-}
-
-/* Subtitle */
-.subtitle{
-  font-size:13px;
-  color:var(--text2);
-  margin-bottom:20px;
-}
-
-/* Input */
-input{
-  width:100%;
-  padding:12px;
-  border-radius:10px;
-  border:1px solid var(--border);
-  background:#1A1625;
-  color:var(--text);
-  margin-bottom:12px;
-}
-
-/* Button login */
-button{
-  width:100%;
-  padding:12px;
-  border-radius:12px;
-  border:none;
-  background:linear-gradient(135deg,#7B5EA7,#9B7CC7);
-  color:white;
-  cursor:pointer;
-  font-weight:500;
-}
-
-/* Botões do painel */
-.btn{
-  display:block;
-  width:100%;
-  padding:14px;
-  border-radius:12px;
-  text-decoration:none;
-  font-size:14px;
-  font-weight:500;
-  margin-bottom:12px;
-  transition:0.2s;
-}
-
-.btn-primary{
-  background:linear-gradient(135deg,#7B5EA7,#9B7CC7);
-  color:white;
-}
-
-.btn-secondary{
-  border:1px solid var(--purple);
-  color:var(--purple2);
-}
-
-.btn:hover{
-  transform:scale(1.03);
-}
-</style>
+  <!-- CSS -->
+  <link rel="stylesheet" href="./assets/css/admin.css">
 </head>
 
 <body>
 
-<!-- LOGIN -->
-<div class="container" id="login">
-  <h1>Acesso <em>Admin</em></h1>
-  <p class="subtitle">Digite a senha</p>
+  <!-- LOGIN -->
+  <div class="container" id="login">
+    <h1>Acesso <em>Admin</em></h1>
+    <p class="subtitle">Digite a senha</p>
 
-  <input type="password" id="senha" placeholder="Senha">
-  <button onclick="entrar()">Entrar</button>
-</div>
+    <input type="password" id="senha" placeholder="Senha">
+    <button type="button">Entrar</button>
+  </div>
 
-<!-- PAINEL -->
-<div class="container" id="painel" style="display:none;">
-  <h1>Painel <em>Admin</em></h1>
-  <p class="subtitle">Gerencie o sistema</p>
+  <!-- PAINEL -->
+  <div class="container hidden" id="painel">
+    <h1>Painel <em>Admin</em></h1>
+    <p class="subtitle">Gerencie o sistema</p>
 
-  <!-- BOTÃO VOLTAR -->
-  <a href="https://app.mychurchflow.app" class="btn btn-secondary">
-    ← Voltar para o App
-  </a>
+    <!-- BOTÃO VOLTAR -->
+    <a href="https://app.mychurchflow.app" class="btn btn-secondary">
+      ← Voltar para o App
+    </a>
 
-  <!-- BOTÕES PRINCIPAIS -->
-  <a href="/admin/plano.html" class="btn btn-primary">
-    Plano de Negócios
-  </a>
+    <!-- BOTÕES PRINCIPAIS -->
+    <a href="/admin/plano.html" class="btn btn-primary">
+      Plano de Negócios
+    </a>
 
-  <a href="/admin/designsystem.html" class="btn btn-secondary">
-    Design System
-  </a>
-</div>
+    <a href="/admin/designsystem.html" class="btn btn-secondary">
+      Design System
+    </a>
+  </div>
 
-<script>
-const SENHA_CORRETA = "123456"; // 🔥 TROCA ISSO
-
-function entrar(){
-  const senha = document.getElementById("senha").value;
-
-  if(senha === SENHA_CORRETA){
-    document.getElementById("login").style.display = "none";
-    document.getElementById("painel").style.display = "block";
-    localStorage.setItem("admin_logado", "true");
-  } else {
-    alert("Senha incorreta");
-  }
-}
-
-// manter logado
-if(localStorage.getItem("admin_logado") === "true"){
-  document.getElementById("login").style.display = "none";
-  document.getElementById("painel").style.display = "block";
-}
-</script>
+  <!-- JavaScript -->
+  <script src="./assets/js/admin.js" defer></script>
 
 </body>
 </html>

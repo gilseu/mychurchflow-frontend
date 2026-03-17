@@ -1,238 +1,11 @@
 <!DOCTYPE html>
 <html lang="pt-BR" data-theme="dark">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MychurchFlow — Encontros que Transformam</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-  [data-theme="dark"]{
-    --bg:#0D0B12;--bg2:#120F1A;--bg3:#1A1625;--surface:#201C2E;--border:#2E2842;
-    --text:#F0ECF8;--text2:#9E96B8;--text3:#5E5678;
-    --purple:#7B5EA7;--purple2:#9B7CC7;--lavender:#C4B5E8;--lavender2:#E8E0F8;
-    --gold:#C9952A;--gold2:#E8B84B;--gold-dim:#2A1F08;
-    --glow:rgba(123,94,167,0.15);
-  }
-  [data-theme="light"]{
-    --bg:#F5F0FF;--bg2:#EDE6F9;--bg3:#E3DAF2;--surface:#FAF7FF;--border:#D5CCE8;
-    --text:#1A1428;--text2:#5E507A;--text3:#A099BC;
-    --purple:#7B5EA7;--purple2:#6B4E97;--lavender:#7B5EA7;--lavender2:#5A3D8A;
-    --gold:#B8830E;--gold2:#C9952A;--gold-dim:#FDF3E0;
-    --glow:rgba(123,94,167,0.08);
-  }
-  *{margin:0;padding:0;box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
-  body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-weight:300;line-height:1.7;transition:background .3s,color .3s;-webkit-font-smoothing:antialiased;padding-bottom:64px;}
-
-  nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;background:var(--bg);border-bottom:1px solid var(--border);transition:background .3s;}
-  .logo-wrap{display:flex;flex-direction:column;line-height:1.15;}
-  .logo-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;font-size:17px;color:var(--text);letter-spacing:-0.01em;}
-  .logo-name span{color:var(--purple2);}
-  .logo-sub{font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);font-weight:400;}
-  .nav-right{display:flex;align-items:center;gap:8px;}
-  .theme-btn{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:6px 12px;cursor:pointer;font-size:11px;color:var(--text2);font-family:'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;gap:5px;transition:all .2s;white-space:nowrap;}
-  .theme-btn:hover{border-color:var(--purple2);color:var(--lavender);}
-  .nav-cta{background:var(--purple);color:#F0ECF8;border:none;border-radius:20px;padding:8px 16px;font-size:12px;font-weight:500;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;text-decoration:none;display:inline-block;transition:all .2s;white-space:nowrap;}
-  .nav-cta:hover{background:var(--purple2);}
-
-  .hero{padding:90px 20px 56px;text-align:center;position:relative;overflow:hidden;}
-  .hero-glow{position:absolute;top:-40px;left:50%;transform:translateX(-50%);width:280px;height:280px;border-radius:50%;background:var(--glow);filter:blur(50px);pointer-events:none;}
-  .hero-badge{display:inline-flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:5px 14px;font-size:11px;color:var(--text2);font-weight:400;letter-spacing:0.04em;margin-bottom:18px;position:relative;}
-  .hero-badge::before{content:'✦';color:var(--gold2);font-size:9px;}
-  h1{font-family:'Cormorant Garamond',serif;font-size:clamp(40px,11vw,72px);font-weight:600;line-height:1.1;color:var(--text);margin-bottom:8px;letter-spacing:-0.01em;position:relative;}
-  h1 em{font-style:italic;background:linear-gradient(135deg,var(--purple2) 0%,var(--gold2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-  .hero-tagline{font-family:'Cormorant Garamond',serif;font-size:clamp(16px,4.5vw,22px);font-style:italic;color:var(--text2);margin-bottom:18px;position:relative;}
-  .hero-tagline span{color:var(--lavender);font-style:normal;font-weight:600;}
-  .hero-desc{font-size:14px;color:var(--text2);max-width:320px;margin:0 auto 24px;line-height:1.7;position:relative;}
-  .vsl-wrap{background:var(--bg3);border:1px solid var(--border);border-radius:14px;aspect-ratio:16/9;max-width:100%;margin:0 auto 24px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;position:relative;overflow:hidden;cursor:pointer;}
-  .vsl-wrap::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,var(--glow) 0%,transparent 70%);}
-  .vsl-ring{width:56px;height:56px;border-radius:50%;border:2px solid var(--purple2);display:flex;align-items:center;justify-content:center;position:relative;z-index:1;animation:pulse 2s ease-in-out infinite;}
-  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(155,124,199,0.4);}50%{box-shadow:0 0 0 12px rgba(155,124,199,0);}}
-  .vsl-play{width:44px;height:44px;border-radius:50%;background:var(--purple);display:flex;align-items:center;justify-content:center;}
-  .vsl-play::after{content:'';width:0;height:0;border-top:9px solid transparent;border-bottom:9px solid transparent;border-left:16px solid #F0ECF8;margin-left:3px;}
-  .vsl-label{font-size:12px;color:var(--text3);position:relative;z-index:1;}
-  .cta-primary{display:block;width:100%;background:linear-gradient(135deg,var(--purple) 0%,var(--purple2) 100%);color:#F0ECF8;border:none;border-radius:14px;padding:16px 24px;font-size:15px;font-weight:500;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;text-decoration:none;margin:0 auto 12px;transition:all .2s;text-align:center;box-shadow:0 4px 20px rgba(123,94,167,0.3);}
-  .cta-primary:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(123,94,167,0.4);}
-  .guar-note{font-size:11px;color:var(--text3);display:flex;align-items:center;justify-content:center;gap:5px;}
-  .guar-note::before{content:'🔒';font-size:11px;}
-
-  .numbers-bar{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
-  .numbers-grid{display:grid;grid-template-columns:repeat(2,1fr);}
-  .num-item{padding:22px 12px;text-align:center;border-right:1px solid var(--border);border-bottom:1px solid var(--border);}
-  .num-item:nth-child(2){border-right:none;}
-  .num-item:nth-child(3){border-bottom:none;}
-  .num-item:nth-child(4){border-right:none;border-bottom:none;}
-  .num-val{font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600;color:var(--purple2);line-height:1;margin-bottom:4px;}
-  .num-label{font-size:11px;color:var(--text2);}
-
-  section{padding:52px 20px;}
-  .sec-label{font-size:10px;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold2);margin-bottom:8px;}
-  h2{font-family:'Cormorant Garamond',serif;font-size:clamp(28px,8vw,48px);font-weight:600;line-height:1.15;color:var(--text);margin-bottom:10px;letter-spacing:-0.01em;}
-  h2 em{font-style:italic;color:var(--purple2);}
-  .sec-sub{font-size:14px;color:var(--text2);margin-bottom:32px;line-height:1.7;}
-
-  .forwhom-list{display:flex;flex-direction:column;gap:10px;}
-  .fw-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;align-items:flex-start;gap:12px;transition:border-color .2s;}
-  .fw-card:hover{border-color:var(--purple);}
-  .fw-icon{width:38px;height:38px;border-radius:10px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
-  .fw-text strong{display:block;font-size:13px;font-weight:500;margin-bottom:2px;}
-  .fw-text span{font-size:12px;color:var(--text2);line-height:1.5;}
-
-  .modules-bg{background:var(--bg2);}
-  .module-list{display:flex;flex-direction:column;gap:10px;}
-  .mod-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;align-items:center;gap:12px;transition:border-color .2s;}
-  .mod-card.entry{border-color:var(--purple);}
-  .mod-icon{width:42px;height:42px;border-radius:10px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;}
-  .mod-card.entry .mod-icon{background:var(--glow);}
-  .mod-info{flex:1;}
-  .mod-tag{font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--purple2);margin-bottom:2px;}
-  .mod-tag.bump{color:var(--text3);}
-  .mod-tag.free{color:var(--gold2);}
-  .mod-name{font-size:13px;font-weight:500;color:var(--text);line-height:1.3;}
-  .mod-price{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;color:var(--text);white-space:nowrap;}
-  .mod-price.hl{color:var(--purple2);}
-  .mod-price.gd{color:var(--gold2);}
-
-  .steps{display:flex;flex-direction:column;}
-  .step{display:flex;gap:16px;padding:22px 0;border-bottom:1px solid var(--border);}
-  .step:last-child{border-bottom:none;}
-  .step-num{font-family:'Cormorant Garamond',serif;font-size:44px;font-weight:600;color:var(--border);line-height:1;flex-shrink:0;width:44px;}
-  .step-body strong{display:block;font-size:14px;font-weight:500;margin-bottom:3px;}
-  .step-body p{font-size:13px;color:var(--text2);line-height:1.6;}
-
-  .offer-bg{background:var(--bg2);}
-  .offer-box{background:var(--surface);border:1px solid var(--purple);border-radius:20px;overflow:hidden;}
-  .offer-head{background:linear-gradient(135deg,#1A1030 0%,#241840 100%);border-bottom:1px solid var(--purple);padding:22px 20px;text-align:center;}
-  [data-theme="light"] .offer-head{background:linear-gradient(135deg,var(--bg3) 0%,var(--bg2) 100%);}
-  .offer-head-label{font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold2);margin-bottom:5px;}
-  .offer-head-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;color:var(--lavender2);margin-bottom:3px;}
-  .offer-head-sub{font-size:12px;color:var(--text2);}
-  .offer-body{padding:20px;}
-  .offer-items{margin-bottom:20px;}
-  .offer-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px;}
-  .offer-item:last-child{border-bottom:none;}
-  .ocheck{width:18px;height:18px;border-radius:50%;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:9px;color:#F0ECF8;flex-shrink:0;font-weight:700;}
-  .oname{flex:1;color:var(--text);}
-  .oprice{color:var(--text3);text-decoration:line-through;font-size:12px;}
-  .oprice.free{color:var(--gold2);text-decoration:none;}
-  .price-block{text-align:center;margin-bottom:20px;}
-  .price-from{font-size:13px;color:var(--text3);text-decoration:line-through;margin-bottom:2px;}
-  .price-main{font-family:'Cormorant Garamond',serif;font-size:60px;font-weight:600;color:var(--purple2);line-height:1;}
-  .price-main sub{font-size:20px;vertical-align:super;}
-  .price-note{font-size:11px;color:var(--text3);margin-top:4px;}
-  .offer-cta{display:block;width:100%;background:linear-gradient(135deg,var(--purple) 0%,var(--purple2) 100%);color:#F0ECF8;border:none;border-radius:12px;padding:16px;font-size:15px;font-weight:500;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;text-align:center;text-decoration:none;margin-bottom:12px;box-shadow:0 4px 20px rgba(123,94,167,0.35);transition:all .2s;}
-  .offer-cta:hover{transform:translateY(-1px);}
-  .offer-guar{text-align:center;font-size:11px;color:var(--text3);display:flex;align-items:center;justify-content:center;gap:5px;}
-
-  .faq-list{display:flex;flex-direction:column;}
-  .faq-item{border-bottom:1px solid var(--border);cursor:pointer;}
-  .faq-item:last-child{border-bottom:none;}
-  .faq-q{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 0;font-size:14px;font-weight:400;color:var(--text);user-select:none;}
-  .faq-icon{width:22px;height:22px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--purple2);flex-shrink:0;transition:transform .2s,background .2s;}
-  .faq-item.open .faq-icon{transform:rotate(45deg);background:var(--purple);border-color:var(--purple);color:#F0ECF8;}
-  .faq-a{font-size:13px;color:var(--text2);line-height:1.7;max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s;}
-  .faq-item.open .faq-a{max-height:160px;padding-bottom:16px;}
-
-  .final-section{text-align:center;padding:68px 20px;background:var(--bg2);border-top:1px solid var(--border);position:relative;overflow:hidden;}
-  .final-section::before{content:'';position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:260px;height:260px;border-radius:50%;background:var(--glow);filter:blur(50px);pointer-events:none;}
-  .final-section h2{margin-bottom:10px;position:relative;}
-  .final-section p{font-size:14px;color:var(--text2);margin-bottom:28px;position:relative;}
-  .final-guar{font-size:11px;color:var(--text3);margin-top:12px;display:flex;align-items:center;justify-content:center;gap:5px;}
-  .final-guar::before{content:'✦';color:var(--gold2);font-size:9px;}
-
-  footer{padding:24px 20px;border-top:1px solid var(--border);text-align:center;font-size:11px;color:var(--text3);}
-  .footer-links{display:flex;justify-content:center;gap:20px;margin-top:8px;}
-  .footer-links a{color:var(--text3);text-decoration:none;}
-
-  .divider{height:1px;background:var(--border);}
-
-  .sticky-bar{position:fixed;bottom:0;left:0;right:0;z-index:99;background:var(--purple);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--purple2);box-shadow:0 -4px 20px rgba(123,94,167,0.4);}
-  .sticky-bar-left{display:flex;flex-direction:column;line-height:1.2;}
-  .sticky-bar-price{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:#F0ECF8;}
-  .sticky-bar-note{font-size:10px;color:rgba(240,236,248,0.7);margin-top:1px;}
-  .sticky-bar-btn{background:#F0ECF8;color:var(--purple);border:none;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:600;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;text-decoration:none;white-space:nowrap;transition:all .2s;}
-  .sticky-bar-btn:hover{background:var(--lavender2);}
-
-  .urgency-bar{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:20px;display:flex;align-items:center;gap:12px;}
-  .urgency-icon{font-size:20px;flex-shrink:0;}
-  .urgency-text strong{display:block;font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px;}
-  .urgency-text span{font-size:12px;color:var(--text2);}
-  .urgency-timer{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--purple2);flex-shrink:0;min-width:56px;text-align:right;}
-
-  .guarantee-box{background:var(--bg3);border:1px solid var(--gold);border-radius:14px;padding:20px;margin:32px 0;display:flex;align-items:flex-start;gap:14px;}
-  .guarantee-icon{font-size:32px;flex-shrink:0;}
-  .guarantee-text strong{display:block;font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--gold2);margin-bottom:4px;}
-  .guarantee-text p{font-size:13px;color:var(--text2);line-height:1.6;}
-
-  .app-screens{display:flex;flex-direction:column;gap:12px;margin-bottom:32px;}
-  .app-screen{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
-  .screen-img{width:100%;aspect-ratio:16/9;background:var(--bg3);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;border-bottom:1px solid var(--border);}
-  .screen-img-tall{width:100%;aspect-ratio:9/16;background:var(--bg3);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;border-bottom:1px solid var(--border);max-height:300px;}
-  .screen-placeholder{width:40px;height:40px;border-radius:10px;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;}
-  .screen-hint{font-size:11px;color:var(--text3);}
-  .screen-caption{padding:12px 14px;}
-  .screen-caption strong{display:block;font-size:13px;font-weight:500;margin-bottom:2px;}
-  .screen-caption span{font-size:12px;color:var(--text2);}
-  .screens-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-
-  .testimonials-bg{background:var(--bg2);}
-  .testimonial-list{display:flex;flex-direction:column;gap:12px;}
-  .testimonial-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;}
-  .testi-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
-  .testi-avatar{width:40px;height:40px;border-radius:50%;background:var(--glow);border:1px solid var(--purple);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
-  .testi-meta strong{display:block;font-size:13px;font-weight:500;}
-  .testi-meta span{font-size:11px;color:var(--text3);}
-  .testi-stars{color:var(--gold2);font-size:13px;margin-bottom:8px;letter-spacing:2px;}
-  .testi-text{font-size:13px;color:var(--text2);line-height:1.65;font-style:italic;}
-  .testi-text::before{content:'"';color:var(--purple2);font-size:24px;font-family:'Cormorant Garamond',serif;line-height:0;vertical-align:-8px;margin-right:2px;}
-  .testi-placeholder{background:var(--surface);border:2px dashed var(--border);border-radius:14px;padding:24px;text-align:center;}
-  .testi-placeholder p{font-size:13px;color:var(--text3);margin-top:8px;}
-
-
-  .wa-btn{position:fixed;bottom:76px;right:16px;z-index:98;width:52px;height:52px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(37,211,102,0.4);cursor:pointer;text-decoration:none;transition:transform .2s;}
-  .wa-btn:hover{transform:scale(1.08);}
-  .wa-btn svg{width:28px;height:28px;fill:#fff;}
-  .wa-tooltip{position:fixed;bottom:80px;right:76px;z-index:98;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:12px;color:var(--text);white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s;box-shadow:0 4px 12px var(--shadow);}
-  .wa-btn:hover + .wa-tooltip,.wa-tooltip:hover{opacity:1;}
-
-
-  .modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.7);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;}
-  .modal-overlay.open{opacity:1;pointer-events:all;}
-  .modal-box{background:var(--bg2);border:1px solid var(--border);border-radius:20px 20px 0 0;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;transform:translateY(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);padding-bottom:env(safe-area-inset-bottom,16px);}
-  .modal-overlay.open .modal-box{transform:translateY(0);}
-  .modal-handle{width:40px;height:4px;border-radius:2px;background:var(--border);margin:12px auto 0;}
-  .modal-header{padding:16px 20px 12px;border-bottom:1px solid var(--border);}
-  .modal-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--text);margin-bottom:2px;}
-  .modal-sub{font-size:12px;color:var(--text3);}
-  .modal-section-label{font-size:10px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);padding:12px 20px 6px;}
-  .modal-item{display:flex;align-items:center;gap:12px;padding:10px 20px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;}
-  .modal-item:hover{background:var(--bg3);}
-  .modal-item:last-child{border-bottom:none;}
-  .modal-item-check{width:20px;height:20px;border-radius:5px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;}
-  .modal-item-check.checked{background:var(--purple);border-color:var(--purple);}
-  .modal-item-check.checked::after{content:'✓';font-size:11px;color:#fff;font-weight:700;}
-  .modal-item-check.locked{background:var(--bg3);border-color:var(--purple);cursor:default;}
-  .modal-item-check.locked::after{content:'🔒';font-size:10px;}
-  .modal-item-info{flex:1;}
-  .modal-item-name{font-size:13px;font-weight:500;color:var(--text);}
-  .modal-item-desc{font-size:11px;color:var(--text3);margin-top:1px;}
-  .modal-item-price{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;color:var(--text);white-space:nowrap;}
-  .modal-item-price.free{color:var(--gold2);font-size:13px;}
-  .modal-item-price.included{color:var(--purple2);font-size:13px;}
-  .modal-total-bar{padding:14px 20px;background:var(--bg3);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
-  .modal-total-row{display:flex;justify-content:space-between;align-items:center;}
-  .modal-total-label{font-size:13px;color:var(--text2);}
-  .modal-total-value{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;color:var(--purple2);}
-  .modal-total-savings{font-size:11px;color:var(--gold2);margin-top:2px;}
-  .modal-footer{padding:14px 20px;}
-  .modal-cta-btn{display:block;width:100%;background:linear-gradient(135deg,var(--purple) 0%,var(--purple2) 100%);color:#F0ECF8;border:none;border-radius:12px;padding:15px;font-size:15px;font-weight:500;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;text-align:center;text-decoration:none;box-shadow:0 4px 20px rgba(123,94,167,0.35);transition:all .2s;margin-bottom:10px;}
-  .modal-cta-btn:hover{transform:translateY(-1px);}
-  .modal-guar{text-align:center;font-size:11px;color:var(--text3);display:flex;align-items:center;justify-content:center;gap:4px;}
-  .modal-close{position:absolute;top:16px;right:16px;width:28px;height:28px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;color:var(--text2);}
-
-  .fade-in{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease;}
-  .fade-in.visible{opacity:1;transform:translateY(0);}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MychurchFlow — Encontros que Transformam</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./assets/css/landingpage.css">
 </head>
 <body>
 
@@ -242,10 +15,10 @@
     <div class="logo-sub">para líderes que transformam vidas</div>
   </div>
   <div class="nav-right">
-    <button class="theme-btn" onclick="toggleTheme()">
+    <button class="theme-btn">
       <span id="ticon">☀</span><span id="tlabel">Claro</span>
     </button>
-    <a href="#" class="nav-cta" href="https://mychurchflow.app/br/app.html">Acessar →</a>
+    <a href="https://mychurchflow.app/br/app.html" class="nav-cta">Acessar →</a>
   </div>
 </nav>
 
@@ -259,7 +32,7 @@
     <div class="vsl-ring"><div class="vsl-play"></div></div>
     <span class="vsl-label">Veja o app em ação — 3 minutos</span>
   </div>
-  <a href="#" class="cta-primary" onclick="event.preventDefault();openModal()">Quero transformar meus encontros →</a>
+  <a href="#" class="cta-primary">Quero transformar meus encontros →</a>
   <p class="guar-note">Garantia de 7 dias · Acesso imediato</p>
 </div>
 
@@ -548,7 +321,7 @@
         </div>
         <div class="urgency-timer" id="timer">10:00</div>
       </div>
-      <a href="#" class="offer-cta" onclick="event.preventDefault();openModal()">Quero meu acesso agora →</a>
+      <a href="#" class="offer-cta">Quero meu acesso agora →</a>
       <div class="offer-guar">🔒 Garantia de 7 dias — devolvemos tudo se não gostar</div>
     </div>
   </div>
@@ -558,11 +331,11 @@
   <div class="sec-label">Dúvidas</div>
   <h2>Perguntas <em>frequentes</em></h2>
   <div class="faq-list">
-    <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">Precisa baixar algum app?<div class="faq-icon">+</div></div><div class="faq-a">Não precisa! O MychurchFlow funciona direto no navegador do celular ou computador — sem instalar nada. Mas se preferir, também disponibilizamos o aplicativo para instalar no celular e ter acesso ainda mais rápido.</div></div>
-    <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">Como recebo o acesso após a compra?<div class="faq-icon">+</div></div><div class="faq-a">Imediatamente após o Pix ser confirmado, você recebe um e-mail com login e senha. O processo é 100% automático — sem espera.</div></div>
-    <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">O acesso expira?<div class="faq-icon">+</div></div><div class="faq-a">Não. Ao comprar o combo você tem acesso vitalício — enquanto o app existir, você tem acesso.</div></div>
-    <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">Como funciona a garantia de 7 dias?<div class="faq-icon">+</div></div><div class="faq-a">Se por qualquer motivo você não ficar satisfeita nos primeiros 7 dias, basta entrar em contato e devolvemos o valor integral. Sem perguntas.</div></div>
-    <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">Posso usar em grupos fora da igreja?<div class="faq-icon">+</div></div><div class="faq-a">O conteúdo foi desenvolvido para grupos de mulheres cristãs, mas muitas dinâmicas funcionam para qualquer grupo feminino. A maioria é adaptável.</div></div>
+    <div class="faq-item"><div class="faq-q">Precisa baixar algum app?<div class="faq-icon">+</div></div><div class="faq-a">Não precisa! O MychurchFlow funciona direto no navegador do celular ou computador — sem instalar nada. Mas se preferir, também disponibilizamos o aplicativo para instalar no celular e ter acesso ainda mais rápido.</div></div>
+    <div class="faq-item"><div class="faq-q">Como recebo o acesso após a compra?<div class="faq-icon">+</div></div><div class="faq-a">Imediatamente após o Pix ser confirmado, você recebe um e-mail com login e senha. O processo é 100% automático — sem espera.</div></div>
+    <div class="faq-item"><div class="faq-q">O acesso expira?<div class="faq-icon">+</div></div><div class="faq-a">Não. Ao comprar o combo você tem acesso vitalício — enquanto o app existir, você tem acesso.</div></div>
+    <div class="faq-item"><div class="faq-q">Como funciona a garantia de 7 dias?<div class="faq-icon">+</div></div><div class="faq-a">Se por qualquer motivo você não ficar satisfeita nos primeiros 7 dias, basta entrar em contato e devolvemos o valor integral. Sem perguntas.</div></div>
+    <div class="faq-item"><div class="faq-q">Posso usar em grupos fora da igreja?<div class="faq-icon">+</div></div><div class="faq-a">O conteúdo foi desenvolvido para grupos de mulheres cristãs, mas muitas dinâmicas funcionam para qualquer grupo feminino. A maioria é adaptável.</div></div>
   </div>
 </section>
 
@@ -586,7 +359,7 @@
   <div class="sec-label">Pronta pra começar?</div>
   <h2>Seu próximo encontro<br>pode ser <em>inesquecível</em></h2>
   <p>Junte-se às líderes que já transformam seus grupos com o MychurchFlow.</p>
-  <a href="#" class="cta-primary" style="max-width:340px;position:relative;" onclick="event.preventDefault();openModal()">Quero meu acesso por R$19,90 →</a>
+  <a href="#" class="cta-primary" style="max-width:340px;position:relative;">Quero meu acesso por R$19,90 →</a>
   <p class="final-guar">Garantia de 7 dias · Pagamento único · Acesso imediato</p>
 </div>
 
@@ -599,71 +372,6 @@
   </div>
 </footer>
 
-<script>
-  function toggleTheme(){
-    const h=document.documentElement,dark=h.getAttribute('data-theme')==='dark';
-    h.setAttribute('data-theme',dark?'light':'dark');
-    document.getElementById('ticon').textContent=dark?'☽':'☀';
-    document.getElementById('tlabel').textContent=dark?'Escuro':'Claro';
-  }
-  function toggleFaq(el){
-    const open=el.classList.contains('open');
-    document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));
-    if(!open)el.classList.add('open');
-  }
-
-
-  let basePrice = 19.90;
-  let extraTotal = 0;
-
-  function openModal(){
-    document.getElementById('checkoutModal').classList.add('open');
-    document.body.style.overflow='hidden';
-  }
-  function closeModal(){
-    document.getElementById('checkoutModal').classList.remove('open');
-    document.body.style.overflow='';
-  }
-  function handleModalClick(e){
-    if(e.target===document.getElementById('checkoutModal')) closeModal();
-  }
-  function toggleBump(el, price){
-    const check = el.querySelector('.modal-item-check');
-    const isChecked = check.classList.contains('checked');
-    if(isChecked){
-      check.classList.remove('checked');
-      extraTotal = Math.round((extraTotal - price) * 100) / 100;
-    } else {
-      check.classList.add('checked');
-      extraTotal = Math.round((extraTotal + price) * 100) / 100;
-    }
-    updateTotal();
-  }
-  function updateTotal(){
-    const total = Math.round((basePrice + extraTotal) * 100) / 100;
-    const savings = Math.round((29.80 + extraTotal - total) * 100) / 100;
-    document.getElementById('modalTotal').textContent = 'R$' + total.toFixed(2).replace('.',',');
-    if(savings > 0){
-      document.getElementById('modalSavings').textContent = 'Você economiza R$' + savings.toFixed(2).replace('.',',') + ' em relação ao preço separado';
-      document.getElementById('modalSavings').style.display = 'block';
-    } else {
-      document.getElementById('modalSavings').style.display = 'none';
-    }
-  }
-
-  let t=600;
-  function tick(){
-    const m=Math.floor(t/60),s=t%60,el=document.getElementById('timer');
-    if(el)el.textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
-    if(t>0)t--;setTimeout(tick,1000);
-  }
-  tick();
-
-  const io=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('visible');});},{threshold:0.1});
-  document.querySelectorAll('.fade-in').forEach(el=>io.observe(el));
-</script>
-
-
 <a class="wa-btn" href="https://wa.me/5548998144008?text=Olá!%20Tenho%20uma%20dúvida%20sobre%20o%20MychurchFlow" target="_blank" title="Falar no WhatsApp">
   <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
 </a>
@@ -674,16 +382,16 @@
     <div class="sticky-bar-price">R$19,90</div>
     <div class="sticky-bar-note">pagamento único · acesso imediato</div>
   </div>
-  <a href="#" class="sticky-bar-btn" onclick="event.preventDefault();openModal()">Quero o app →</a>
+  <a href="#" class="sticky-bar-btn">Quero o app →</a>
 </div>
 
-<div class="modal-overlay" id="checkoutModal" onclick="handleModalClick(event)">
+<div class="modal-overlay" id="checkoutModal">
   <div class="modal-box">
     <div class="modal-handle"></div>
     <div class="modal-header" style="position:relative;">
       <div class="modal-title">Seu pedido</div>
       <div class="modal-sub">Selecione o que deseja adicionar</div>
-      <div class="modal-close" onclick="closeModal()">✕</div>
+      <div class="modal-close">✕</div>
     </div>
 
     <div class="modal-section-label">📦 Incluso no combo</div>
@@ -715,7 +423,7 @@
     </div>
 
     <div class="modal-section-label">➕ Adicionar ao pedido</div>
-    <div class="modal-item" onclick="toggleBump(this, 9.90)" data-price="9.90">
+    <div class="modal-item" data-price="9.90">
       <div class="modal-item-check"></div>
       <div class="modal-item-info">
         <div class="modal-item-name">50 Quebra-Gelos Cristãos</div>
@@ -723,7 +431,7 @@
       </div>
       <div class="modal-item-price">R$9,90</div>
     </div>
-    <div class="modal-item" onclick="toggleBump(this, 9.90)" data-price="9.90">
+    <div class="modal-item" data-price="9.90">
       <div class="modal-item-check"></div>
       <div class="modal-item-info">
         <div class="modal-item-name">100 Perguntas Poderosas</div>
@@ -731,7 +439,7 @@
       </div>
       <div class="modal-item-price">R$9,90</div>
     </div>
-    <div class="modal-item" onclick="toggleBump(this, 9.90)" data-price="9.90">
+    <div class="modal-item" data-price="9.90">
       <div class="modal-item-check"></div>
       <div class="modal-item-info">
         <div class="modal-item-name">30 Estudos Bíblicos Curtos</div>
@@ -741,7 +449,7 @@
     </div>
 
     <div class="modal-section-label">✨ Produtos premium</div>
-    <div class="modal-item" onclick="toggleBump(this, 12.90)" data-price="12.90">
+    <div class="modal-item" data-price="12.90">
       <div class="modal-item-check"></div>
       <div class="modal-item-info">
         <div class="modal-item-name">Devocional para Mulheres</div>
@@ -749,7 +457,7 @@
       </div>
       <div class="modal-item-price" style="color:#C47A8A;">R$12,90</div>
     </div>
-    <div class="modal-item" onclick="toggleBump(this, 24.90)" data-price="24.90">
+    <div class="modal-item" data-price="24.90">
       <div class="modal-item-check"></div>
       <div class="modal-item-info">
         <div class="modal-item-name">50 Encontros Completos</div>
@@ -767,7 +475,7 @@
     </div>
 
     <div class="modal-footer">
-      <a id="checkoutBtn" href="https://ggcheckout.com/checkout/v5/NMRKHjN1GMySjgX67MNv" target="_blank" class="modal-cta-btn" onclick="closeModal()">
+      <a id="checkoutBtn" href="https://ggcheckout.com/checkout/v5/NMRKHjN1GMySjgX67MNv" target="_blank" class="modal-cta-btn">
         Finalizar compra →
       </a>
       <div class="modal-guar">🔒 Garantia de 7 dias · Pix ou cartão em até 3x</div>
@@ -775,5 +483,6 @@
   </div>
 </div>
 
+<script src="./assets/js/landingpage.js" defer></script>
 </body>
 </html>
