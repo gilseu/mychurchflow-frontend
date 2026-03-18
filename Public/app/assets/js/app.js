@@ -416,11 +416,11 @@ let encontrosGeradosSessao = [];
 let conjuntosEncontros = [];
 
 // ── PERSISTÊNCIA LOCAL ──
-const STORAGE_KEY_PLANOS    = ()=> `encontros_planos_v1_${usuarioAtual?.email||'guest'}`;
-const STORAGE_KEY_FAVORITOS = ()=> `encontros_favoritos_v1_${usuarioAtual?.email||'guest'}`;
-const STORAGE_KEY_HIST_GER  = ()=> `encontros_hist_gerador_v1_${usuarioAtual?.email||'guest'}`;
-const STORAGE_KEY_USO_DIN   = ()=> `encontros_uso_din_v1_${usuarioAtual?.email||'guest'}`;
-const STORAGE_KEY_HIST_ENC_GER = ()=> `encontros_hist_enc_ger_v1_${usuarioAtual?.email||'guest'}`;
+const STORAGE_KEY_PLANOS    = ()=> `encontros_planos_v1_${usuarioAtual?.email || usuarioAtual?.nome || 'anon'}`;
+const STORAGE_KEY_FAVORITOS = ()=> `encontros_favoritos_v1_${usuarioAtual?.email || usuarioAtual?.nome || 'anon'}`;
+const STORAGE_KEY_HIST_GER  = ()=> `encontros_hist_gerador_v1_${usuarioAtual?.email || usuarioAtual?.nome || 'anon'}`;
+const STORAGE_KEY_USO_DIN   = ()=> `encontros_uso_din_v1_${usuarioAtual?.email || usuarioAtual?.nome || 'anon'}`;
+const STORAGE_KEY_HIST_ENC_GER = ()=> `encontros_hist_enc_ger_v1_${usuarioAtual?.email || usuarioAtual?.nome || 'anon'}`;
 
 function salvarStorage(){
   try{
@@ -503,9 +503,12 @@ function nav(screenId, navId){
     renderCardsGerarDinamica();
     // Auto-gerar no primeiro acesso (quando ainda está no placeholder)
     const gdTitulo = document.getElementById('gd-titulo');
-    if(gdTitulo && (!gdTitulo.textContent || gdTitulo.textContent === '—')){
-      gerarTudoJunto();
+    //if(gdTitulo && (!gdTitulo.textContent || gdTitulo.textContent === '—')){
+    //  gerarTudoJunto();}
+    if(screenId==='screen-gerar'){
+    renderCardsGerarDinamica();
     }
+    
     if(conjuntosGerados.length){ const w=document.getElementById('gerar-historico-wrap'); if(w) w.style.display='block'; renderHistoricoConjuntos(); }
   }
   if(screenId==='screen-novidades') renderNovidadesList();
@@ -666,16 +669,29 @@ function renderFavoritos(){
   if(!c) return;
 
   // Coletar itens de cada categoria
+  const email = usuarioAtual?.email || usuarioAtual?.nome || 'anon';
   const favDins = favorites.map(id=>dinamicas.find(d=>d.id===id)).filter(Boolean);
-  const keyP = 'fav_perguntas_'+(usuarioAtual?.email||'');
-  const keyE = 'fav_encontros_'+(usuarioAtual?.email||'');
-  const keyQ = 'fav_qgelos_'+(usuarioAtual?.email||'');
-  let favPergs=[],favEncs=[],favQGs=[];
+  const keyP = 'fav_perguntas_'+email;
+  const keyE = 'fav_encontros_'+email;
+  const keyQ = 'fav_qgelos_'+email;
+  const keyConj = 'fav_conjuntos_'+email;
+  const keyEncGer = 'fav_encontros_ger_'+email;
+  let favPergs=[],favEncs=[],favQGs=[],favConjuntos=[],favEncontrosGerados=[];
   try{ favPergs=(JSON.parse(localStorage.getItem(keyP)||'[]')).map(id=>perguntas100.find(p=>p.id===id)).filter(Boolean); }catch(e){}
   try{ favEncs=(JSON.parse(localStorage.getItem(keyE)||'[]')).map(id=>encontros50.find(x=>x.id===id)).filter(Boolean); }catch(e){}
   try{ favQGs=(JSON.parse(localStorage.getItem(keyQ)||'[]')).map(id=>quebraGelos50.find(x=>x.id===id)).filter(Boolean); }catch(e){}
+  try{
+  favConjuntos = (JSON.parse(localStorage.getItem(keyConj) || '[]'))
+    .map(id => conjuntosGerados.find(c => String(c.id) === String(id)))
+    .filter(Boolean);
+  }catch(e){}
 
-  const total = favDins.length + favPergs.length + favEncs.length + favQGs.length;
+  try{
+  favEncontrosGerados = (JSON.parse(localStorage.getItem(keyEncGer) || '[]'))
+    .map(id => conjuntosEncontros.find(c => String(c.id) === String(id)))
+    .filter(Boolean);
+  }catch(e){}
+  const total = favDins.length + favPergs.length + favEncs.length + favQGs.length + favConjuntos.length + favEncontrosGerados.length;
 
   if(!total){
     // Sugestões: 3 dinâmicas aleatórias
@@ -704,6 +720,8 @@ function renderFavoritos(){
   const showPergs = favTabAtiva==='todos' || favTabAtiva==='perguntas';
   const showEncs  = favTabAtiva==='todos' || favTabAtiva==='encontros';
   const showQGs   = favTabAtiva==='todos' || favTabAtiva==='qgelos';
+  const showConj  = favTabAtiva==='todos' || favTabAtiva==='conjuntos'; // Conjuntos gerados na aba dinamicas
+  const showEncGer = favTabAtiva==='todos' || favTabAtiva==='encontros'; // Encontros gerados na aba encontros
 
   if(showDins && favDins.length){
     if(favTabAtiva==='todos') html+=`<p style="font-size:11px;font-weight:700;color:var(--text-soft);text-transform:uppercase;letter-spacing:.8px;padding:4px 0 2px">🎭 Dinâmicas</p>`;
@@ -713,6 +731,17 @@ function renderFavoritos(){
           <button class="fav-btn" onclick="event.stopPropagation();toggleFav(${d.id})">❤️</button>
         </div>
         <div class="content-card-meta"><span class="tag">${d.categoria}</span><span class="tag sage">⏱ ${d.tempo}</span></div>
+      </div>`).join('');
+  }
+
+  if(showConj && favConjuntos.length){
+    if(favTabAtiva==='todos') html+=`<p style="font-size:11px;font-weight:700;color:var(--text-soft);text-transform:uppercase;letter-spacing:.8px;padding:8px 0 2px">✨ Conjuntos</p>`;
+    html+=favConjuntos.map(c=>`
+      <div class="content-card" onclick="abrirConjuntoPreview(${c.id})">
+        <div class="content-card-top"><h4>${c.nome || `Conjunto ${c.tema && c.tema !== 'Aleatório' ? 'sobre ' + c.tema : 'selecionado'}`}</h4>
+          <button class="fav-btn" onclick="event.stopPropagation();toggleFavConjunto(${c.id});renderFavoritos()">❤️</button>
+        </div>
+        <div class="content-card-meta"><span class="tag">${c.tema !== 'Aleatório' ? c.tema : 'Gerado'}</span><span class="tag sage">⏱ Conjunto</span></div>
       </div>`).join('');
   }
 
@@ -733,8 +762,9 @@ function renderFavoritos(){
       <div class="content-card" onclick="openQGDetail(${q.id})">
         <div class="content-card-top"><h4>${q.titulo}</h4>
           <button class="fav-btn" onclick="event.stopPropagation();(function(id){
-            const k='fav_qgelos_'+(usuarioAtual?.email||'');
-            confirmarDesfavoritar(()=>{let f=JSON.parse(localStorage.getItem(k)||'[]');f=f.filter(x=>x!==id);localStorage.setItem(k,JSON.stringify(f));toastMsg(t('toast.fav.rm'));renderFavoritos();});
+            const email = usuarioAtual?.email || usuarioAtual?.nome || 'anon';
+            const k='fav_qgelos_'+email;
+            confirmarDesfavoritar(()=>{let f=JSON.parse(localStorage.getItem(k)||'[]');f=f.filter(x=>x!==String(id));localStorage.setItem(k,JSON.stringify(f));toastMsg(t('toast.fav.rm'));renderFavoritos();});
           })(${q.id})">❤️</button>
         </div>
         <div class="content-card-meta"><span class="tag">${q.categoria}</span><span class="tag sage">⏱ ${q.duracao}</span></div>
@@ -747,19 +777,35 @@ function renderFavoritos(){
       <div class="content-card" onclick="openEncontroDetail(${e.id})">
         <div class="content-card-top"><h4>${e.titulo}</h4>
           <button class="fav-btn" onclick="event.stopPropagation();(function(id){
-            const k='fav_encontros_'+(usuarioAtual?.email||'');
-            confirmarDesfavoritar(()=>{let f=JSON.parse(localStorage.getItem(k)||'[]');f=f.filter(x=>x!==id);localStorage.setItem(k,JSON.stringify(f));toastMsg(t('toast.fav.rm'));renderFavoritos();});
+            const email = usuarioAtual?.email || usuarioAtual?.nome || 'anon';
+            const k='fav_encontros_'+email;
+            confirmarDesfavoritar(()=>{let f=JSON.parse(localStorage.getItem(k)||'[]');f=f.filter(x=>x!==String(id));localStorage.setItem(k,JSON.stringify(f));toastMsg(t('toast.fav.rm'));renderFavoritos();});
           })(${e.id})">❤️</button>
         </div>
         <div class="content-card-meta"><span class="tag">${e.categoria}</span><span class="tag sage">📖 ${e.versiculo}</span></div>
       </div>`).join('');
   }
 
+  if(showEncGer && favEncontrosGerados.length){
+    if(favTabAtiva==='todos') html+=`<p style="font-size:11px;font-weight:700;color:var(--text-soft);text-transform:uppercase;letter-spacing:.8px;padding:8px 0 2px">🌸 Encontros Gerados</p>`;
+    html+=favEncontrosGerados.map(e=>`
+      <div class="content-card" onclick="abrirEncontroPreviewGerado(${e.id})">
+        <div class="content-card-top"><h4>${e.nome || e.enc.titulo}</h4>
+          <button class="fav-btn" onclick="event.stopPropagation();(function(id){
+            const email = usuarioAtual?.email || usuarioAtual?.nome || 'anon';
+            const k='fav_encontros_ger_'+email;
+            confirmarDesfavoritar(()=>{let f=JSON.parse(localStorage.getItem(k)||'[]');f=f.filter(x=>x!==String(id));localStorage.setItem(k,JSON.stringify(f));toastMsg(t('toast.fav.rm'));renderFavoritos();});
+          })(${e.id})">❤️</button>
+        </div>
+        <div class="content-card-meta"><span class="tag">${e.enc.categoria}</span><span class="tag sage">📖 ${e.enc.versiculo}</span></div>
+      </div>`).join('');
+  }
+
   // Se a aba selecionada não tem itens
-  if((favTabAtiva==='dinamicas' && !favDins.length) ||
+  if((favTabAtiva==='dinamicas' && !favDins.length && !favConjuntos.length) ||
      (favTabAtiva==='perguntas' && !favPergs.length) ||
      (favTabAtiva==='qgelos'   && !favQGs.length)   ||
-     (favTabAtiva==='encontros'&& !favEncs.length)){
+     (favTabAtiva==='encontros'&& !favEncs.length && !favEncontrosGerados.length)){
     html+=`<div class="empty-state" style="padding:40px 20px"><div class="empty-icon">🤍</div><p style="font-size:13px;color:var(--text-soft)">${t('fav.categoria.vazia')}</p></div>`;
   }
 
@@ -930,7 +976,11 @@ function gerarTudoJunto(){
 
   renderCardsGerarDinamica();
   adicionarConjuntoAoHistorico(currentConjunto);
-  toastTop(t('toast.gerar.nova'));
+  setTimeout(() => {
+  const ultimo = conjuntosGerados[0];
+  if (ultimo) renomearConjunto(ultimo.id);
+}, 100);
+  toastTop(t('toast.gerar.conj'));
 }
 
 // Alias para compatibilidade
@@ -1017,8 +1067,8 @@ function renderHistoricoConjuntos(){
       </div>
       <!-- Ações -->
       <div style="display:flex;gap:8px;border-top:1px solid var(--border);padding-top:8px">
-        <button onclick="toggleFavConjunto(${c.id})" style="flex:1;background:none;border:1px solid var(--border);border-radius:50px;padding:6px 10px;font-size:12px;font-weight:600;color:${c.favorito?'var(--rose)':'var(--text-soft)'};cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif">
-          ${c.favorito ? '❤️ Salvo' : '🤍 Favoritar'}
+        <button onclick="toggleFavConjunto(${c.id})" style="flex:1;background:none;border:1px solid var(--border);border-radius:50px;padding:6px 10px;font-size:12px;font-weight:600;color:${isFavConjunto(c.id)?'var(--rose)':'var(--text-soft)'};cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif">
+          ${isFavConjunto(c.id) ? '❤️ Salvo' : '🤍 Favoritar'}
         </button>
         <button onclick="renomearConjunto(${c.id})" style="flex:1;background:none;border:1px solid var(--border);border-radius:50px;padding:6px 10px;font-size:12px;font-weight:600;color:var(--text-soft);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif">
           ✏️ Renomear
@@ -1109,13 +1159,38 @@ function fecharConjuntoPreviewBtn(){
 function fecharConjuntoPreview(e){
   if(e.target===document.getElementById('conjunto-preview-overlay')) fecharConjuntoPreviewBtn();
 }
+function isFavConjunto(id){
+  const email = usuarioAtual?.email || usuarioAtual?.nome || 'anon';
+  const key = 'fav_conjuntos_'+email;
+  const favs = JSON.parse(localStorage.getItem(key)||'[]');
+  return favs.includes(String(id));
+}
+
 function toggleFavConjunto(id){
-  const c = conjuntosGerados.find(x=>x.id===id);
-  if(!c) return;
-  c.favorito = !c.favorito;
-  salvarStorage();
+  const email = usuarioAtual?.email || usuarioAtual?.nome || 'anon';
+  const key = 'fav_conjuntos_'+email;
+  let favs = JSON.parse(localStorage.getItem(key)||'[]');
+  const sid = String(id);
+
+  if(favs.includes(sid)){
+    confirmarDesfavoritar(()=>{
+      favs = favs.filter(x=>x!==sid);
+      localStorage.setItem(key, JSON.stringify(favs));
+      salvarStorage();
+      toastMsg(t('toast.fav.rm'));
+      renderFavoritos();
+      renderHistoricoConjuntos();
+    });
+    return;
+  } else {
+    favs.push(sid);
+    localStorage.setItem(key, JSON.stringify(favs));
+    salvarStorage();
+    toastMsg(t('toast.fav.add'));
+  }
+
+  renderFavoritos();
   renderHistoricoConjuntos();
-  toastMsg(c.favorito ? '❤️ Conjunto salvo!' : '🤍 Removido dos favoritos');
 }
 
 let _renomearId = null;
@@ -1124,7 +1199,11 @@ function renomearConjunto(id){
   if(!c) return;
   _renomearId = id;
   const input = document.getElementById('renomear-input');
-  input.value = c.nome || c.din.titulo;
+  input.value = c.nome || (
+  c.tema && c.tema !== 'Aleatório'
+    ? `Conjunto sobre ${c.tema}`
+    : 'Conjunto selecionado'
+  );  
   document.getElementById('modal-renomear').classList.add('open');
   setTimeout(()=>{ input.focus(); input.select(); }, 150);
 }
@@ -1270,20 +1349,45 @@ function renderHistoricoEncontros(){
         <span style="color:var(--text-soft);font-size:16px;flex-shrink:0">›</span>
       </div>
       <div style="display:flex;gap:8px;border-top:1px solid var(--border);padding-top:8px">
-        <button onclick="toggleFavEncontro(${c.id})" style="flex:1;background:none;border:1px solid var(--border);border-radius:50px;padding:6px 10px;font-size:12px;font-weight:600;color:${c.favorito?'var(--rose)':'var(--text-soft)'};cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif">${c.favorito?'❤️ Salvo':'🤍 Favoritar'}</button>
+        <button onclick="toggleFavEncontro(${c.id})" style="flex:1;background:none;border:1px solid var(--border);border-radius:50px;padding:6px 10px;font-size:12px;font-weight:600;color:${isFavEncontroGerado(c.id)?'var(--rose)':'var(--text-soft)'};cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif">${isFavEncontroGerado(c.id)?'❤️ Salvo':'🤍 Favoritar'}</button>
         <button onclick="renomearEncontro(${c.id})" style="flex:1;background:none;border:1px solid var(--border);border-radius:50px;padding:6px 10px;font-size:12px;font-weight:600;color:var(--text-soft);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif">✏️ Renomear</button>
         <button onclick="abrirEncontroPreviewGerado(${c.id})" style="flex:1;background:var(--gold);border:none;border-radius:50px;padding:6px 10px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif">👁 Ver</button>
       </div>
     </div>`).join('');
 }
 
+function isFavEncontroGerado(id){
+  const email = usuarioAtual?.email || usuarioAtual?.nome || 'anon';
+  const key = 'fav_encontros_ger_'+email;
+  const favs = JSON.parse(localStorage.getItem(key)||'[]');
+  return favs.includes(String(id));
+}
+
 function toggleFavEncontro(id){
-  const c = conjuntosEncontros.find(x=>x.id===id);
-  if(!c) return;
-  c.favorito = !c.favorito;
-  salvarStorage();
+  const email = usuarioAtual?.email || usuarioAtual?.nome || 'anon';
+  const key = 'fav_encontros_ger_'+email;
+  let favs = JSON.parse(localStorage.getItem(key)||'[]');
+  const sid = String(id);
+
+  if(favs.includes(sid)){
+    confirmarDesfavoritar(()=>{
+      favs = favs.filter(x=>x!==sid);
+      localStorage.setItem(key, JSON.stringify(favs));
+      salvarStorage();
+      toastMsg(t('toast.fav.rm'));
+      renderFavoritos();
+      renderHistoricoEncontros();
+    });
+    return;
+  } else {
+    favs.push(sid);
+    localStorage.setItem(key, JSON.stringify(favs));
+    salvarStorage();
+    toastMsg(t('toast.fav.add'));
+  }
+
+  renderFavoritos();
   renderHistoricoEncontros();
-  toastMsg(c.favorito ? '❤️ Encontro salvo!' : '🤍 Removido');
 }
 
 let _renomearEncId = null;
@@ -2919,47 +3023,77 @@ function updateDoneBtn(){
   btn.classList.toggle('feita', feita);
 }
 
-function renderHistorico(){
+function renderHistorico() {
   const c = document.getElementById('historico-list');
-  if(!historico.length){
-    c.innerHTML=`<div class="empty-state">
-      <div class="empty-icon">📅</div>
-      <h4>${t('hist.vazio.titulo')}</h4>
-      <p>${t('hist.vazio.sub')}</p>
-      <button onclick="nav('screen-dinamicas','nav-dinamicas')" style="margin-top:8px;padding:10px 20px;background:var(--gerar-grad);border:none;border-radius:50px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;color:#fff;cursor:pointer">🎭 Ver Dinâmicas</button>
-    </div>`;
+  if (!c) return;
+
+  const allHist = [
+    ...historico.map(h => ({ ...h, tipo: h.tipo || 'dinamica' })),
+    ...historicoEnc.map(h => ({ ...h, tipo: h.tipo || 'encontro' }))
+  ].sort((a, b) => new Date(b.data) - new Date(a.data));
+
+  if (!allHist.length) {
+    c.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📅</div>
+        <h4>${t('hist.vazio.titulo')}</h4>
+        <p>${t('hist.vazio.sub')}</p>
+        <button onclick="nav('screen-dinamicas','nav-dinamicas')" style="margin-top:8px;padding:10px 20px;background:var(--gerar-grad);border:none;border-radius:50px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;color:#fff;cursor:pointer">🎭 Ver Dinâmicas</button>
+      </div>
+    `;
     return;
   }
-  c.innerHTML = historico.map(h=>{
+
+  c.innerHTML = allHist.map(h => {
     const aval = h.avaliacao;
-    const estrelas = aval ? '⭐'.repeat(aval.estrelas) + '☆'.repeat(5-aval.estrelas) : '';
-    const avalHtml = aval ? `
-      <div style="margin-top:8px;padding:8px 10px;background:var(--bg);border-radius:10px;font-size:12px">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-          <span style="font-size:14px">${estrelas}</span>
-          ${aval.participantes ? `<span class="tag" style="font-size:10px">👥 ${aval.participantes} participantes</span>` : ''}
+    const estrelas = aval ? '⭐'.repeat(aval.estrelas) + '☆'.repeat(5 - aval.estrelas) : '';
+    const icon = h.tipo === 'encontro' ? '🌸' : '🎭';
+
+    const avalHtml = aval
+      ? `
+        <div style="margin-top:8px;padding:8px 10px;background:var(--bg);border-radius:10px;font-size:12px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+            <span style="font-size:14px">${estrelas}</span>
+            ${aval.participantes ? `<span class="tag" style="font-size:10px">👥 ${aval.participantes} participantes</span>` : ''}
+          </div>
+          ${aval.obs ? `<p style="color:var(--text-soft);margin:0;line-height:1.4">${aval.obs}</p>` : ''}
         </div>
-        ${aval.obs ? `<p style="color:var(--text-soft);margin:0;line-height:1.4">${aval.obs}</p>` : ''}
-      </div>` : `<button onclick="abrirAval({id:${h.id},titulo:'${h.titulo.replace(/'/g,"\\'")}',categoria:'${h.categoria}',tempo:'${h.tempo}',objetivo:'',aplicacao:''})" style="margin-top:8px;font-size:11px;color:var(--rose);background:none;border:1px dashed var(--rose);border-radius:8px;padding:4px 10px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif">+ Adicionar avaliação</button>`;
+      `
+      : `
+        <button onclick="abrirAval(${h.id}, '${h.tipo}')" style="margin-top:8px;font-size:11px;color:var(--rose);background:none;border:1px dashed var(--rose);border-radius:8px;padding:4px 10px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif">
+          + Adicionar avaliação
+        </button>
+      `;
+
     return `
-    <div class="hist-card">
-      <div class="hist-card-top">
-        <h4>${h.titulo}</h4>
-        <span class="hist-date">${new Date(h.data).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})}</span>
+      <div class="hist-card">
+        <div class="hist-card-top">
+          <h4>${h.titulo}</h4>
+          <span class="hist-date">${new Date(h.data).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}</span>
+        </div>
+        <div class="content-card-meta" style="margin-bottom:6px">
+          <span class="tag">${h.categoria}</span>
+          <span class="tag sage">⏱ ${h.tempo || '60 min'}</span>
+          <span class="tag" style="background:var(--sage-light);color:var(--sage)">✓ Realizada</span>
+          <span class="tag" style="background:var(--gold-pale);color:var(--gold)">${icon} ${h.tipo === 'encontro' ? 'Encontro' : 'Dinâmica'}</span>
+        </div>
+        ${avalHtml}
+        <button class="hist-del-btn" onclick="removerHistorico(${h.id}, '${h.tipo}')" style="margin-top:10px">
+          ${t('hist.remover.btn')}
+        </button>
       </div>
-      <div class="content-card-meta" style="margin-bottom:6px">
-        <span class="tag">${h.categoria}</span>
-        <span class="tag sage">⏱ ${h.tempo}</span>
-        <span class="tag" style="background:var(--sage-light);color:var(--sage)">✓ Realizada</span>
-      </div>
-      ${avalHtml}
-      <button class="hist-del-btn" onclick="removerHistorico(${h.id})" style="margin-top:10px">${t('hist.remover.btn')}</button>
-    </div>`}).join('');
+    `;
+  }).join('');
 }
 
-function removerHistorico(id){
-  historico = historico.filter(h=>h.id!==id);
-  salvarHistorico();
+function removerHistorico(id, tipo){
+  if(tipo === 'encontro'){
+    historicoEnc = historicoEnc.filter(h=>h.id!==id);
+    salvarHistoricoEnc();
+  } else {
+    historico = historico.filter(h=>h.id!==id);
+    salvarHistorico();
+  }
   renderHistorico();
   toastMsg(t('toast.hist.removido'));
 }
@@ -3052,30 +3186,30 @@ let avalStar = 0;
 let avalNum = '';
 let avalDinamica = null;
 
-function toggleDone(){
-  if(!currentDetail) return;
-  const id = currentDetail.id;
-  const jaFeita = historico.find(h=>h.id===id);
-  if(jaFeita){
-    historico = historico.filter(h=>h.id!==id);
-    toastMsg(t('toast.hist.removida'));
-    salvarHistorico();
-    updateDoneBtn();
-    renderHistorico();
+function toggleDone() {
+  if (!currentDetail) return;
+
+  const idx = historico.findIndex(h => String(h.id) === String(currentDetail.id));
+
+  if (idx >= 0) {
+    historico.splice(idx, 1);
   } else {
-    // Marca como feita e abre avaliação
     historico.unshift({
-      id, titulo: currentDetail.titulo, categoria: currentDetail.categoria,
-      tempo: currentDetail.tempo, data: new Date().toISOString(),
-      avaliacao: null
+      id: currentDetail.id,
+      titulo: currentDetail.titulo,
+      categoria: currentDetail.categoria,
+      tempo: currentDetail.tempo,
+      data: new Date().toISOString(),
+      avaliacao: null,
+      tipo: 'dinamica'
     });
-    salvarHistorico();
-    incrementarUsoDin(id);
-    renderDinamicas(dinamicas);
-    updateDoneBtn();
-    renderHistorico();
-    toastMsg(t('toast.marcada.realizada'));
-    setTimeout(()=>abrirAval(currentDetail), 800);
+  }
+
+  if (typeof salvarHistorico === 'function') salvarHistorico();
+  updateDoneBtn();
+  renderHistorico();
+  if (idx < 0) {
+    setTimeout(() => abrirAval({ ...currentDetail, tipo: 'dinamica' }), 800);
   }
 }
 
@@ -3115,22 +3249,33 @@ function avalSetNum(btn, val){
   btn.classList.add('selected');
 }
 
-function salvarAval(){
-  if(!avalDinamica) return;
-  const obs = document.getElementById('aval-obs').value.trim();
-  const idx = historico.findIndex(h=>h.id===avalDinamica.id);
-  if(idx >= 0){
-    historico[idx].avaliacao = {
-      estrelas: avalStar,
-      participantes: avalNum,
-      obs,
-      dataAval: new Date().toISOString()
-    };
-    salvarHistorico();
-    renderHistorico();
+function salvarAval() {
+  if (!avalDinamica || avalStar < 1) return;
+
+  const aval = {
+    estrelas: avalStar,
+    participantes: avalNum,
+    obs: document.getElementById('aval-obs').value.trim(),
+    data: new Date().toISOString()
+  };
+
+  if (avalDinamica.tipo === 'encontro') {
+    const idx = historicoEnc.findIndex(h => String(h.id) === String(avalDinamica.id));
+    if (idx >= 0) {
+      historicoEnc[idx].avaliacao = aval;
+      if (typeof salvarHistoricoEnc === 'function') salvarHistoricoEnc();
+    }
+  } else {
+    const idx = historico.findIndex(h => String(h.id) === String(avalDinamica.id));
+    if (idx >= 0) {
+      historico[idx].avaliacao = aval;
+      if (typeof salvarHistorico === 'function') salvarHistorico();
+    }
   }
+
   fecharAval();
-  toastMsg(t('toast.avaliacao.salva'));
+  renderHistorico();
+  toastMsg(t('toast.aval.salva'));
 }
 
 // ── STORIES ──
@@ -3646,6 +3791,7 @@ TRANSLATIONS = {
     'fav.tab.perguntas': '💬 Perguntas',
     'fav.tab.qgelos': '🧊 Quebra-Gelos',
     'fav.tab.encontros': '🌸 Encontros',
+    'fav.tab.conjuntos': '✨ Conjuntos',
     'fav.vazio.titulo': 'Nenhum favorito ainda',
     'fav.vazio.sub': 'Salve dinâmicas tocando no coração ❤️ para acessá-las rapidamente aqui.',
     'admin.titulo': '⚙️ Painel Admin',
@@ -3662,7 +3808,7 @@ TRANSLATIONS = {
     'voltar': '← Voltar',
     'verse.translation': 'almeida',
     'toast.fav.add': '❤️ Salvo nos favoritos!',
-    'toast.fav.rm': 'Removido dos favoritos',
+    'toast.fav.rm': '🤍 Removido dos favoritos',
     'toast.done': '✅ Marcada como realizada!',
     'toast.done.rm': '↩️ Removida do histórico',
     'toast.plan.ok': '✅ Encontro planejado com sucesso!',
@@ -3672,6 +3818,8 @@ TRANSLATIONS = {
     'toast.verse.ok': '📖 Versículo encontrado!',
     'toast.din.sel': '🎭 Dinâmica selecionada!',
     'toast.gerar': '✨ Nova dinâmica gerada!',
+    'toast.gerar.conj': '✨ Novo conjunto gerado!',
+    'toast.aval.salva': '⭐ Avaliação salva com sucesso!',
     'whatsapp.msg': 'Olá! Preciso de ajuda com o app Encontros de Mulheres. 🌸',
     'lib.dinamicas': '200 Dinâmicas',
     'lib.dinamicas.count': '200 atividades',
@@ -5941,25 +6089,36 @@ function updateDoneBtnEnc(){
   btn.classList.toggle('feita', feita);
 }
 
-function toggleDoneEnc(){
-  if(!currentEncDetail) return;
-  const id = currentEncDetail.id;
-  const jaFeito = historicoEnc.some(h=>h.id===id);
-  if(jaFeito){
-    historicoEnc = historicoEnc.filter(h=>h.id!==id);
-    salvarHistoricoEnc(); updateDoneBtnEnc();
-    toastMsg(t('toast.done.rm'));
+function toggleDoneEnc() {
+  if (!currentEncDetail) return;
+
+  const idx = historicoEnc.findIndex(h => String(h.id) === String(currentEncDetail.id));
+
+  if (idx >= 0) {
+    historicoEnc.splice(idx, 1);
   } else {
-    historicoEnc.unshift({ id, titulo: currentEncDetail.titulo, categoria: currentEncDetail.categoria, data: new Date().toISOString() });
-    salvarHistoricoEnc(); updateDoneBtnEnc();
-    toastMsg(t('toast.done'));
-    setTimeout(()=>abrirAvalEnc(currentEncDetail), 800);
+    historicoEnc.unshift({
+      id: currentEncDetail.id,
+      titulo: currentEncDetail.titulo,
+      categoria: currentEncDetail.categoria,
+      tempo: currentEncDetail.tempo,
+      data: new Date().toISOString(),
+      avaliacao: null,
+      tipo: 'encontro'
+    });
+  }
+
+  if (typeof salvarHistoricoEnc === 'function') salvarHistoricoEnc();
+  updateDoneBtn();
+  renderHistorico();
+  if (idx < 0) {
+    setTimeout(() => abrirAvalEnc({ ...currentEncDetail, tipo: 'encontro' }), 800);
   }
 }
 
 function abrirAvalEnc(enc){
   // reutiliza o mesmo modal de avaliação mas adapta para encontro
-  avalDinamica = { id: enc.id, titulo: enc.titulo, tempo: '60 min' };
+  avalDinamica = { id: enc.id, titulo: enc.titulo, tempo: '60 min', tipo: 'encontro' };
   avalStar = 0; avalNum = '';
   document.getElementById('aval-din-nome').textContent = enc.titulo;
   document.getElementById('aval-obs').value = '';
@@ -6430,21 +6589,23 @@ function copiarPergunta(id){
 }
 
 // Favoritos de perguntas
-function isFavPergunta(id){ try{ const f=JSON.parse(localStorage.getItem('fav_perguntas_'+(usuarioAtual?.email||''))||'[]'); return f.includes(id); }catch(e){return false;} }
+function isFavPergunta(id){ try{ const email = usuarioAtual?.email || usuarioAtual?.nome || 'anon'; const f=JSON.parse(localStorage.getItem('fav_perguntas_'+email)||'[]'); return f.includes(String(id)); }catch(e){return false;} }
 function toggleFavPergunta(id){
   try{
-    const key='fav_perguntas_'+(usuarioAtual?.email||'');
+    const email = usuarioAtual?.email || usuarioAtual?.nome || 'anon';
+    const key='fav_perguntas_'+email;
     let f=JSON.parse(localStorage.getItem(key)||'[]');
-    if(f.includes(id)){
+    const sid = String(id);
+    if(f.includes(sid)){
       confirmarDesfavoritar(()=>{
-        f=f.filter(x=>x!==id);
+        f=f.filter(x=>x!==sid);
         localStorage.setItem(key,JSON.stringify(f));
         toastMsg(t('toast.fav.rm'));
         const btn=document.getElementById('pfav-'+id);
         if(btn) btn.textContent='🤍';
       });
     } else {
-      f.push(id);
+      f.push(sid);
       localStorage.setItem(key,JSON.stringify(f));
       toastMsg(t('toast.fav.add'));
       const btn=document.getElementById('pfav-'+id);
@@ -6518,108 +6679,15 @@ function atualizarBtnFavQG(id){
 }
 
 // ── PATCH NOTES ──
-const APP_VERSION = '1.6.0';
-const STORAGE_KEY_VERSION = ()=> `encontros_versao_v1_${usuarioAtual?.email||'guest'}`;
-
-const PATCH_NOTES = [
-  {
-    versao: '1.6.0',
-    data: '2026-03-16',
-    novidade: true,
-    itens: [
-      {icon:'🎨', texto:'Novo design system aplicado — paleta roxa/dourada MychurchFlow'},
-      {icon:'🔤', texto:'Tipografia atualizada — Cormorant Garamond (títulos) + Plus Jakarta Sans (corpo)'},
-      {icon:'🌙', texto:'Modo claro renovado — fundo lavanda suave em vez de rosa'},
-      {icon:'⏰', texto:'Planejador: novo campo de horário no encontro'},
-      {icon:'🔔', texto:'Sistema de lembrete de encontro com notificação na hora e 1h antes'},
-      {icon:'🔘', texto:'Botões de ação com ícone + texto — Timer, Stories, Ao vivo, Salvar'},
-      {icon:'⏱', texto:'Botão de timer agora abre e fecha o cronômetro ao clicar'},
-      {icon:'🛍', texto:'Modais de upsell para Quebra-Gelos, Perguntas e Estudos (R$9,90 cada)'},
-      {icon:'💰', texto:'Preços atualizados — Encontros R$24,90 · Devocional R$12,90'},
-      {icon:'🔮', texto:'Modal de pré-visualização nas sugestões de favoritos'},
-      {icon:'📸', texto:'Slider de opacidade na foto do gerador de imagem para Stories'},
-    ]
-  },
-  {
-    versao: '1.5.2',
-    data: '2026-03-16',
-    novidade: true,
-    itens: [
-      {icon:'🔐', texto:'Login/Logout corrigido — auto-login agora preserva módulos desbloqueados pelo admin'},
-      {icon:'⚡', texto:'Inicialização otimizada — sem render duplo ao restaurar sessão'},
-      {icon:'💬', texto:'Favoritos de perguntas agora exibem texto e categoria corretamente'},
-      {icon:'💾', texto:'Gerador: favoritar, renomear e regenerar agora salvam no localStorage'},
-      {icon:'🌸', texto:'Histórico de encontros gerados agora persiste entre sessões'},
-      {icon:'🎲', texto:'Seletor de tema com opção "Aleatório" — gera de todas as categorias'},
-      {icon:'✨', texto:'Tela do gerador auto-gera no primeiro acesso — sem dados placeholder'},
-      {icon:'↩️', texto:'Logout limpa estado completo — profiles, gerador e históricos resetados'},
-    ]
-  },
-  {
-    versao: '1.5.1',
-    data: '2026-03-16',
-    novidade: true,
-    itens: [
-      {icon:'👤', texto:'Barra inferior reorganizada — Histórico movido para dentro do Perfil, Perfil agora na nav'},
-      {icon:'✨', texto:'Botão flutuante "Gerar encontro" aparece na tela inicial'},
-      {icon:'📋', texto:'Empty states com instrução clara e botão de ação em cada tela vazia'},
-      {icon:'🎙', texto:'Modo Ao Vivo: último passo destaca em dourado com fundo especial'},
-      {icon:'🌿', texto:'20 temas no Planejador — 10 novos: Paz, Força, Amor, Alegria, Crescimento, Testemunho, Serviço, Sabedoria, Adoração, Cura Interior'},
-      {icon:'🔒', texto:'Logout corrigido — volta para login e reseta todas as telas'},
-    ]
-  },
-  {
-    versao: '1.5.0',
-    data: '2026-03-16',
-    novidade: true,
-    itens: [
-      {icon:'👋', texto:'Onboarding — tour de 5 passos para novas usuárias ao fazer login pela primeira vez'},
-      {icon:'🏷', texto:'Filtro por categoria nos 50 Encontros Completos'},
-      {icon:'🎙', texto:'Modo Ao Vivo — conduz dinâmica passo a passo em tela cheia'},
-      {icon:'📦', texto:'Histórico permanente no gerador — persiste entre sessões, até 20 conjuntos'},
-      {icon:'✓', texto:'Contador de uso nas dinâmicas — badge "✓ 3×" aparece nos cards'},
-      {icon:'❤️', texto:'Empty state de Favoritos com sugestões de dinâmicas para salvar'},
-      {icon:'📲', texto:'Compartilhar WhatsApp envia conjunto completo (dinâmica + estudo + pergunta)'},
-      {icon:'🔁', texto:'Correção: 0 duplicatas em todos os títulos de dinâmicas'},
-    ]
-  },
-  {
-    versao: '1.4.6',
-    data: '2026-03-16',
-    novidade: true,
-    itens: [
-      {icon:'🔔', texto:'Toast no topo ao gerar conjunto — aparece por 1,5s e some suavemente'},
-      {icon:'🧹', texto:'Removido o toast inferior ao gerar — tela mais limpa durante a geração'},
-    ]
-  },
-  {
-    versao: '1.4.5',
-    data: '2026-03-16',
-    novidade: true,
-    itens: [
-      {icon:'🗂', texto:'Abas de categorias nos Favoritos — filtre por Dinâmicas, Perguntas, Quebra-Gelos ou Encontros'},
-      {icon:'❤️', texto:'Botão favoritar na tela de detalhe dos Encontros Completos'},
-      {icon:'🧊', texto:'Botão favoritar na tela de detalhe dos Quebra-Gelos'},
-    ]
-  },
-  {
-    versao: '1.4.4',
-    data: '2026-03-16',
-    novidade: true,
-    itens: [
-      {icon:'🌸', texto:'Aba Encontro Completo reformulada — mesmo padrão do gerador de dinâmicas'},
-      {icon:'🎲', texto:'Tema obrigatório no gerador — opção "Aleatório" removida, Gratidão selecionada por padrão'},
-      {icon:'📋', texto:'Histórico de encontros completos com favoritar, renomear e preview completo'},
-      {icon:'👁', texto:'Preview do encontro gerado mostra quebra-gelo, reflexão, perguntas e oração'},
-    ]
-  },
+const STORAGE_PATCH_VISTA = 'patch_notes_last_seen';
+const STORAGE_PATCH_ADMIN = 'patch_notes_admin_v1';
+const PATCH_NOTES_PADRAO = [
   {
     versao: '1.4.3',
     data: '2026-03-16',
     novidade: true,
+    titulo: 'Melhorias de experiência',
     itens: [
-      {icon:'🔔', texto:'Modal de novidades corrigido — aparece corretamente ao detectar versão mais nova'},
-      {icon:'↺', texto:'Botões ↺ nova estilizados nos 3 cards do gerador (dinâmica, estudo, pergunta)'},
       {icon:'✏️', texto:'Renomear conjunto agora usa popup estilizado no lugar do prompt nativo do navegador'},
     ]
   },
@@ -6716,48 +6784,226 @@ const PATCH_NOTES = [
   },
 ];
 
+let PATCH_NOTES = [];
+
+function normalizarPatchNote(patch) {
+  return {
+    id: patch.id || `v${String(patch.versao || '0.0.0').replaceAll('.', '_')}`,
+    versao: patch.versao || '0.0.0',
+    data: patch.data || '2026-01-01',
+    novidade: patch.novidade ?? true,
+    titulo: patch.titulo || '',
+    itens: Array.isArray(patch.itens) ? patch.itens.map(item => ({
+      icon: item.icon || '🆕',
+      texto: item.texto || ''
+    })) : []
+  };
+}
+
+function sortPatchNotes(lista) {
+  return [...lista].sort((a, b) => new Date(b.data) - new Date(a.data));
+}
+
+function carregarPatchNotes() {
+  try {
+    const salvas = JSON.parse(localStorage.getItem(STORAGE_PATCH_ADMIN) || '[]');
+
+    const padrao = PATCH_NOTES_PADRAO.map(normalizarPatchNote);
+    const admin = Array.isArray(salvas) ? salvas.map(normalizarPatchNote) : [];
+
+    // 🔥 juntar os dois
+    const combinadas = [...padrao, ...admin];
+
+    // 🔥 remover duplicadas por ID
+    const unicas = [];
+    const ids = new Set();
+
+    combinadas.forEach(p => {
+      if (!ids.has(p.id)) {
+        ids.add(p.id);
+        unicas.push(p);
+      }
+    });
+
+    PATCH_NOTES = sortPatchNotes(unicas);
+
+    return PATCH_NOTES;
+
+  } catch (e) {
+    console.warn('Erro ao carregar patch notes:', e);
+
+    PATCH_NOTES = sortPatchNotes(PATCH_NOTES_PADRAO.map(normalizarPatchNote));
+    return PATCH_NOTES;
+  }
+}
+
+function salvarPatchNotesNoStorage() {
+  try {
+    localStorage.setItem(STORAGE_PATCH_ADMIN, JSON.stringify(PATCH_NOTES));
+  } catch (e) {
+    console.warn('Erro ao salvar patch notes:', e);
+  }
+}
+
+function addPatchNote({ versao, data, titulo, itens, novidade = true }) {
+  const novoPatch = normalizarPatchNote({
+    versao,
+    data,
+    titulo,
+    itens,
+    novidade
+  });
+
+  PATCH_NOTES = PATCH_NOTES.filter(p => p.id !== novoPatch.id);
+  PATCH_NOTES.push(novoPatch);
+  PATCH_NOTES = sortPatchNotes(PATCH_NOTES);
+  salvarPatchNotesNoStorage();
+
+  return novoPatch;
+}
 function renderNovidadesList(){
   const c = document.getElementById('novidades-list');
   if(!c) return;
-  c.innerHTML = PATCH_NOTES.map((pn, i) => `
-    <div class="pn-version-card ${i===0?'pn-latest':''}">
-      <div class="pn-version-header">
-        <span class="pn-version-num">v${pn.versao}</span>
-        <span class="pn-version-date">${new Date(pn.data).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}</span>
-        ${i===0 ? `<span class="pn-new-badge">ATUAL</span>` : ''}
-      </div>
-      ${pn.itens.map(it=>`
-        <div class="pn-item">
-          <span class="pn-item-icon">${it.icon}</span>
-          <span>${it.texto}</span>
-        </div>`).join('')}
-    </div>`).join('');
+
+  let adminNotes = [];
+  try {
+    adminNotes = JSON.parse(localStorage.getItem('patch_notes_admin_v1') || '[]');
+  } catch(e) {
+    adminNotes = [];
+  }
+
+  const todas = [...PATCH_NOTES, ...adminNotes];
+
+  const mapa = new Map();
+  todas.forEach(p => {
+    const id = p.id || `v${String(p.versao).replaceAll('.', '_')}`;
+    mapa.set(id, p);
+  });
+
+  const listaFinal = [...mapa.values()].sort((a, b) => new Date(b.data) - new Date(a.data));
+
+  c.innerHTML = listaFinal.map((pn, i) => {
+    const itens = Array.isArray(pn.itens) ? pn.itens : [];
+    const principal = itens[0] || null;
+    const restantes = itens.slice(1);
+
+    return `
+      <div class="pn-version-card ${i===0?'pn-latest':''}">
+        <div class="pn-version-header">
+          <span class="pn-version-num">v${pn.versao}</span>
+          <span class="pn-version-date">${new Date(pn.data).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}</span>
+          ${i===0 ? `<span class="pn-new-badge">ATUAL</span>` : ''}
+        </div>
+
+        ${pn.titulo ? `<div class="pn-version-title">${pn.titulo}</div>` : ''}
+
+        ${principal ? `
+          <div class="pn-history-highlight">
+            <span class="pn-history-highlight-icon">${principal.icon || '🆕'}</span>
+            <span class="pn-history-highlight-text">${principal.texto || ''}</span>
+          </div>
+        ` : ''}
+
+        ${restantes.length ? `
+          <div class="pn-history-rest">
+            ${restantes.map(item => `
+              <div class="pn-history-item">
+                <span class="pn-history-item-icon">${item.icon || '🆕'}</span>
+                <span class="pn-history-item-text">${item.texto || ''}</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+      </div>`;
+  }).join('');
 }
 
 function checkNovidadesModal(){
-  try{
-    const vistaNaVersao = localStorage.getItem(STORAGE_KEY_VERSION()) || '0.0.0';
-    const toNum = v => v.split('.').reduce((a,n,i)=>a+parseInt(n)*Math.pow(1000,2-i),0);
-    if(toNum(vistaNaVersao) >= toNum(APP_VERSION)) return;
-    setTimeout(abrirNovidadesModal, 1500);
-  }catch(e){}
+  try {
+    const latest = getLatestPatchNote();
+    if (!latest) return;
+
+    const ultimaVista = localStorage.getItem('patch_notes_last_seen');
+
+    if (ultimaVista !== latest.versao) {
+      setTimeout(() => {
+        abrirNovidadesModal();
+      }, 600);
+    }
+  } catch(e) {
+    console.warn('Erro ao verificar novidades:', e);
+  }
+}
+
+function getLatestPatchNote() {
+  if (!Array.isArray(PATCH_NOTES) || PATCH_NOTES.length === 0) {
+    carregarPatchNotes();
+  }
+
+  return sortPatchNotes(PATCH_NOTES)[0] || null;
 }
 
 function abrirNovidadesModal(){
-  const latest = PATCH_NOTES[0];
-  document.getElementById('novidades-modal-versao').textContent = `v${latest.versao} · ${new Date(latest.data).toLocaleDateString('pt-BR',{day:'2-digit',month:'long'})}`;
-  document.getElementById('novidades-modal-lista').innerHTML = latest.itens.map(it=>`
-    <div class="pn-item">
-      <span class="pn-item-icon">${it.icon}</span>
-      <span style="font-size:13px;color:var(--text);line-height:1.5">${it.texto}</span>
-    </div>`).join('');
+  const latest = getLatestPatchNote();
+  if (!latest) return;
+
+  document.getElementById('novidades-modal-versao').textContent =
+    `v${latest.versao} · ${new Date(latest.data).toLocaleDateString('pt-BR',{day:'2-digit',month:'long'})}`;
+
+  const tituloEl = document.getElementById('novidades-modal-titulo');
+  if (tituloEl) {
+    tituloEl.textContent = latest.titulo || 'Novidades desta versão';
+  }
+
+  const listaEl = document.getElementById('novidades-modal-lista');
+  if (!listaEl) return;
+
+  const itens = Array.isArray(latest.itens) ? latest.itens : [];
+  const principal = itens[0] || null;
+  const restantes = itens.slice(1);
+
+  listaEl.innerHTML = `
+    ${principal ? `
+      <div class="pn-highlight">
+        <div class="pn-highlight-label">✨ Destaque da atualização</div>
+        <div class="pn-highlight-main">
+          <span class="pn-highlight-icon">${principal.icon || '🆕'}</span>
+          <span class="pn-highlight-text">${principal.texto || ''}</span>
+        </div>
+      </div>
+    ` : ''}
+
+    ${restantes.length ? `
+      <div class="pn-section-label">Outras melhorias</div>
+      <div class="pn-list-rest">
+        ${restantes.map(it => `
+          <div class="pn-item">
+            <span class="pn-item-icon">${it.icon || '🆕'}</span>
+            <span style="font-size:13px;color:var(--text);line-height:1.5">${it.texto || ''}</span>
+          </div>
+        `).join('')}
+      </div>
+    ` : ''}
+  `;
+
   document.getElementById('novidades-overlay').classList.add('open');
 }
 
 function fecharNovidades(){
+  const latest = getLatestPatchNote();
+
   document.getElementById('novidades-overlay').classList.remove('open');
-  try{ localStorage.setItem(STORAGE_KEY_VERSION(), APP_VERSION); }catch(e){}
-  if(window._onbAfterNov){ window._onbAfterNov(); window._onbAfterNov=null; }
+
+  try {
+    if (latest?.versao) {
+      localStorage.setItem('patch_notes_last_seen', latest.versao);
+    }
+  } catch(e) {}
+
+  if(window._onbAfterNov){
+    window._onbAfterNov();
+    window._onbAfterNov = null;
+  }
 }
 
 function fecharNovidadesOverlay(e){
@@ -6765,8 +7011,15 @@ function fecharNovidadesOverlay(e){
 }
 
 // ── INIT ──
+carregarPatchNotes();
+
 // 1. Carregar módulos admin PRIMEIRO (atualiza USUARIOS antes de qualquer cópia)
 carregarModulosAdmin();
+
+setTimeout(() => {
+  checkNovidadesModal();
+}, 300);
+
 
 // 2. Tentar restaurar sessão
 (function(){

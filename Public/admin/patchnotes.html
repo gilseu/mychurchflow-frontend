@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="./assets/css/patchnotes.css" />
+  <title>Patch Notes Admin — MyChurchFlow</title>
+  <script src="./assets/js/patchnotes.js" defer></script>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <div class="topbar-row">
+        <div class="topbar-brand">
+          <div class="topbar-brand-title">My<span class="accent">Church</span>Flow</div>
+          <div class="topbar-brand-sub">Admin · Patch Notes</div>
+        </div>
+
+        <nav class="topbar-actions" aria-label="Navegação principal">
+          <a href="../index.html" class="nav-chip">🏠 Landing</a>
+          <a href="./index.html" class="nav-chip">⚙️ Admin</a>
+          <a href="../app/index.html" class="nav-chip primary">📱 App</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="content">
+      <section class="admin-hero">
+        <div class="hero-meta-row">
+          <span class="admin-badge">MyChurchFlow Admin</span>
+          <span class="storage-badge" id="storage-mode-badge">Local</span>
+        </div>
+
+        <h1>Patch <em>Notes</em></h1>
+        <p class="admin-sub">
+          Crie atualizações manuais, importe JSON gerado por IA e mantenha o histórico do app limpo, consistente e pronto para backend depois.
+        </p>
+      </section>
+
+      <section class="card card-highlight">
+        <div class="section-title">Fluxo com IA</div>
+        <p class="section-sub">
+          Peça o patch no chat, copie o JSON e cole abaixo. O sistema valida e cadastra sozinho.
+        </p>
+
+        <label class="field-label" for="patch-json-input">JSON da IA</label>
+        <div class="json-box">
+          <textarea
+            id="patch-json-input"
+            class="json-textarea"
+            spellcheck="false"
+            placeholder='{
+  "versao": "1.9.0",
+  "data": "2026-03-18",
+  "titulo": "Melhorias no sistema",
+  "itens": [
+    { "icon": "✨", "texto": "Novo sistema de favoritos" },
+    { "icon": "⚙️", "texto": "Correções no carregamento" }
+  ]
+}'></textarea>
+        </div>
+
+        <div class="actions-row actions-row-3">
+          <button class="btn btn-secondary" id="btn-fill-example" type="button">🧪 Preencher exemplo</button>
+          <button class="btn btn-secondary" id="btn-copy-prompt" type="button">🤖 Copiar prompt IA</button>
+          <button class="btn btn-primary" id="btn-import-json" type="button">⚡ Importar JSON</button>
+        </div>
+
+        <div class="hint-box">
+          <strong>Formato aceito:</strong> um objeto JSON único ou um array de patch notes. Cada patch precisa ter <strong>versao</strong>, <strong>data</strong>, <strong>titulo</strong> e <strong>itens</strong>.
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-title">Nova atualização manual</div>
+
+        <label class="field-label" for="patch-versao">Versão</label>
+        <div class="field">
+          <span class="field-icon">🏷️</span>
+          <input id="patch-versao" type="text" placeholder="Ex: 1.7.0" autocomplete="off" />
+        </div>
+
+        <label class="field-label" for="patch-data">Data</label>
+        <div class="field">
+          <span class="field-icon">📅</span>
+          <input id="patch-data" type="date" />
+        </div>
+
+        <label class="field-label" for="patch-titulo">Título</label>
+        <div class="field">
+          <span class="field-icon">✏️</span>
+          <input id="patch-titulo" type="text" placeholder="Título da atualização" autocomplete="off" />
+        </div>
+
+        <div class="section-headline-inline">
+          <label class="field-label no-margin">Itens da patch note</label>
+          <button class="mini-link" id="btn-clear-form" type="button">Limpar formulário</button>
+        </div>
+
+        <div id="patch-itens-wrap" class="patch-items-editor"></div>
+
+        <div class="actions-row actions-row-2">
+          <button class="btn btn-secondary" id="btn-add-item" type="button">➕ Adicionar item</button>
+          <button class="btn btn-primary" id="btn-save-patch" type="button">💾 Salvar patch</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-title section-title-between">
+          <span>Ferramentas de teste</span>
+          <span class="mini-badge">Debug</span>
+        </div>
+
+        <p class="section-sub">
+          Use isso para testar o modal de novidades do app sem apagar todos os dados do usuário.
+        </p>
+
+        <div class="debug-grid">
+          <div class="debug-box">
+            <div class="debug-label">Último patch visto no app</div>
+            <div class="debug-value" id="last-seen-value">—</div>
+          </div>
+
+          <div class="debug-box">
+            <div class="debug-label">Patch mais recente cadastrado</div>
+            <div class="debug-value" id="latest-patch-value">—</div>
+          </div>
+        </div>
+
+        <div class="actions-row actions-row-2">
+          <button class="btn btn-secondary" id="btn-reset-last-seen" type="button">🔄 Resetar modal do app</button>
+          <button class="btn btn-secondary" id="btn-copy-reset-command" type="button">📋 Copiar comando de reset</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-title section-title-between">
+          <span>Patch notes cadastradas <span id="patch-count"></span></span>
+          <span class="mini-badge" id="patch-total-badge">0 itens</span>
+        </div>
+
+        <div class="actions-row actions-row-2 compact-gap">
+          <button class="btn btn-secondary" id="btn-copy-json" type="button">📋 Copiar JSON</button>
+          <button class="btn btn-secondary" id="btn-export-latest" type="button">✨ Copiar última patch</button>
+        </div>
+
+        <div id="patch-lista-admin" class="patch-list"></div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

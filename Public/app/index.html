@@ -180,6 +180,7 @@
           </div>
       </div>
     </div>
+  </div>
 
     <div class="search-wrap">
       <div class="search-wrap-inner">
@@ -415,7 +416,7 @@
         <!-- Seletor de tema -->
         <div class="gerar-tema-wrap">
           <div class="gerar-tema-label">🏷 Tema do encontro</div>
-          <select class="gerar-tema-select" id="gerar-tema-sel" onchange="gerarPorTema()">
+          <select class="gerar-tema-select" id="gerar-tema-sel">  
             <option value="">🎲 Aleatório (todos os temas)</option>
             <option value="Gratidão">🌿 Gratidão</option>
             <option value="Amizade">🤝 Amizade</option>
@@ -780,6 +781,7 @@
         <button class="fav-tab" onclick="setFavTab('perguntas')" id="fav-tab-perguntas" data-i18n="fav.tab.perguntas">💬 Perguntas</button>
         <button class="fav-tab" onclick="setFavTab('qgelos')" id="fav-tab-qgelos" data-i18n="fav.tab.qgelos">🧊 Quebra-Gelos</button>
         <button class="fav-tab" onclick="setFavTab('encontros')" id="fav-tab-encontros" data-i18n="fav.tab.encontros">🌸 Encontros</button>
+        <button class="fav-tab" id="fav-tab-conjuntos" onclick="setFavTab('conjuntos')" data-i18n="fav.tab.conjuntos">✨ Conjuntos</button>
       </div>
     </div>
     <div id="favoritos-list"></div>
@@ -814,9 +816,10 @@
     <div class="novidades-sheet">
       <div class="novidades-handle"></div>
       <div class="novidades-hero">
-        <div class="novidades-hero-icon">🌸</div>
-        <div class="novidades-hero-title" data-i18n="novidades.modal.titulo">Novidades desta versão</div>
-        <div class="novidades-hero-sub" id="novidades-modal-versao"></div>
+      <div class="novidades-hero-icon">🌸</div>
+      <div class="novidades-hero-title" id="novidades-modal-titulo" data-i18n="novidades.modal.titulo">Novidades desta versão</div>
+      <div class="novidades-hero-sub" id="novidades-modal-versao">
+      </div>
       </div>
       <div id="novidades-modal-lista"></div>
       <div style="display:flex;gap:10px;margin-top:20px">
