@@ -1,3 +1,4 @@
+console.log('JS OK')
 // ── FORWARD DECLARATIONS (previne TDZ — variáveis usadas antes da definição completa) ──
 var TRANSLATIONS = null;
 var currentLang = 'pt';
@@ -2466,20 +2467,42 @@ function fazerLogout(){
   setTimeout(()=>{ loginEl.classList.add('active'); }, 380);
 }
 
-function atualizarUIUsuario(){
-  if(!usuarioAtual) return;
-  const iniciais = usuarioAtual.nome.split(' ').map(n=>n[0]).slice(0,2).join('');
-  const av = document.getElementById('user-avatar'); if(av) av.textContent = iniciais;
-  document.getElementById('user-name-label').innerHTML = usuarioAtual.nome.split(' ')[0]
-    + (usuarioAtual.email==='admin@encontros.com' ? ' <span class="admin-tag">ADMIN</span>' : '');
-  document.getElementById('topbar-welcome').textContent = t('home.welcome.back');
+function atualizarUIUsuario() {
+  if (!usuarioAtual) return;
+
+  let iniciais = '';
+
+  if (usuarioAtual.nome) {
+    iniciais = usuarioAtual.nome
+      .split(' ')
+      .map(n => n[0])
+      .slice(0, 2)
+      .join('');
+  }
+
+  const av = document.getElementById('user-avatar');
+  if (av) av.textContent = iniciais;
+
+  const userNameLabel = document.getElementById('user-name-label');
+  if (userNameLabel && usuarioAtual.nome) {
+    userNameLabel.innerHTML =
+      usuarioAtual.nome.split(' ')[0] +
+      (usuarioAtual.email === 'admin@encontros.com'
+        ? ' <span class="admin-tag">ADMIN</span>'
+        : '');
+  }
+
+  const topbarWelcome = document.getElementById('topbar-welcome');
+  if (topbarWelcome) {
+    topbarWelcome.textContent = t('home.welcome.back');
+  }
+
   // Aba admin
   const isAdmin = usuarioAtual.email === 'admin@encontros.com';
   const navAdmin = document.getElementById('nav-admin');
-  if(navAdmin) navAdmin.style.display = isAdmin ? 'flex' : 'none';
-  if(isAdmin) setTimeout(renderAdminPanel, 100);
+  if (navAdmin) navAdmin.style.display = isAdmin ? 'flex' : 'none';
+  if (isAdmin) setTimeout(renderAdminPanel, 100);
 }
-
 function atualizarBloqueios(){
   if(!usuarioAtual) return;
   const m = usuarioAtual.modulos;
