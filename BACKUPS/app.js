@@ -1447,26 +1447,253 @@ function gerarEncontroAleatorio(){ gerarEncontroCompleto(); }
 function renderPlanejadorCampos(){
   const m = usuarioAtual?.modulos || {};
 
+  // chamada nova aqui 👇
+  renderPlanQuebraGeloWrap(m);
   const qbWrap = document.getElementById('plan-quebraGelo-wrap');
-  if(qbWrap){
-    if(m.quebraGelos){
-      qbWrap.innerHTML = `
-        <div id="plan-qg-sug" style="display:none;margin-bottom:8px"></div>
-        <textarea class="plan-textarea" id="plan-quebraGelo" rows="2" placeholder="${t('plan.quebraGelo.placeholder')}"></textarea>`;
-    } else {
-      qbWrap.innerHTML = `<div class="plan-locked-field" onclick="openLocked('${t('plan.quebraGelo.locked.titulo')}','')">
-        <span class="plan-locked-icon">🧊</span>
-        <div><div class="plan-locked-title">${t('plan.quebraGelo.locked.titulo')}</div><div class="plan-locked-sub">${t('plan.quebraGelo.locked.sub')}</div></div>
-        <span class="plan-locked-arrow">›</span></div>`;
-    }
+if(qbWrap){
+  if(m.quebraGelos){
+    qbWrap.innerHTML = `
+      <div id="plan-qg-chosen" style="display:none">
+        <div class="plan-din-chosen-card">
+          <div class="plan-din-chosen-badge">🧊 Quebra-gelo escolhido</div>
+          <div class="plan-din-chosen-title" id="plan-qg-chosen-title"></div>
+          <div class="plan-din-chosen-meta" id="plan-qg-chosen-meta"></div>
+          <div class="plan-din-chosen-actions">
+            <button class="plan-din-btn-edit" onclick="editarQuebraGelo()">✏️ Alterar</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="plan-qg-sug" style="display:none"></div>
+
+      <button
+        type="button"
+        class="plan-din-btn-edit"
+        id="plan-qg-manual-toggle"
+        onclick="togglePlanQGManual()"
+        style="margin-top:8px;align-self:flex-start">
+        ✏️ Digitar manualmente
+      </button>
+
+      <textarea
+        class="plan-textarea"
+        id="plan-quebraGelo"
+        rows="2"
+        placeholder="${t('plan.quebraGelo.placeholder')}"
+        style="display:none;margin-top:8px"></textarea>`;
+  } else {
+    qbWrap.innerHTML = `<div class="plan-locked-field" onclick="openLocked('${t('plan.quebraGelo.locked.titulo')}','')">
+      <span class="plan-locked-icon">🧊</span>
+      <div><div class="plan-locked-title">${t('plan.quebraGelo.locked.titulo')}</div><div class="plan-locked-sub">${t('plan.quebraGelo.locked.sub')}</div></div>
+      <span class="plan-locked-arrow">›</span></div>`;
   }
+}
+
+function renderPlanQuebraGeloWrap(m){
+  const qbWrap = document.getElementById('plan-quebraGelo-wrap');
+  if(!qbWrap) return;
+
+  if(m.quebraGelos){
+    qbWrap.innerHTML = `
+      <div id="plan-qg-chosen" style="display:none">
+        <div class="plan-din-chosen-card">
+          <div class="plan-din-chosen-badge">🧊 Quebra-gelo escolhido</div>
+          <div class="plan-din-chosen-title" id="plan-qg-chosen-title"></div>
+          <div class="plan-din-chosen-meta" id="plan-qg-chosen-meta"></div>
+          <div class="plan-din-chosen-actions">
+            <button class="plan-din-btn-edit" onclick="editarQuebraGelo()">✏️ Alterar</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="plan-qg-sug" style="display:none"></div>
+
+      <button
+        type="button"
+        class="plan-din-btn-edit"
+        id="plan-qg-manual-toggle"
+        onclick="togglePlanQGManual()"
+        style="margin-top:8px;align-self:flex-start">
+        ✏️ Digitar manualmente
+      </button>
+
+      <textarea
+        class="plan-textarea"
+        id="plan-quebraGelo"
+        rows="2"
+        placeholder="Digite um quebra-gelo manualmente..."
+        style="display:none;margin-top:8px"></textarea>
+    `;
+  } else {
+    qbWrap.innerHTML = `
+      <div class="plan-locked-field" onclick="openLocked('Quebra-gelo','')">
+        <span class="plan-locked-icon">🧊</span>
+        <div>
+          <div class="plan-locked-title">Quebra-gelo</div>
+          <div class="plan-locked-sub">Disponível no plano</div>
+        </div>
+        <span class="plan-locked-arrow">›</span>
+      </div>
+    `;
+  }
+}
+
+/* =========================
+   RENDER SUGESTÕES
+   ========================= */
+
+function renderPlanQGSugestoes(data){
+  const qgEl = document.getElementById('plan-qg-sug');
+  if(!qgEl) return;
+
+  if(!data?.qids?.length){
+    qgEl.style.display = 'none';
+    qgEl.innerHTML = '';
+    return;
+  }
+
+  const lista = data.qids
+    .map(id => quebraGelos50.find(q => q.id === id))
+    .filter(Boolean);
+
+  if(!lista.length){
+    qgEl.style.display = 'none';
+    qgEl.innerHTML = '';
+    return;
+  }
+
+  window._planQGSugestoes = lista;
+  window._planQGExpandido = false;
+
+  qgEl.style.display = 'block';
+  atualizarListaQG();
+}
+
+/* =========================
+   ATUALIZA LISTA (EXPANSÃO)
+   ========================= */
+
+function atualizarListaQG(){
+  const qgEl = document.getElementById('plan-qg-sug');
+  const lista = window._planQGSugestoes || [];
+  if(!qgEl || !lista.length) return;
+
+  const visiveis = lista.slice(0,3);
+
+  qgEl.innerHTML = `
+    <div class="plan-sug-header">
+      <span>🧊</span>
+      <span>Quebra-gelos para este tema</span>
+      <button class="plan-sug-all-btn" onclick="abrirBrowseQuebraGelos()">
+        ${t('plan.sug.ver.todas')} →
+      </button>
+    </div>
+
+    <div class="plan-sug-list">
+      ${visiveis.map(q => `
+        <div class="plan-sug-item">
+          <div class="plan-sug-item-info">
+            <div class="plan-sug-item-title">${q.titulo}</div>
+            <div class="plan-sug-item-meta">⏱ ${q.duracao || 'Livre'}</div>
+          </div>
+
+          <div class="plan-sug-item-btns">
+            <button class="btn-preview-sug" onclick="previewQGById(${q.id}, false)">👁</button>
+            <button
+              class="btn-usar-sug"
+              data-titulo="${q.titulo.replace(/"/g, '&quot;')}"
+              onclick="usarSugestaoQG(this.dataset.titulo, ${q.id})">
+              ${t('plan.sug.usar')}
+            </button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+/* =========================
+   EXPANDIR LISTA
+   ========================= */
+
+function togglePlanQGLista(){
+  abrirBrowseQuebraGelos();
+}
+
+/* =========================
+   USAR SUGESTÃO
+   ========================= */
+
+function usarSugestaoQG(titulo, id){
+  const ta = document.getElementById('plan-quebraGelo');
+  if(!ta) return;
+
+  ta.style.display = 'block';
+  ta.value = titulo;
+
+  const btn = document.getElementById('plan-qg-manual-toggle');
+  if(btn) btn.textContent = '✕ Fechar campo manual';
+
+  if(typeof toastMsg === 'function'){
+    toastMsg(`🧊 Selecionado: ${titulo}`);
+  }
+}
+
+/* =========================
+   TOGGLE MANUAL
+   ========================= */
+
+function togglePlanQGManual(){
+  const ta = document.getElementById('plan-quebraGelo');
+  const btn = document.getElementById('plan-qg-manual-toggle');
+  if(!ta || !btn) return;
+
+  const aberto = ta.style.display !== 'none';
+  if(!aberto){
+    // Switching to manual mode should clear any selected quebra-gelo suggestion
+    planoQGId = null;
+    const chosen = document.getElementById('plan-qg-chosen');
+    if(chosen) chosen.style.display = 'none';
+  }
+
+  ta.style.display = aberto ? 'none' : 'block';
+  btn.textContent = aberto
+    ? '✏️ Digitar manualmente'
+    : '✕ Fechar campo manual';
+}
 
   const pgWrap = document.getElementById('plan-perguntas-wrap');
   if(pgWrap){
     if(m.perguntas){
       pgWrap.innerHTML = `
+        <div id="plan-perg-chosen" style="display:none">
+          <div class="plan-din-chosen-card">
+            <div class="plan-din-chosen-badge">❓ Pergunta escolhida</div>
+            <div class="plan-din-chosen-title" id="plan-perg-chosen-title"></div>
+            <div class="plan-din-chosen-meta" id="plan-perg-chosen-meta"></div>
+            <div class="plan-din-chosen-actions">
+              <button class="plan-din-btn-edit" onclick="editarPergunta()">✏️ Alterar</button>
+            </div>
+          </div>
+        </div>
+
         <div id="plan-perg-sug" style="display:none;margin-bottom:8px"></div>
-        <textarea class="plan-textarea" id="plan-pergunta" rows="2" placeholder="${t('plan.pergunta.placeholder')}"></textarea>`;
+
+        <button
+          type="button"
+          class="plan-din-btn-edit"
+          id="plan-perg-manual-toggle"
+          onclick="togglePerguntaManual()"
+          style="margin-top:8px;align-self:flex-start">
+          Escolher manualmente a pergunta
+        </button>
+
+        <textarea
+          class="plan-textarea"
+          id="plan-pergunta"
+          rows="2"
+          placeholder="${t('plan.pergunta.placeholder')}"
+          style="display:none;margin-top:8px"></textarea>`;
     } else {
       pgWrap.innerHTML = `<div class="plan-locked-field" onclick="openLocked('${t('plan.pergunta.locked.titulo')}','')">
         <span class="plan-locked-icon">💬</span>
@@ -1513,14 +1740,17 @@ const temasData = {
 
 let planoDinId = null; // ID da dinâmica selecionada no plano
 let planoQGId  = null; // ID do quebra-gelo selecionado no plano
+let planoPergId = null; // ID da pergunta selecionada no plano
 
 function onTemaSelect(val){
   const input = document.getElementById('plan-tema');
   const sugestao = document.getElementById('plan-sugestao');
   clearError('field-tema','plan-tema-select');
   clearError('field-tema','plan-tema');
-  // reset dynamic selection
+  // reset dynamic, quebra-gelo and pergunta selection
   resetDinSelecao();
+  resetQGSelecao();
+  resetPergSelecao();
 
   if(val === 'outro'){
     input.style.display = 'block'; input.focus();
@@ -1573,62 +1803,135 @@ function renderSugList(list){
 function renderSugPergQG(data){
   // Perguntas
   const pergEl = document.getElementById('plan-perg-sug');
+  const ta = document.getElementById('plan-pergunta');
+  if(ta) ta.style.display = 'none';
+
+  const btn = document.getElementById('plan-perg-manual-toggle');
+  if(btn){
+    btn.style.display = 'inline-flex';
+    btn.textContent = 'Escolher manualmente a pergunta';
+  }
+
   if(pergEl && data?.pids?.length){
     const pergs = data.pids.map(id=>perguntas100.find(p=>p.id===id)).filter(Boolean);
     if(pergs.length){
       pergEl.style.display = 'block';
       pergEl.innerHTML = `
-        <div class="plan-sug-header" style="border-radius:14px 14px 0 0">
-          <span>💬</span><span>${t('plan.sug.perguntas')}</span>
-        </div>
-        <div style="border:1.5px solid var(--gold-light);border-top:none;border-radius:0 0 14px 14px;overflow:hidden">
+        <div class="plan-sug-list">
           ${pergs.map(p=>`
             <div class="plan-sug-item">
-              <div class="plan-sug-item-info" style="flex:1">
-                <div class="plan-sug-item-title" style="font-size:13px;font-weight:500">${p.pergunta}</div>
+              <div class="plan-sug-item-info">
+                <div class="plan-sug-item-title">${p.pergunta}</div>
                 <div class="plan-sug-item-meta">${p.categoriaLabel}</div>
               </div>
               <div class="plan-sug-item-btns">
-                <button class="btn-usar-sug" onclick="usarSugestaoPerguntas(${JSON.stringify(p.pergunta).replace(/"/g,'&quot;')})">${t('plan.sug.usar')}</button>
+                <button class="btn-usar-sug" onclick="selecionarPergunta('${p.id}', ${JSON.stringify(p.pergunta).replace(/"/g,'&quot;')})">${t('plan.sug.usar')}</button>
               </div>
             </div>`).join('')}
         </div>`;
+    } else {
+      pergEl.style.display='none';
+      pergEl.innerHTML = '';
     }
-  } else if(pergEl){ pergEl.style.display='none'; }
+  } else if(pergEl){
+    pergEl.style.display='none';
+    pergEl.innerHTML = '';
+  }
 
-  // Quebra-gelos
-  const qgEl = document.getElementById('plan-qg-sug');
-  if(qgEl && data?.qids?.length){
-    const qgs = data.qids.map(id=>quebraGelos50.find(q=>q.id===id)).filter(Boolean);
-    if(qgs.length){
-      qgEl.style.display = 'block';
-      qgEl.innerHTML = `
-        <div class="plan-sug-header" style="border-radius:14px 14px 0 0">
-          <span>🧊</span><span>${t('plan.sug.qgelos')}</span>
-        </div>
-        <div style="border:1.5px solid var(--gold-light);border-top:none;border-radius:0 0 14px 14px;overflow:hidden">
-          ${qgs.map(q=>`
-            <div class="plan-sug-item">
-              <div class="plan-sug-item-info" style="flex:1">
-                <div class="plan-sug-item-title" style="font-size:13px">${q.titulo}</div>
-                <div class="plan-sug-item-meta">⏱ ${q.duracao}</div>
-              </div>
-              <div class="plan-sug-item-btns">
-                <button class="btn-usar-sug" onclick="usarSugestaoQG(${JSON.stringify(q.titulo).replace(/"/g,'&quot;')}, ${q.id})">${t('plan.sug.usar')}</button>
-              </div>
-            </div>`).join('')}
-        </div>`;
-    }
-  } else if(qgEl){ qgEl.style.display='none'; }
+ // Quebra-gelos
+const qgEl = document.getElementById('plan-qg-sug');
+if(qgEl && data?.qids?.length){
+  const lista = data.qids
+    .map(id => quebraGelos50.find(q => q.id === id))
+    .filter(Boolean);
+
+  if(lista.length){
+    qgEl.style.display = 'block';
+    window._planQGSugestoes = lista;
+    window._planQGExpandido = false;
+    renderPlanQGSugestoes();
+  } else {
+    qgEl.style.display = 'none';
+    qgEl.innerHTML = '';
+  }
+} else if(qgEl){
+  qgEl.style.display = 'none';
+  qgEl.innerHTML = '';
+}
 }
 
 function usarSugestaoPerguntas(texto){
-  const el = document.getElementById('plan-pergunta');
-  if(el){ el.value = texto; el.focus(); toastMsg('💬 ' + t('plan.sug.escolhida')); }
+  selecionarPergunta(null, texto);
 }
+
 function usarSugestaoQG(titulo, id){
-  const el = document.getElementById('plan-quebraGelo');
-  if(el){ el.value = titulo; el.focus(); planoQGId = id || null; toastMsg('🧊 ' + t('plan.sug.escolhida')); }
+  selecionarQuebraGelo(id, titulo);
+}
+
+function selecionarQuebraGelo(id, titulo){
+  const q = quebraGelos50.find(x=>x.id===id);
+  const text = titulo || q?.titulo || '';
+  if(!text) return;
+
+  planoQGId = id || null;
+  const ta = document.getElementById('plan-quebraGelo');
+  if(ta){
+    ta.value = text;
+  }
+
+  const chosen = document.getElementById('plan-qg-chosen');
+  if(chosen){
+    document.getElementById('plan-qg-chosen-title').textContent = text;
+    document.getElementById('plan-qg-chosen-meta').textContent = q ? (q.categoria + ' · ⏱ ' + q.duracao) : '';
+    chosen.style.display = 'block';
+  }
+
+  const sug = document.getElementById('plan-qg-sug'); if(sug) sug.style.display = 'none';
+  const btn = document.getElementById('plan-qg-manual-toggle'); if(btn) btn.style.display = 'none';
+  if(ta) ta.style.display = 'none';
+
+  // Close browse modal if open
+  const browse = document.getElementById('modal-browse-qg');
+  if(browse) browse.classList.remove('open');
+
+  toastMsg('🧊 ' + t('plan.sug.escolhida'));
+}
+
+function editarQuebraGelo(){
+  planoQGId = null;
+  const chosen = document.getElementById('plan-qg-chosen'); if(chosen) chosen.style.display = 'none';
+
+  const sug = document.getElementById('plan-qg-sug');
+  if(sug){
+    if(window._planQGSugestoes?.length){
+      sug.style.display = 'block';
+      atualizarListaQG();
+    } else {
+      sug.style.display = 'none';
+      sug.innerHTML = '';
+    }
+  }
+
+  const btn = document.getElementById('plan-qg-manual-toggle');
+  if(btn){
+    btn.style.display = 'inline-flex';
+    btn.textContent = '✏️ Digitar manualmente';
+  }
+
+  const ta = document.getElementById('plan-quebraGelo');
+  if(ta){
+    ta.style.display = 'none';
+  }
+}
+
+function resetQGSelecao(){
+  planoQGId = null;
+  const chosen = document.getElementById('plan-qg-chosen'); if(chosen) chosen.style.display = 'none';
+  const sug = document.getElementById('plan-qg-sug'); if(sug){ sug.style.display = 'none'; }
+  const btn = document.getElementById('plan-qg-manual-toggle');
+  if(btn){ btn.style.display = 'inline-flex'; btn.textContent = '✏️ Digitar manualmente'; }
+  const ta = document.getElementById('plan-quebraGelo');
+  if(ta){ ta.style.display = 'none'; ta.value = ''; }
 }
 
 function resetDinSelecao(){
@@ -1636,6 +1939,77 @@ function resetDinSelecao(){
   document.getElementById('plan-din-chosen').style.display = 'none';
   document.getElementById('plan-dinamica').value = '';
   document.getElementById('plan-dinamica-free').value = '';
+}
+
+function resetPergSelecao(){
+  planoPergId = null;
+  const chosen = document.getElementById('plan-perg-chosen'); if(chosen) chosen.style.display = 'none';
+  const sug = document.getElementById('plan-perg-sug'); if(sug){ sug.style.display = 'none'; }
+  const btn = document.getElementById('plan-perg-manual-toggle');
+  if(btn){ btn.style.display = 'inline-flex'; btn.textContent = 'Escolher manualmente a pergunta'; }
+  const ta = document.getElementById('plan-pergunta');
+  if(ta){ ta.style.display = 'none'; ta.value = ''; }
+}
+
+function selecionarPergunta(id, texto){
+  const p = perguntas100.find(x=>x.id===id);
+  const text = texto || p?.pergunta || '';
+  if(!text) return;
+
+  planoPergId = id || null;
+  const ta = document.getElementById('plan-pergunta');
+  if(ta){ ta.value = text; }
+
+  const chosen = document.getElementById('plan-perg-chosen');
+  if(chosen){
+    document.getElementById('plan-perg-chosen-title').textContent = text;
+    document.getElementById('plan-perg-chosen-meta').textContent = p ? p.categoriaLabel : '';
+    chosen.style.display = 'block';
+  }
+
+  const sug = document.getElementById('plan-perg-sug'); if(sug) sug.style.display = 'none';
+  const btn = document.getElementById('plan-perg-manual-toggle'); if(btn) btn.style.display = 'none';
+  if(ta) ta.style.display = 'none';
+
+  toastMsg('❓ ' + t('plan.sug.escolhida'));
+}
+
+function editarPergunta(){
+  planoPergId = null;
+  const chosen = document.getElementById('plan-perg-chosen'); if(chosen) chosen.style.display = 'none';
+
+  const sug = document.getElementById('plan-perg-sug');
+  if(sug){
+    if(sug.innerHTML.trim()){
+      sug.style.display = 'block';
+    } else {
+      sug.style.display = 'none';
+    }
+  }
+
+  const btn = document.getElementById('plan-perg-manual-toggle');
+  if(btn){
+    btn.style.display = 'inline-flex';
+    btn.textContent = 'Escolher manualmente a pergunta';
+  }
+
+  const ta = document.getElementById('plan-pergunta');
+  if(ta){ ta.style.display = 'none'; }
+}
+
+function togglePerguntaManual(){
+  const ta = document.getElementById('plan-pergunta');
+  const btn = document.getElementById('plan-perg-manual-toggle');
+  if(!ta || !btn) return;
+
+  const aberto = ta.style.display !== 'none';
+  if(!aberto){
+    planoPergId = null;
+    const chosen = document.getElementById('plan-perg-chosen'); if(chosen) chosen.style.display = 'none';
+  }
+
+  ta.style.display = aberto ? 'none' : 'block';
+  btn.textContent = aberto ? 'Escolher manualmente a pergunta' : '✕ Fechar campo manual';
 }
 
 function selecionarDinamica(id){
@@ -1721,6 +2095,54 @@ function renderBrowseDin(list){
       <div class="browse-din-item-btns">
         <button class="btn-preview-sug" onclick="previewDinById(${d.id},true)">👁</button>
         <button class="btn-usar-sug" onclick="selecionarDinamica(${d.id})">Usar</button>
+      </div>
+    </div>`).join('');
+}
+
+// ── Browse modal (Quebra-gelo) ──
+let qgPreviewId = null;
+let qgPreviewFromBrowse = false;
+function previewQGById(id, fromBrowse){
+  const q = quebraGelos50.find(x=>x.id===id);
+  if(!q) return;
+  qgPreviewId = id;
+  qgPreviewFromBrowse = fromBrowse;
+  document.getElementById('qg-titulo').textContent = q.titulo;
+  document.getElementById('qg-tags').innerHTML = `<span class="tag">${q.categoria}</span><span class="tag sage">⏱ ${q.duracao}</span>`;
+  document.getElementById('qg-body').innerHTML = `
+    <div class="detail-section"><h5>🎯 Objetivo</h5><p>${q.objetivo}</p></div>
+    <div class="detail-section"><h5>🧰 Como</h5><p>${q.como}</p></div>
+    <div class="detail-section" style="border-left:3px solid var(--gold)"><h5>💡 Dica</h5><p>${q.dica}</p></div>`;
+  document.getElementById('modal-qg-preview').classList.add('open');
+}
+function previewQGPlano(){ if(planoQGId) previewQGById(planoQGId, false); }
+function closeQGPreview(e){ if(e.target===document.getElementById('modal-qg-preview')) closeQGPreviewDirect(); }
+function closeQGPreviewDirect(){ document.getElementById('modal-qg-preview').classList.remove('open'); }
+function usarQGPreview(){ if(qgPreviewId) selecionarQuebraGelo(qgPreviewId); closeQGPreviewDirect(); }
+
+function abrirBrowseQuebraGelos(){
+  renderBrowseQG(quebraGelos50);
+  document.getElementById('browse-qg-search').value = '';
+  document.getElementById('modal-browse-qg').classList.add('open');
+}
+function closeBrowseQG(e){ if(e.target===document.getElementById('modal-browse-qg')) document.getElementById('modal-browse-qg').classList.remove('open'); }
+function filterBrowseQG(q){
+  const base = quebraGelos50;
+  renderBrowseQG(q ? base.filter(x=>
+    x.titulo.toLowerCase().includes(q.toLowerCase())||
+    x.categoria.toLowerCase().includes(q.toLowerCase())
+  ) : base);
+}
+function renderBrowseQG(list){
+  document.getElementById('browse-qg-list').innerHTML = list.map(q=>`
+    <div class="browse-din-item">
+      <div style="flex:1;min-width:0">
+        <h5>${q.titulo}</h5>
+        <p>${q.categoria} · ⏱ ${q.duracao}</p>
+      </div>
+      <div class="browse-din-item-btns">
+        <button class="btn-preview-sug" onclick="previewQGById(${q.id},true)">👁</button>
+        <button class="btn-usar-sug" onclick="selecionarQuebraGelo(${q.id})">Usar</button>
       </div>
     </div>`).join('');
 }
@@ -2146,6 +2568,7 @@ function salvarPlano(){
     quebraGelo: document.getElementById('plan-quebraGelo')?.value?.trim() || '',
     quebraGeloId: planoQGId || null,
     pergunta: document.getElementById('plan-pergunta')?.value?.trim() || '',
+    perguntaId: planoPergId || null,
     oracao: oracaoVal,
     notas: document.getElementById('plan-notas').value,
     id: Date.now()
@@ -2178,8 +2601,9 @@ function salvarPlano(){
     const el=document.getElementById(iid); if(el) el.classList.remove('error');
   });
   limparVersiculo();
-  planoDinId = null;
-  planoQGId  = null;
+  resetDinSelecao();
+  resetQGSelecao();
+  resetPergSelecao();
   renderPlanos();
   toastMsg(t('toast.enc.planejado'));
 }
@@ -7346,3 +7770,60 @@ function mcRunUiPack(){
     setTimeout(mcRunUiPack, 120);
   });
 })();
+function renderPlanQGSugestoes(){
+  const qgEl = document.getElementById('plan-qg-sug');
+  const lista = window._planQGSugestoes || [];
+  if(!qgEl || !lista.length) return;
+
+  const visiveis = lista.slice(0, 3);
+
+  qgEl.innerHTML = `
+    <div class="plan-sug-header">
+      <span>🧊</span>
+      <span>${t('plan.sug.qgelos')}</span>
+      <button class="plan-sug-all-btn" onclick="abrirBrowseQuebraGelos()">
+        ${t('plan.sug.ver.todas')} →
+      </button>
+    </div>
+
+    <div class="plan-sug-list">
+      ${visiveis.map(q => `
+        <div class="plan-sug-item">
+          <div class="plan-sug-item-info">
+            <div class="plan-sug-item-title">${q.titulo}</div>
+            <div class="plan-sug-item-meta">⏱ ${q.duracao || 'Livre'}</div>
+          </div>
+
+          <div class="plan-sug-item-btns">
+            <button class="btn-preview-sug" onclick="previewQGById(${q.id}, false)">👁</button>
+            <button
+              class="btn-usar-sug"
+              data-titulo="${q.titulo.replace(/"/g, '&quot;')}"
+              onclick="usarSugestaoQG(this.dataset.titulo, ${q.id})">
+              ${t('plan.sug.usar')}
+            </button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function atualizarListaQG(){
+  // mantenha compatibilidade com editarQuebraGelo() que espera essa função global
+  renderPlanQGSugestoes();
+}
+
+function togglePlanQGLista(){
+  abrirBrowseQuebraGelos();
+}
+
+function togglePlanQGManual(){
+  const ta = document.getElementById('plan-quebraGelo');
+  const btn = document.getElementById('plan-qg-manual-toggle');
+  if(!ta || !btn) return;
+
+  const aberto = ta.style.display !== 'none';
+  ta.style.display = aberto ? 'none' : 'block';
+  btn.textContent = aberto ? '✏️ Digitar manualmente' : '✕ Fechar campo manual';
+}

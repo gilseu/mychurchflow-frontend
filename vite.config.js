@@ -3,9 +3,9 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   root: 'Public',
   server: {
-    port: 5173,
+    port: 5177,
     open: true,
-    strictPort: false
+    strictPort: true
   },
   build: {
     outDir: '../dist',
