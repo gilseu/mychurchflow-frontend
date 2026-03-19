@@ -1,6 +1,28 @@
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    if (!window.supabaseClient) {
+      console.error('supabaseClient não encontrado');
+      return;
+    }
+
+    const { data, error } = await window.supabaseClient.auth.getSession();
+
+    console.log('Supabase conectado ✅');
+    console.log('Sessão atual:', data);
+    console.log('Erro:', error);
+  } catch (err) {
+    console.error('Erro ao testar Supabase:', err);
+  }
+});
+
 console.log('JS OK')
 // ── FORWARD DECLARATIONS (previne TDZ — variáveis usadas antes da definição completa) ──
 var currentLang = 'pt';
+
+function syncCoreRuntimeState(){
+  if(!window.appStore) return;
+  window.appStore.syncMany({ usuarioAtual, currentLang });
+}
 function t(key, fallback){
   try{ return TRANSLATIONS?.[currentLang]?.[key] || TRANSLATIONS?.['pt']?.[key] || fallback || key; }
   catch(e){ return fallback || key; }
@@ -157,11 +179,87 @@ function moduloLabel(k){ return MODULOS_LABELS[k] ? t(MODULOS_LABELS[k].key) : k
 
 let usuarioAtual = null;
 const STORAGE_KEY_AUTH = 'encontros_auth_v1';
+syncCoreRuntimeState();
 
-function fazerLogin(){
+function mapUserAccessToModulos(access) {
+  return {
+    dinamicas: true,
+    perguntas: !!access?.sugestoes,
+    quebraGelos: !!access?.sugestoes,
+    estudos: !!access?.sugestoes,
+    encontros: !!access?.encontros_guiados || !!access?.encontros_premium,
+    devocional: !!access?.devocional,
+    planejador: !!access?.planejador,
+    guia: true,
+    floresça: true
+  };
+}
+
+function getPlanoVisual(plano) {
+  switch ((plano || '').toLowerCase()) {
+    case 'lider':
+      return {
+        plano: 'Líder',
+        planoBg: 'linear-gradient(135deg,#7B5EA7,#9B7CC7)'
+      };
+    case 'essencial':
+      return {
+        plano: 'Essencial',
+        planoBg: 'linear-gradient(135deg,#2F6F6D,#4E9A97)'
+      };
+    case 'combo':
+    default:
+      return {
+        plano: 'Produto Principal',
+        planoBg: 'var(--rose)'
+      };
+  }
+}
+
+async function carregarUsuarioSupabase(authUser) {
+  if (!window.supabaseClient || !authUser?.id) return null;
+
+  const { data: profile, error: profileError } = await window.supabaseClient
+    .from('profiles')
+    .select('id, nome, email, avatar_url')
+    .eq('id', authUser.id)
+    .single();
+
+  if (profileError) {
+    console.error('Erro ao carregar profile:', profileError);
+    return null;
+  }
+
+  const { data: access, error: accessError } = await window.supabaseClient
+    .from('user_access')
+    .select('*')
+    .eq('user_id', authUser.id)
+    .single();
+
+  if (accessError) {
+    console.error('Erro ao carregar user_access:', accessError);
+    return null;
+  }
+
+  const planoVisual = getPlanoVisual(access?.plano);
+
+  return {
+    id: profile.id,
+    email: profile.email,
+    nome: profile.nome || authUser.email?.split('@')[0] || 'Usuária',
+    avatar: '🌸',
+    plano: planoVisual.plano,
+    planoBg: planoVisual.planoBg,
+    modulos: mapUserAccessToModulos(access),
+    supabaseProfile: profile,
+    supabaseAccess: access,
+    isAdmin: !!access?.is_admin
+  };
+}
+
+async function fazerLogin() {
   const email = document.getElementById('login-email').value.trim().toLowerCase();
   const senha = document.getElementById('login-senha').value;
-  const lembrar = document.getElementById('login-lembrar').checked;
   const errEl = document.getElementById('login-error');
   const emailEl = document.getElementById('login-email');
   const senhaEl = document.getElementById('login-senha');
@@ -170,33 +268,108 @@ function fazerLogin(){
   senhaEl.classList.remove('error');
   errEl.classList.remove('show');
 
-  const user = USUARIOS[email];
-  if(!user || user.senha !== senha){
+  if (!window.supabaseClient) {
+    console.error('supabaseClient não encontrado');
+    errEl.classList.add('show');
+    return;
+  }
+
+  const { data, error } = await window.supabaseClient.auth.signInWithPassword({
+    email,
+    password: senha
+  });
+
+  if (error || !data?.user) {
+    console.error('Erro no login:', error);
     emailEl.classList.add('error');
     senhaEl.classList.add('error');
     errEl.classList.add('show');
     return;
   }
 
-  usuarioAtual = {...user, email};
-  if(lembrar){
-    try{ localStorage.setItem(STORAGE_KEY_AUTH, email); }catch(e){}
-  } else {
-    try{ localStorage.removeItem(STORAGE_KEY_AUTH); }catch(e){}
+  const userMontado = await carregarUsuarioSupabase(data.user);
+
+  if (!userMontado) {
+    errEl.classList.add('show');
+    return;
   }
+
+  usuarioAtual = userMontado;
+  syncCoreRuntimeState();
   entrarNoApp();
 }
+
+function getPlanoVisual(plano) {
+  switch ((plano || '').toLowerCase()) {
+    case 'lider':
+      return {
+        plano: 'Líder',
+        planoBg: 'linear-gradient(135deg,#7B5EA7,#9B7CC7)'
+      };
+    case 'essencial':
+      return {
+        plano: 'Essencial',
+        planoBg: 'linear-gradient(135deg,#2F6F6D,#4E9A97)'
+      };
+    case 'combo':
+    default:
+      return {
+        plano: 'Produto Principal',
+        planoBg: 'var(--rose)'
+      };
+  }
+}
+async function carregarUsuarioSupabase(authUser) {
+  if (!window.supabaseClient || !authUser?.id) return null;
+
+  const { data: profile, error: profileError } = await window.supabaseClient
+    .from('profiles')
+    .select('id, nome, email, avatar_url')
+    .eq('id', authUser.id)
+    .single();
+
+  if (profileError) {
+    console.error('Erro ao carregar profile:', profileError);
+    return null;
+  }
+
+  const { data: access, error: accessError } = await window.supabaseClient
+    .from('user_access')
+    .select('*')
+    .eq('user_id', authUser.id)
+    .single();
+
+  if (accessError) {
+    console.error('Erro ao carregar user_access:', accessError);
+    return null;
+  }
+
+  const planoVisual = getPlanoVisual(access?.plano);
+
+  return {
+    id: profile.id,
+    email: profile.email,
+    nome: profile.nome || authUser.email?.split('@')[0] || 'Usuária',
+    avatar: '🌸',
+    plano: planoVisual.plano,
+    planoBg: planoVisual.planoBg,
+    modulos: mapUserAccessToModulos(access),
+    supabaseProfile: profile,
+    supabaseAccess: access,
+    isAdmin: !!access?.is_admin
+  };
+}
+
 
 function loginRapidoNovo(){
   // Limpa TODOS os dados da conta nova para simular primeira vez
   const email = 'nova@email.com';
   try{
     // Coletar todas as chaves primeiro, depois deletar (evita corrupção de índice)
-    const allKeys = [];
-    for(let i=0; i<localStorage.length; i++) allKeys.push(localStorage.key(i));
-    allKeys.filter(k=>k && k.includes(email.replace('@','').replace('.',''))).forEach(k=>localStorage.removeItem(k));
+    const allKeys = storage.keys();
+    allKeys.filter(k=>k && k.includes(email.replace('@','').replace('.',''))).forEach(k=>storage.remove(k));
     // Também pelo email direto
-    allKeys.filter(k=>k && k.includes(email)).forEach(k=>localStorage.removeItem(k));
+    allKeys.filter(k=>k && k.includes(email)).forEach(k=>storage.remove(k));
   }catch(e){}
   loginRapido(email,'nova123','profile-nova');
 }
@@ -246,9 +419,9 @@ function entrarNoApp(){
     renderFavoritos();
     renderHistorico();
     popularFiltroCategoria();
-    const _fcl=document.getElementById('fav-count-label'); if(_fcl) _fcl.textContent=`${favorites.length} salvos`;
+    const _fcl=document.getElementById('fav-count-label'); if(_fcl) _fcl.textContent=`${favorites.length} ${String(t('fav.nav')).toLowerCase()}`;
     // Mostrar aba admin só para admin
-    const isAdmin = usuarioAtual?.email === 'admin@encontros.com';
+    const isAdmin = !!usuarioAtual?.isAdmin;
     document.getElementById('nav-admin').style.display = isAdmin ? 'flex' : 'none';
     if(isAdmin) renderAdminPanel();
     // Mostrar dica do dia
@@ -272,13 +445,13 @@ function entrarNoApp(){
     setTimeout(aplicarIdioma, 50);
   }, 380);
 }
-
-function fazerLogout(){
-  const loginEl = document.getElementById('login-screen');
-  const appEl   = document.getElementById('app');
+function limparSessaoLocal() {
   closePerfil();
-  appEl.classList.remove('visivel');
-  planos = []; favorites = []; historico = []; historicoEnc = []; favTabAtiva = 'todos';
+  planos = [];
+  favorites = [];
+  historico = [];
+  historicoEnc = [];
+  favTabAtiva = 'todos';
   conjuntosGerados = [];
   conjuntosEncontros = [];
   currentConjunto = null;
@@ -286,33 +459,87 @@ function fazerLogout(){
   geradasSessao = [];
   encontrosGeradosSessao = [];
   usuarioAtual = null;
-  try{ localStorage.removeItem(STORAGE_KEY_AUTH); }catch(e){}
-  document.getElementById('modal-usuario').classList.remove('open');
-  document.getElementById('login-email').value = '';
-  document.getElementById('login-senha').value = '';
-  document.getElementById('login-error').classList.remove('show');
-  // Limpar estado visual dos quick-login profiles
+
+  if (typeof syncCoreRuntimeState === 'function') syncCoreRuntimeState();
+
+  const modalUsuario = document.getElementById('modal-usuario');
+  if (modalUsuario) modalUsuario.classList.remove('open');
+
+  const loginEmail = document.getElementById('login-email');
+  if (loginEmail) loginEmail.value = '';
+
+  const loginSenha = document.getElementById('login-senha');
+  if (loginSenha) loginSenha.value = '';
+
+  const loginError = document.getElementById('login-error');
+  if (loginError) loginError.classList.remove('show');
+
   document.querySelectorAll('.login-profile-btn').forEach(b => b.classList.remove('selecionado'));
-  // Resetar card do gerador para placeholder
-  const gdT = document.getElementById('gd-titulo'); if(gdT) gdT.textContent = '—';
-  const gdD = document.getElementById('gd-desc'); if(gdD) gdD.textContent = '';
-  // Esconder nav, FAB e whatsapp ao sair
+
+  const gdT = document.getElementById('gd-titulo');
+  if (gdT) gdT.textContent = '—';
+
+  const gdD = document.getElementById('gd-desc');
+  if (gdD) gdD.textContent = '';
+
   const fab = document.getElementById('gerar-fab-wrap');
-  if(fab) fab.classList.remove('visivel');
+  if (fab) fab.classList.remove('visivel');
+
   const nav = document.getElementById('bottom-nav');
-  if(nav) nav.style.display = 'none';
+  if (nav) nav.style.display = 'none';
+
   const wfab = document.getElementById('whatsapp-fab');
-  if(wfab) wfab.style.display = 'none';
-  // Voltar para home screen
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  if (wfab) wfab.style.display = 'none';
+
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+
   const home = document.getElementById('screen-home');
-  if(home) home.classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  const nh = document.getElementById('nav-home');
-  if(nh) nh.classList.add('active');
-  setTimeout(()=>{ loginEl.classList.add('active'); }, 380);
+  if (home) home.classList.add('active');
+
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  const navHome = document.getElementById('nav-home');
+  if (navHome) navHome.classList.add('active');
 }
 
+async function fazerLogout() {
+  const loginEl = document.getElementById('login-screen');
+  const appEl = document.getElementById('app');
+
+  appEl.classList.remove('visivel');
+
+  if (window.supabaseClient) {
+    const { error } = await window.supabaseClient.auth.signOut();
+    if (error) console.error('Erro ao sair:', error);
+  }
+
+  limparSessaoLocal();
+
+  setTimeout(() => {
+    loginEl.classList.add('active');
+  }, 380);
+}
+async function restaurarSessaoSupabase() {
+  if (!window.supabaseClient) return false;
+
+  const { data, error } = await window.supabaseClient.auth.getSession();
+
+  if (error) {
+    console.error('Erro ao restaurar sessão:', error);
+    return false;
+  }
+
+  const authUser = data?.session?.user;
+  if (!authUser) return false;
+
+  const userMontado = await carregarUsuarioSupabase(authUser);
+  if (!userMontado) return false;
+
+  usuarioAtual = userMontado;
+  if (typeof syncCoreRuntimeState === 'function') syncCoreRuntimeState();
+  entrarNoApp();
+  return true;
+}
 function atualizarUIUsuario() {
   if (!usuarioAtual) return;
 
@@ -333,7 +560,7 @@ function atualizarUIUsuario() {
   if (userNameLabel && usuarioAtual.nome) {
     userNameLabel.innerHTML =
       usuarioAtual.nome.split(' ')[0] +
-      (usuarioAtual.email === 'admin@encontros.com'
+      (usuarioAtual.isAdmin
         ? ' <span class="admin-tag">ADMIN</span>'
         : '');
   }
@@ -344,7 +571,7 @@ function atualizarUIUsuario() {
   }
 
   // Aba admin
-  const isAdmin = usuarioAtual.email === 'admin@encontros.com';
+  const isAdmin = !!usuarioAtual?.isAdmin;
   const navAdmin = document.getElementById('nav-admin');
   if (navAdmin) navAdmin.style.display = isAdmin ? 'flex' : 'none';
   if (isAdmin) setTimeout(renderAdminPanel, 100);
@@ -474,7 +701,7 @@ function trocarFoto(event){
     const dataUrl = e.target.result;
     // Salva no localStorage por conta
     const key = 'foto_' + usuarioAtual.email;
-    localStorage.setItem(key, dataUrl);
+    storage.set(key, dataUrl);
     // Atualiza avatar no modal e na topbar
     renderAvatar(dataUrl);
     toastMsg(t('perfil.foto'));
@@ -508,7 +735,7 @@ function carregarPerfil(){
   if(!usuarioAtual) return;
   const key = 'perfil_' + usuarioAtual.email;
   try{
-    const dados = JSON.parse(localStorage.getItem(key)||'{}');
+    const dados = storage.getJSON(key, {});
     document.getElementById('perfil-nome').value = dados.nome || usuarioAtual.nome || '';
     document.getElementById('perfil-telefone').value = dados.telefone || '';
     document.getElementById('perfil-igreja').value = dados.igreja || '';
@@ -518,7 +745,7 @@ function carregarPerfil(){
   }catch(e){}
   // Carrega foto
   const fotoKey = 'foto_' + usuarioAtual.email;
-  const foto = localStorage.getItem(fotoKey);
+  const foto = storage.get(fotoKey);
   renderAvatar(foto || null);
 }
 
@@ -533,7 +760,7 @@ function salvarPerfil(){
     bio: document.getElementById('perfil-bio').value.trim(),
   };
   const key = 'perfil_' + usuarioAtual.email;
-  localStorage.setItem(key, JSON.stringify(dados));
+  storage.setJSON(key, dados);
   // Atualiza nome exibido se preenchido
   if(dados.nome){
     document.getElementById('user-modal-nome').textContent = dados.nome;
@@ -633,13 +860,13 @@ function abrirPerfilTela(){
   document.getElementById('perfil-hero-email').textContent = u.email;
   const plEl = document.getElementById('perfil-hero-plano');
   plEl.textContent = u.plano; plEl.style.background = u.planoBg;
-  const foto = localStorage.getItem('foto_' + u.email);
+  const foto = storage.get('foto_' + u.email);
   const av = document.getElementById('perfil-avatar-img');
   if(foto){ av.innerHTML=`<img src="${foto}" alt="">`; av.style.background='none'; }
   else { av.textContent=u.nome.split(' ').map(n=>n[0]).slice(0,2).join(''); av.style.background=''; }
   // Barra de atalhos admin
   const adminBar = document.getElementById('perfil-admin-bar');
-  if(adminBar) adminBar.style.display = u.email==='admin@encontros.com' ? 'flex' : 'none';
+  if(adminBar) adminBar.style.display = u.isAdmin ? 'flex' : 'none';
   carregarPerfil();
   // Fecha todas as seções — usuária escolhe qual abrir
   ['info','modulos','seguranca'].forEach(s=>{
@@ -714,7 +941,7 @@ document.addEventListener('keydown', e => {
 // ── WHATSAPP ──
 const WHATSAPP_NUMERO = '5548998144008';
 function abrirWhatsApp(){
-  const msg = encodeURIComponent('Olá! Preciso de ajuda com o app Encontros de Mulheres. 🌸');
+  const msg = encodeURIComponent(t('whatsapp.msg'));
   window.open(`https://wa.me/${WHATSAPP_NUMERO}?text=${msg}`, '_blank');
 }
 
@@ -722,7 +949,7 @@ function abrirWhatsApp(){
 const STORAGE_KEY_TIP = 'encontros_tip_v1';
 function mostrarTipDoDia(){
   try{
-    const salvo = JSON.parse(localStorage.getItem(STORAGE_KEY_TIP)||'{}');
+    const salvo = storage.getJSON(STORAGE_KEY_TIP, {});
     const hoje  = new Date().toDateString();
     if(salvo.data === hoje && salvo.fechado) return;
   }catch(e){}
@@ -734,33 +961,54 @@ function mostrarTipDoDia(){
   document.getElementById('tip-titulo').textContent = d.titulo;
   document.getElementById('tip-desc').textContent   = d.objetivo;
   document.getElementById('daily-tip').style.display = 'flex';
-  try{ localStorage.setItem(STORAGE_KEY_TIP, JSON.stringify({data: new Date().toDateString(), id: raw.id, fechado: false})); }catch(e){}
+  storage.setJSON(STORAGE_KEY_TIP, {data: new Date().toDateString(), id: raw.id, fechado: false});
 }
 function fecharTip(){
   document.getElementById('daily-tip').style.display = 'none';
   try{
-    const salvo = JSON.parse(localStorage.getItem(STORAGE_KEY_TIP)||'{}');
-    localStorage.setItem(STORAGE_KEY_TIP, JSON.stringify({...salvo, fechado: true}));
+    const salvo = storage.getJSON(STORAGE_KEY_TIP, {});
+    storage.setJSON(STORAGE_KEY_TIP, {...salvo, fechado: true});
   }catch(e){}
 }
 function abrirTipDoDia(){
   try{
-    const salvo = JSON.parse(localStorage.getItem(STORAGE_KEY_TIP)||'{}');
+    const salvo = storage.getJSON(STORAGE_KEY_TIP, {});
     if(salvo.id) openDetail(salvo.id);
   }catch(e){}
+}
+
+
+// ── NORMALIZAÇÃO DE CONTEÚDO POR ID (camada 2) ──
+function findByIdSafe(list, id){
+  if(!Array.isArray(list)) return null;
+  return list.find(x => String(x.id) === String(id)) || null;
+}
+function resolveHistoricoDinamicaItem(entry){
+  const base = findByIdSafe(typeof dinamicas !== 'undefined' ? dinamicas : [], entry?.itemId ?? entry?.id);
+  return base ? getDinamica(base) : null;
+}
+function resolveHistoricoEncontroItem(entry){
+  const raw = entry?.enc || findByIdSafe(typeof encontros50 !== 'undefined' ? encontros50 : [], entry?.itemId ?? entry?.id);
+  return raw ? getEncontro(raw) : null;
+}
+function resolveHistoricoItem(entry){
+  if(!entry) return null;
+  const tipo = entry.tipo || 'dinamica';
+  if(tipo === 'encontro') return resolveHistoricoEncontroItem(entry);
+  return resolveHistoricoDinamicaItem(entry);
 }
 
 // ── HISTÓRICO ──
 const STORAGE_KEY_HIST = ()=>`encontros_hist_v1_${usuarioAtual?.email||'guest'}`;
 // historico — declarado no topo do script
 
-function salvarHistorico(){ try{ localStorage.setItem(STORAGE_KEY_HIST(), JSON.stringify(historico)); }catch(e){} }
-function carregarHistorico(){ try{ const h=localStorage.getItem(STORAGE_KEY_HIST()); historico=h?JSON.parse(h):[]; }catch(e){ historico=[]; } }
+function salvarHistorico(){ storage.setJSON(STORAGE_KEY_HIST(), historico); if(window.appStore) window.appStore.set('historico', historico); }
+function carregarHistorico(){ historico = storage.getJSON(STORAGE_KEY_HIST(), []); if(window.appStore) window.appStore.set('historico', historico); }
 
 function updateDoneBtn(){
   const btn = document.getElementById('detail-done-btn');
   if(!btn || !currentDetail) return;
-  const feita = historico.some(h=>h.id===currentDetail.id);
+  const feita = historico.some(h => String(h.itemId ?? h.id) === String(currentDetail.id));
   btn.textContent = feita ? t('din.realizada') : t('din.marcar.realizada');
   btn.classList.toggle('feita', feita);
 }
@@ -780,13 +1028,16 @@ function renderHistorico() {
         <div class="empty-icon">📅</div>
         <h4>${t('hist.vazio.titulo')}</h4>
         <p>${t('hist.vazio.sub')}</p>
-        <button onclick="nav('screen-dinamicas','nav-dinamicas')" style="margin-top:8px;padding:10px 20px;background:var(--gerar-grad);border:none;border-radius:50px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;color:#fff;cursor:pointer">🎭 Ver Dinâmicas</button>
+        <button onclick="nav('screen-dinamicas','nav-dinamicas')" style="margin-top:8px;padding:10px 20px;background:var(--gerar-grad);border:none;border-radius:50px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;color:#fff;cursor:pointer">🎭 ${t('nav.dinamicas')}</button>
       </div>
     `;
     return;
   }
 
   c.innerHTML = allHist.map(h => {
+    const item = resolveHistoricoItem(h);
+    if(!item) return '';
+
     const aval = h.avaliacao;
     const estrelas = aval ? '⭐'.repeat(aval.estrelas) + '☆'.repeat(5 - aval.estrelas) : '';
     const icon = h.tipo === 'encontro' ? '🌸' : '🎭';
@@ -802,25 +1053,25 @@ function renderHistorico() {
         </div>
       `
       : `
-        <button onclick="abrirAval(${h.id}, '${h.tipo}')" style="margin-top:8px;font-size:11px;color:var(--rose);background:none;border:1px dashed var(--rose);border-radius:8px;padding:4px 10px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif">
-          + Adicionar avaliação
+        <button onclick="abrirAval({ id:${JSON.stringify(h.itemId ?? h.id)}, itemId:${JSON.stringify(h.itemId ?? h.id)}, tipo:'${h.tipo}' })" style="margin-top:8px;font-size:11px;color:var(--rose);background:none;border:1px dashed var(--rose);border-radius:8px;padding:4px 10px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif">
+          + ${t('aval.salvar')}
         </button>
       `;
 
     return `
       <div class="hist-card">
         <div class="hist-card-top">
-          <h4>${h.titulo}</h4>
+          <h4>${item.titulo}</h4>
           <span class="hist-date">${new Date(h.data).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}</span>
         </div>
         <div class="content-card-meta" style="margin-bottom:6px">
-          <span class="tag">${h.categoria}</span>
-          <span class="tag sage">⏱ ${h.tempo || '60 min'}</span>
-          <span class="tag" style="background:var(--sage-light);color:var(--sage)">✓ Realizada</span>
-          <span class="tag" style="background:var(--gold-pale);color:var(--gold)">${icon} ${h.tipo === 'encontro' ? 'Encontro' : 'Dinâmica'}</span>
+          ${item.categoria ? `<span class="tag">${item.categoria}</span>` : ''}
+          ${item.tempo ? `<span class="tag sage">⏱ ${item.tempo}</span>` : ''}
+          <span class="tag" style="background:var(--sage-light);color:var(--sage)">${t('din.realizada')}</span>
+          <span class="tag" style="background:var(--gold-pale);color:var(--gold)">${icon} ${h.tipo === 'encontro' ? t('gerar.card.encontro') : t('gerar.card.dinamica')}</span>
         </div>
         ${avalHtml}
-        <button class="hist-del-btn" onclick="removerHistorico(${h.id}, '${h.tipo}')" style="margin-top:10px">
+        <button class="hist-del-btn" onclick="removerHistorico(${JSON.stringify(h.itemId ?? h.id)}, '${h.tipo}')" style="margin-top:10px">
           ${t('hist.remover.btn')}
         </button>
       </div>
@@ -830,10 +1081,10 @@ function renderHistorico() {
 
 function removerHistorico(id, tipo){
   if(tipo === 'encontro'){
-    historicoEnc = historicoEnc.filter(h=>h.id!==id);
+    historicoEnc = historicoEnc.filter(h => String(h.itemId ?? h.id) !== String(id));
     salvarHistoricoEnc();
   } else {
-    historico = historico.filter(h=>h.id!==id);
+    historico = historico.filter(h => String(h.itemId ?? h.id) !== String(id));
     salvarHistorico();
   }
   renderHistorico();
@@ -931,16 +1182,14 @@ let avalDinamica = null;
 function toggleDone() {
   if (!currentDetail) return;
 
-  const idx = historico.findIndex(h => String(h.id) === String(currentDetail.id));
+  const idx = historico.findIndex(h => String(h.itemId ?? h.id) === String(currentDetail.id));
 
   if (idx >= 0) {
     historico.splice(idx, 1);
   } else {
     historico.unshift({
       id: currentDetail.id,
-      titulo: currentDetail.titulo,
-      categoria: currentDetail.categoria,
-      tempo: currentDetail.tempo,
+      itemId: currentDetail.id,
       data: new Date().toISOString(),
       avaliacao: null,
       tipo: 'dinamica'
@@ -951,7 +1200,7 @@ function toggleDone() {
   updateDoneBtn();
   renderHistorico();
   if (idx < 0) {
-    setTimeout(() => abrirAval({ ...currentDetail, tipo: 'dinamica' }), 800);
+    setTimeout(() => abrirAval({ id: currentDetail.id, itemId: currentDetail.id, tipo: 'dinamica' }), 800);
   }
 }
 
@@ -1002,13 +1251,13 @@ function salvarAval() {
   };
 
   if (avalDinamica.tipo === 'encontro') {
-    const idx = historicoEnc.findIndex(h => String(h.id) === String(avalDinamica.id));
+    const idx = historicoEnc.findIndex(h => String(h.itemId ?? h.id) === String(avalDinamica.itemId ?? avalDinamica.id));
     if (idx >= 0) {
       historicoEnc[idx].avaliacao = aval;
       if (typeof salvarHistoricoEnc === 'function') salvarHistoricoEnc();
     }
   } else {
-    const idx = historico.findIndex(h => String(h.id) === String(avalDinamica.id));
+    const idx = historico.findIndex(h => String(h.itemId ?? h.id) === String(avalDinamica.itemId ?? avalDinamica.id));
     if (idx >= 0) {
       historico[idx].avaliacao = aval;
       if (typeof salvarHistorico === 'function') salvarHistorico();
@@ -1120,7 +1369,7 @@ function renderStoriesCanvas(){
   // App name top
   ctx.fillStyle = storiesBgImage ? 'rgba(255,255,255,.65)' : (isDark ? 'rgba(255,255,255,.5)' : 'rgba(180,80,150,.6)');
   ctx.font = '700 48px sans-serif'; ctx.textAlign = 'center';
-  ctx.fillText('Encontros de Mulheres 🌸', w/2, 140);
+  ctx.fillText(`${t('app.title')} 🌸`, w/2, 140);
 
   // Category pill
   const catW=400,catH=72,catX=(w-catW)/2,catY=240;
@@ -1139,7 +1388,7 @@ function renderStoriesCanvas(){
 
   // Objetivo
   ctx.fillStyle = accentColor; ctx.font='700 44px sans-serif'; ctx.textAlign='left';
-  ctx.fillText('🎯 OBJETIVO', 100, 860);
+  ctx.fillText(t('din.objetivo'), 100, 860);
   ctx.fillStyle = softColor; ctx.font='400 52px sans-serif';
   wrapText(ctx, currentDetail.objetivo, 100, 940, w-200, 68, 'left');
 
@@ -1148,14 +1397,14 @@ function renderStoriesCanvas(){
   ctx.fillStyle = storiesBgImage ? 'rgba(255,255,255,.12)' : (isDark ? 'rgba(255,255,255,.08)' : 'rgba(201,123,176,.12)');
   roundRect(ctx,80,boxY,w-160,360,32); ctx.fill();
   ctx.fillStyle = accentColor; ctx.font='700 40px sans-serif'; ctx.textAlign='left';
-  ctx.fillText('✦ Aplicação Espiritual', 120, boxY+60);
+  ctx.fillText(t('din.aplicacao'), 120, boxY+60);
   ctx.fillStyle = softColor; ctx.font='400 44px sans-serif';
   wrapText(ctx, currentDetail.aplicacao, 120, boxY+120, w-280, 58, 'left', 4);
 
   // Bottom tag
   ctx.fillStyle = storiesBgImage ? 'rgba(255,255,255,.4)' : (isDark ? 'rgba(255,255,255,.3)' : 'rgba(180,80,150,.4)');
   ctx.font='500 40px sans-serif'; ctx.textAlign='center';
-  ctx.fillText('app Encontros de Mulheres', w/2, h-80);
+  ctx.fillText(t('app.name'), w/2, h-80);
 }
 
 function abrirStories(){
@@ -1231,7 +1480,7 @@ function salvarStories(){
 function compartilharDinamica(){
   if(!currentDetail) return;
   const d = currentDetail;
-  const texto = `🌸 *${d.titulo}*\n\n🎯 ${d.objetivo}\n📦 Materiais: ${d.materiais}\n⏱ Tempo: ${d.tempo}\n\n✦ ${d.aplicacao}\n\n_Via app Encontros de Mulheres_`;
+  const texto = `🌸 *${d.titulo}*\n\n🎯 ${d.objetivo}\n${t('din.materiais')}: ${d.materiais}\n${t('filtro.tempo')}: ${d.tempo}\n\n${d.aplicacao}\n\n_${t('app.title')}_`;
   const url = `https://wa.me/?text=${encodeURIComponent(texto)}`;
   window.open(url, '_blank');
 }
@@ -1240,12 +1489,12 @@ function compartilharEncontroGerado(){
   const c = currentConjunto;
   if(!c){ toastMsg(t('toast.conj.primeiro')); return; }
   const d = c.din;
-  let texto = `✨ *Encontro de Mulheres*\n`;
-  if(c.tema && c.tema !== 'Aleatório') texto += `🏷 Tema: ${c.tema}\n`;
-  texto += `\n🎭 *Dinâmica: ${d.titulo}*\n${d.objetivo}\n⏱ ${d.tempo} · 📦 ${d.materiais}`;
-  if(c.estudo) texto += `\n\n📖 *Estudo: ${c.estudo.titulo}*\n${c.estudo.reflexao?.slice(0,180)}…`;
-  if(c.pergunta) texto += `\n\n💬 *Pergunta:* ${c.pergunta.pergunta || c.pergunta.texto || ''}`;
-  texto += `\n\n_Via app Encontros de Mulheres_ 🌸`;
+  let texto = `✨ *${t('gerar.card.encontro')}*\n`;
+  if(c.tema && c.tema !== 'Aleatório') texto += `${t('gerar.tema.label')} ${c.tema}\n`;
+  texto += `\n🎭 *${t('gerar.card.dinamica')}: ${d.titulo}*\n${d.objetivo}\n⏱ ${d.tempo} · 📦 ${d.materiais}`;
+  if(c.estudo) texto += `\n\n📖 *${t('gerar.card.estudo')}: ${c.estudo.titulo}*\n${c.estudo.reflexao?.slice(0,180)}…`;
+  if(c.pergunta) texto += `\n\n💬 *${t('gerar.card.pergunta')}:* ${c.pergunta.pergunta || c.pergunta.texto || ''}`;
+  texto += `\n\n_${t('app.title')}_ 🌸`;
   window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
 }
 
@@ -1278,7 +1527,7 @@ const ONB_PASSOS_I18N = {
 const ONB_PASSOS = ONB_PASSOS_I18N.pt; // fallback
 
 function abrirOnboarding(){
-  try{ if(localStorage.getItem(STORAGE_KEY_ONB())==='done') return; }catch(e){}
+  if(storage.get(STORAGE_KEY_ONB())==='done') return;
   onbIdx = 0;
   document.getElementById('onb-overlay').classList.add('open');
   onbRender();
@@ -1303,7 +1552,7 @@ function onbNext(){
 
 function fecharOnboarding(){
   document.getElementById('onb-overlay').classList.remove('open');
-  try{ localStorage.setItem(STORAGE_KEY_ONB(),'done'); }catch(e){}
+  storage.set(STORAGE_KEY_ONB(),'done');
 }
 
 // ── MODO AO VIVO ──
@@ -1360,7 +1609,7 @@ function aoVivoRender(){
 
 // ── ADMIN PANEL ──
 function renderAdminPanel(){
-  if(!usuarioAtual || usuarioAtual.email !== 'admin@encontros.com') return;
+  if(!usuarioAtual || !usuarioAtual.isAdmin) return;
 
   // Stats
   const total  = Object.keys(USUARIOS).length;
@@ -1429,13 +1678,13 @@ function salvarModulosAdmin(){
     Object.entries(USUARIOS).forEach(([email, u])=>{
       data[email] = {...u.modulos};
     });
-    localStorage.setItem(STORAGE_KEY_MODULOS, JSON.stringify(data));
+    storage.setJSON(STORAGE_KEY_MODULOS, data);
   }catch(e){}
 }
 
 function carregarModulosAdmin(){
   try{
-    const saved = localStorage.getItem(STORAGE_KEY_MODULOS);
+    const saved = storage.get(STORAGE_KEY_MODULOS);
     if(!saved) return;
     const data = JSON.parse(saved);
     Object.entries(data).forEach(([email, mods])=>{
@@ -2057,7 +2306,8 @@ function atualizarFiltrosTraduzidos(){
 
 function setLang(lang){
   currentLang = lang;
-  try{ localStorage.setItem(STORAGE_KEY_LANG, lang); }catch(e){}
+  syncCoreRuntimeState();
+  storage.set(STORAGE_KEY_LANG, lang);
   aplicarIdioma();
   toastMsg(lang==='pt'? '🇧🇷 Português' : lang==='en'? '🇺🇸 English' : '🇪🇸 Español');
 }
@@ -2065,13 +2315,14 @@ function setLang(lang){
 // Carrega idioma salvo ou detecta pelo navegador
 (function(){
   try{
-    const saved = localStorage.getItem(STORAGE_KEY_LANG);
-    if(saved){ currentLang=saved; return; }
+    const saved = storage.get(STORAGE_KEY_LANG);
+    if(saved){ currentLang=saved; syncCoreRuntimeState(); return; }
   }catch(e){}
   const nav = (navigator.language||'pt').toLowerCase();
   if(nav.startsWith('en')) currentLang='en';
   else if(nav.startsWith('es')) currentLang='es';
   else currentLang='pt';
+  syncCoreRuntimeState();
 })();
 
 // ── 50 ENCONTROS COMPLETOS ──

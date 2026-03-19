@@ -1,4 +1,7 @@
 // ── SISTEMA DE IDIOMAS (i18n) ──
+// Fonte única de traduções do app.
+// A persistência do idioma agora é centralizada em storage.js
+// e o estado runtime é sincronizado pelo store.js via app-core.js.
 const STORAGE_KEY_LANG = 'encontros_lang_v1';
 // currentLang — declarado no topo do script
 
@@ -11,6 +14,16 @@ var TRANSLATIONS = {
     'login.senha': 'Senha',
     'login.email.placeholder': 'seu@email.com',
     'login.senha.placeholder': '••••••••',
+    'plan.dinamica.example': 'Ex: Toque de Gratidão',
+    'plan.dinamica.free.placeholder': 'Digite ou busque nas 200 dinâmicas',
+    'dp.placeholder': 'DD/MM/AAAA',
+    'btn.voltar.est': '← Estudos',
+    'support.title': 'Falar com suporte',
+    'modal.renomear.placeholder': 'Ex: Encontro de Gratidão, Reunião de Oração...',
+    'modal.renomear.confirm': '✏️ Renomear',
+    'stories.bg.gradient': 'Gradiente padrão',
+    'stories.bg.camera': 'Câmera',
+    'stories.bg.gallery': 'Galeria',
     'login.lembrar': 'Manter conectada',
     'login.btn': 'Entrar ✦',
     'login.erro': 'E-mail ou senha incorretos.',
@@ -414,8 +427,45 @@ var TRANSLATIONS = {
     'guia.s5.titulo': 'Como encerrar bem',
     'guia.s5.texto': 'Agradeça cada participante pela presença. Compartilhe brevemente o próximo encontro e convide para trazerem uma amiga. O encerramento planta a semente do próximo encontro.',
     'guia.s5.dica': 'Uma pequena lembrança simbólica (um versículo impresso, uma pedrinha, um papel dobrado) faz o encontro durar na vida delas além do dia.',
-},
-  en: {
+    'common.free': 'Livre',
+    'qg.detail.objetivo': '🎯 Objetivo',
+    'qg.detail.como': '🧰 Como',
+    'qg.detail.dica': '💡 Dica',
+    'plan.pergunta.manual.choose': 'Escolher manualmente a pergunta',
+    'plan.manual.type': '✏️ Digitar manualmente',
+    'plan.manual.close': '✕ Fechar campo manual',
+    'browse.din.use': 'Usar',
+    'browse.qg.use': 'Usar',
+    'plan.view.edit': 'Editar plano', 
+    'gerar.hist.favorite': '🤍 Favoritar',
+    'gerar.hist.saved': '❤️ Salvo',
+    'gerar.hist.rename': '✏️ Renomear',
+    'gerar.hist.view': '👁 Ver',
+    'perfil.progress.eyebrow': 'Seu progresso',
+    'perfil.progress.title': 'Seu ministério em movimento',
+    'perfil.progress.sub': 'Acompanhe o que você já salvou, planejou e colocou em prática.',
+    'perfil.progress.favorites': 'favoritos salvos',
+    'perfil.progress.plans': 'encontros planejados',
+    'perfil.progress.history': 'encontros realizados',
+    'perfil.progress.generated': 'conjuntos gerados',
+    'perfil.progress.plan_now': '📝 Planejar agora',
+    'perfil.progress.see_updates': '🆕 Ver novidades',
+    'mc.empty.favorites.title': 'Seus favoritos começam aqui',
+    'mc.empty.favorites.sub': 'Salve dinâmicas, perguntas e encontros para montar sua própria biblioteca rápida.',
+    'mc.empty.favorites.cta1': '🎭 Explorar dinâmicas',
+    'mc.empty.favorites.cta2': '✨ Gerar agora',
+    'mc.empty.history.title': 'Seu histórico ainda está vazio',
+    'mc.empty.history.sub': 'Quando você marcar uma dinâmica ou encontro como realizado, ele aparece aqui para não repetir depois.',
+    'mc.empty.hist.cta1': '🎭 Ver dinâmicas',
+    'mc.empty.hist.cta2': '✨ Gerar encontro',
+    'mc.empty.plans.title': 'Planeje seu próximo encontro',
+    'mc.empty.plans.sub': 'Guarde tema, dinâmica, versículo e observações em um só lugar para não improvisar em cima da hora.',
+    'mc.empty.plans.cta1': '🌸 Começar planejamento',
+    'mc.empty.plans.cta2': '✨ Buscar ideias',
+    'share.via': 'Via app Encontros de Mulheres'
+    },
+    en: {
+    'common.free': 'Free',
     'app.name': 'Meetings',
     'app.title': 'Women\'s Meetings',
     'app.subtitle': 'Your Christian dynamics library',
@@ -822,7 +872,7 @@ var TRANSLATIONS = {
     'guia.s5.titulo': 'How to close well',
     'guia.s5.texto': 'Thank each participant for being there. Briefly share about the next meeting and invite them to bring a friend. The closing plants the seed for the next meeting.',
     'guia.s5.dica': 'A small symbolic keepsake (a printed verse, a pebble, a folded paper) makes the meeting last in their lives beyond the day.',
-},
+  },
   es: {
     'app.name': 'Encuentros',
     'app.title': 'Encuentros de Mujeres',
@@ -1228,7 +1278,18 @@ var TRANSLATIONS = {
     'guia.s5.titulo': 'Cómo cerrar bien',
     'guia.s5.texto': 'Agradece a cada participante por su presencia. Comparte brevemente el próximo encuentro e invita a traer una amiga. El cierre planta la semilla del próximo encuentro.',
     'guia.s5.dica': 'Un pequeño recuerdo simbólico (un versículo impreso, una piedrita, un papel doblado) hace que el encuentro dure en sus vidas más allá del día.',
-}
+    'common.free': 'Libre',
+    'qg.detail.objetivo': '🎯 Objetivo',
+    'qg.detail.como': '🧰 Cómo',
+    'qg.detail.dica': '💡 Consejo',
+    'plan.pergunta.manual.choose': 'Elegir manualmente la pregunta',
+    'plan.manual.type': '✏️ Escribir manualmente',
+    'plan.manual.close': '✕ Cerrar campo manual',
+    'browse.din.use': 'Usar',
+    'browse.qg.use': 'Usar',
+    'plan.view.edit': 'Editar plan',
+  
+  }
 };
 // ── TRADUÇÕES DE CONTEÚDO (encontros, quebraGelos, estudos, perguntas, devocional) ──
 
@@ -1237,7 +1298,17 @@ const ENCONTROS_TRADUCOES = {
     cats: {'Fé e Confiança':'Faith & Trust','Fé e Esperança':'Faith & Hope','Virtudes Cristãs':'Christian Virtues','Identidade e Propósito':'Identity & Purpose','Vida e Relacionamentos':'Life & Relationships','Amor e Comunidade':'Love & Community','Crescimento Espiritual':'Spiritual Growth','Sabedoria e Discernimento':'Wisdom & Discernment','Gratidão e Alegria':'Gratitude & Joy','Perdão e Cura':'Forgiveness & Healing','Serviço e Missão':'Service & Mission','Força e Resiliência':'Strength & Resilience','Relacionamentos e Conflitos':'Relationships & Conflicts','Saúde e Bem-estar':'Health & Wellness','Fé Prática':'Practical Faith','Transformação e Celebração':'Transformation & Celebration'},
     titles: {1:'Trust in God',2:'Inner Peace',3:'Life of Prayer',4:'Renewed Hope',5:'Persevering Faith',6:'Overcoming Fear',7:'Humble Heart',8:'Generosity',9:'Perseverance',10:'Holiness',11:'Kindness',12:'Patience',13:'Identity in Christ',14:'God\'s Calling',15:'Life Purpose',16:'Abundant Life',17:'Healthy Friendships',18:'Family',19:'Love Your Neighbor',20:'Transforming Love',21:'Authentic Fellowship',22:'Spiritual Renewal',23:'Spiritual Growth',24:'Spiritual Discipline',25:'Path of Wisdom',26:'Spiritual Discernment',27:'Making Wise Decisions',28:'Gratitude',29:'Daily Gratitude',30:'Joy',31:'Forgiveness',32:'Emotional Healing',33:'Freedom from the Past',34:'Loving Service',35:'Mission & Purpose',36:'Transforming Impact',37:'Strength in God',38:'Spiritual Resilience',39:'Overcoming Obstacles',40:'Honest Communication',41:'Resolving Conflicts',42:'Healthy Boundaries',43:'Caring for the Body',44:'Emotional Health',45:'Balance & Rest',46:'Faith in Daily Life',47:'Integrity',48:'Contentment',49:'Continuous Transformation',50:'Celebration & Final Gratitude'}
   },
-  es: {
+
+    'common.free': 'Free',
+    'qg.detail.objetivo': '🎯 Objective',
+    'qg.detail.como': '🧰 How',
+    'qg.detail.dica': '💡 Tip',
+    'plan.pergunta.manual.choose': 'Choose the question manually',
+    'plan.manual.type': '✏️ Type manually',
+    'plan.manual.close': '✕ Close manual field',
+    'browse.din.use': 'Use',
+    'browse.qg.use': 'Use',
+    'plan.view.edit': 'Edit plan',  es: {
     cats: {'Fé e Confiança':'Fe y Confianza','Fé e Esperança':'Fe y Esperanza','Virtudes Cristãs':'Virtudes Cristianas','Identidade e Propósito':'Identidad y Propósito','Vida e Relacionamentos':'Vida y Relaciones','Amor e Comunidade':'Amor y Comunidad','Crescimento Espiritual':'Crecimiento Espiritual','Sabedoria e Discernimento':'Sabiduría y Discernimiento','Gratidão e Alegria':'Gratitud y Alegría','Perdão e Cura':'Perdón y Sanación','Serviço e Missão':'Servicio y Misión','Força e Resiliência':'Fuerza y Resiliencia','Relacionamentos e Conflitos':'Relaciones y Conflictos','Saúde e Bem-estar':'Salud y Bienestar','Fé Prática':'Fe Práctica','Transformação e Celebração':'Transformación y Celebración'},
     titles: {1:'Confianza en Dios',2:'Paz Interior',3:'Vida de Oración',4:'Esperanza Renovada',5:'Fe que Persevera',6:'Venciendo el Miedo',7:'Humildad de Corazón',8:'Generosidad',9:'Perseverancia',10:'Santidad',11:'Bondad',12:'Paciencia',13:'Identidad en Cristo',14:'Llamado de Dios',15:'Propósito de Vida',16:'Vida Abundante',17:'Amistades Saludables',18:'Familia',19:'Amor al Prójimo',20:'Amor que Transforma',21:'Comunión Auténtica',22:'Renovación Espiritual',23:'Crecimiento Espiritual',24:'Disciplina Espiritual',25:'Camino de Sabiduría',26:'Discernimiento Espiritual',27:'Tomando Decisiones Sabias',28:'Gratitud',29:'Gratitud Diaria',30:'Alegría',31:'Perdón',32:'Sanación Emocional',33:'Libertad del Pasado',34:'Servicio Amoroso',35:'Misión y Propósito',36:'Impacto Transformador',37:'Fuerza en Dios',38:'Resiliencia Espiritual',39:'Superando Obstáculos',40:'Comunicación Honesta',41:'Resolviendo Conflictos',42:'Límites Saludables',43:'Cuidando el Cuerpo',44:'Salud Emocional',45:'Equilibrio y Descanso',46:'Fe en el Día a Día',47:'Integridad',48:'Contentamiento',49:'Transformación Continua',50:'Celebración y Gratitud Final'}
   }

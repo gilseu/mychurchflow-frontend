@@ -1,5 +1,10 @@
 // ── PLANEJADOR ──
 
+function syncPlannerRuntimeState(){
+  if(!window.appStore) return;
+  window.appStore.syncMany({ planoDinId, planoQGId, planoPergId });
+}
+
 function renderPlanejadorCampos(){
   const m = usuarioAtual?.modulos || {};
 
@@ -15,7 +20,7 @@ function renderPlanejadorCampos(){
             <div class="plan-din-chosen-title" id="plan-perg-chosen-title"></div>
             <div class="plan-din-chosen-meta" id="plan-perg-chosen-meta"></div>
             <div class="plan-din-chosen-actions">
-              <button class="plan-din-btn-edit" onclick="editarPergunta()">✏️ Alterar</button>
+              <button class="plan-din-btn-edit" onclick="editarPergunta()">${t('btn.alterar')}</button>
             </div>
           </div>
         </div>
@@ -28,7 +33,7 @@ function renderPlanejadorCampos(){
           id="plan-perg-manual-toggle"
           onclick="togglePerguntaManual()"
           style="margin-top:8px;align-self:flex-start">
-          Escolher manualmente a pergunta
+          ${t('plan.pergunta.manual.choose')}
         </button>
 
         <textarea
@@ -69,7 +74,7 @@ function renderPlanQuebraGeloWrap(m){
           <div class="plan-din-chosen-title" id="plan-qg-chosen-title"></div>
           <div class="plan-din-chosen-meta" id="plan-qg-chosen-meta"></div>
           <div class="plan-din-chosen-actions">
-            <button class="plan-din-btn-edit" onclick="editarQuebraGelo()">✏️ Alterar</button>
+            <button class="plan-din-btn-edit" onclick="editarQuebraGelo()">${t('btn.alterar')}</button>
           </div>
         </div>
       </div>
@@ -82,7 +87,7 @@ function renderPlanQuebraGeloWrap(m){
         id="plan-qg-manual-toggle"
         onclick="togglePlanQGManual()"
         style="margin-top:8px;align-self:flex-start">
-        ✏️ Digitar manualmente
+        ${t('plan.manual.type')}
       </button>
 
       <textarea
@@ -150,7 +155,7 @@ function atualizarListaQG(){
         <div class="plan-sug-item">
           <div class="plan-sug-item-info">
             <div class="plan-sug-item-title">${q.titulo}</div>
-            <div class="plan-sug-item-meta">⏱ ${q.duracao || 'Livre'}</div>
+            <div class="plan-sug-item-meta">⏱ ${q.duracao || t('common.free')}</div>
           </div>
 
           <div class="plan-sug-item-btns">
@@ -184,12 +189,13 @@ function togglePlanQGManual(){
   const aberto = ta.style.display !== 'none';
   if(!aberto){
     planoQGId = null;
+  syncPlannerRuntimeState();
     const chosen = document.getElementById('plan-qg-chosen');
     if(chosen) chosen.style.display = 'none';
   }
 
   ta.style.display = aberto ? 'none' : 'block';
-  btn.textContent = aberto ? '✏️ Digitar manualmente' : '✕ Fechar campo manual';
+  btn.textContent = aberto ? t('plan.manual.type') : t('plan.manual.close');
 }
 
 // ── PLANEJADOR ──
@@ -297,7 +303,7 @@ function renderSugPergQG(data){
   const btn = document.getElementById('plan-perg-manual-toggle');
   if(btn){
     btn.style.display = 'inline-flex';
-    btn.textContent = 'Escolher manualmente a pergunta';
+    btn.textContent = t('plan.pergunta.manual.choose');
   }
 
   if(pergEl && data?.pids?.length){
@@ -345,6 +351,7 @@ function selecionarQuebraGelo(id, titulo){
   if(!text) return;
 
   planoQGId = id || null;
+  syncPlannerRuntimeState();
   const ta = document.getElementById('plan-quebraGelo');
   if(ta){
     ta.value = text;
@@ -370,6 +377,7 @@ function selecionarQuebraGelo(id, titulo){
 
 function editarQuebraGelo(){
   planoQGId = null;
+  syncPlannerRuntimeState();
   const chosen = document.getElementById('plan-qg-chosen'); if(chosen) chosen.style.display = 'none';
 
   const sug = document.getElementById('plan-qg-sug');
@@ -386,7 +394,7 @@ function editarQuebraGelo(){
   const btn = document.getElementById('plan-qg-manual-toggle');
   if(btn){
     btn.style.display = 'inline-flex';
-    btn.textContent = '✏️ Digitar manualmente';
+    btn.textContent = t('plan.manual.type');
   }
 
   const ta = document.getElementById('plan-quebraGelo');
@@ -397,16 +405,18 @@ function editarQuebraGelo(){
 
 function resetQGSelecao(){
   planoQGId = null;
+  syncPlannerRuntimeState();
   const chosen = document.getElementById('plan-qg-chosen'); if(chosen) chosen.style.display = 'none';
   const sug = document.getElementById('plan-qg-sug'); if(sug){ sug.style.display = 'none'; }
   const btn = document.getElementById('plan-qg-manual-toggle');
-  if(btn){ btn.style.display = 'inline-flex'; btn.textContent = '✏️ Digitar manualmente'; }
+  if(btn){ btn.style.display = 'inline-flex'; btn.textContent = t('plan.manual.type'); }
   const ta = document.getElementById('plan-quebraGelo');
   if(ta){ ta.style.display = 'none'; ta.value = ''; }
 }
 
 function resetDinSelecao(){
   planoDinId = null;
+  syncPlannerRuntimeState();
   document.getElementById('plan-din-chosen').style.display = 'none';
   document.getElementById('plan-dinamica').value = '';
   document.getElementById('plan-dinamica-free').value = '';
@@ -414,10 +424,11 @@ function resetDinSelecao(){
 
 function resetPergSelecao(){
   planoPergId = null;
+  syncPlannerRuntimeState();
   const chosen = document.getElementById('plan-perg-chosen'); if(chosen) chosen.style.display = 'none';
   const sug = document.getElementById('plan-perg-sug'); if(sug){ sug.style.display = 'none'; }
   const btn = document.getElementById('plan-perg-manual-toggle');
-  if(btn){ btn.style.display = 'inline-flex'; btn.textContent = 'Escolher manualmente a pergunta'; }
+  if(btn){ btn.style.display = 'inline-flex'; btn.textContent = t('plan.pergunta.manual.choose'); }
   const ta = document.getElementById('plan-pergunta');
   if(ta){ ta.style.display = 'none'; ta.value = ''; }
 }
@@ -428,6 +439,7 @@ function selecionarPergunta(id, texto){
   if(!text) return;
 
   planoPergId = id || null;
+  syncPlannerRuntimeState();
   const ta = document.getElementById('plan-pergunta');
   if(ta){ ta.value = text; }
 
@@ -447,6 +459,7 @@ function selecionarPergunta(id, texto){
 
 function editarPergunta(){
   planoPergId = null;
+  syncPlannerRuntimeState();
   const chosen = document.getElementById('plan-perg-chosen'); if(chosen) chosen.style.display = 'none';
 
   const sug = document.getElementById('plan-perg-sug');
@@ -461,7 +474,7 @@ function editarPergunta(){
   const btn = document.getElementById('plan-perg-manual-toggle');
   if(btn){
     btn.style.display = 'inline-flex';
-    btn.textContent = 'Escolher manualmente a pergunta';
+    btn.textContent = t('plan.pergunta.manual.choose');
   }
 
   const ta = document.getElementById('plan-pergunta');
@@ -476,17 +489,19 @@ function togglePerguntaManual(){
   const aberto = ta.style.display !== 'none';
   if(!aberto){
     planoPergId = null;
+  syncPlannerRuntimeState();
     const chosen = document.getElementById('plan-perg-chosen'); if(chosen) chosen.style.display = 'none';
   }
 
   ta.style.display = aberto ? 'none' : 'block';
-  btn.textContent = aberto ? 'Escolher manualmente a pergunta' : '✕ Fechar campo manual';
+  btn.textContent = aberto ? t('plan.pergunta.manual.choose') : t('plan.manual.close');
 }
 
 function selecionarDinamica(id){
   const d = dinamicas.find(x=>x.id===id);
   if(!d) return;
   planoDinId = id;
+  syncPlannerRuntimeState();
   document.getElementById('plan-dinamica').value = d.titulo;
   document.getElementById('plan-din-chosen-title').textContent = d.titulo;
   document.getElementById('plan-din-chosen-meta').textContent = d.categoria + ' · ⏱ ' + d.tempo;
@@ -501,6 +516,7 @@ function selecionarDinamica(id){
 function editarDinamica(){
   const temaSel = document.getElementById('plan-tema-select').value;
   planoDinId = null;
+  syncPlannerRuntimeState();
   document.getElementById('plan-din-chosen').style.display = 'none';
   document.getElementById('plan-dinamica').value = '';
   if(temaSel && temaSel !== 'outro' && temasData[temaSel]){
@@ -521,12 +537,12 @@ function previewDinById(id, fromBrowse){
   document.getElementById('dp-titulo').textContent = d.titulo;
   document.getElementById('dp-tags').innerHTML = `<span class="tag">${d.categoria}</span><span class="tag sage">⏱ ${d.tempo}</span>`;
   document.getElementById('dp-body').innerHTML = `
-    <div class="detail-section"><h5>🎯 Objetivo</h5><p>${d.objetivo}</p></div>
-    <div class="detail-section"><h5>📦 Materiais</h5><p>${d.materiais}</p></div>
+    <div class="detail-section"><h5>${t('din.objetivo')}</h5><p>${d.objetivo}</p></div>
+    <div class="detail-section"><h5>${t('din.materiais')}</h5><p>${d.materiais}</p></div>
     <div class="detail-section"><h5>${t('din.passos.label')}</h5>
       <ul class="steps">${d.passos.map((p,i)=>`<li><span class="step-num">${i+1}</span>${p}</li>`).join('')}</ul>
     </div>
-    <div class="detail-section" style="border-left:3px solid var(--gold)"><h5>✦ Aplicação Espiritual</h5><p>${d.aplicacao}</p></div>`;
+    <div class="detail-section" style="border-left:3px solid var(--gold)"><h5>${t('din.aplicacao')}</h5><p>${d.aplicacao}</p></div>`;
   document.getElementById('modal-din-preview').classList.add('open');
 }
 function previewDinPlano(){ if(planoDinId) previewDinById(planoDinId, false); }
@@ -540,6 +556,7 @@ function usarDinPreview(){
 function onDinFreeInput(val){
   document.getElementById('plan-dinamica').value = val;
   planoDinId = null;
+  syncPlannerRuntimeState();
   if(val) clearError('field-dinamica-free','plan-dinamica-free');
 }
 
@@ -565,7 +582,7 @@ function renderBrowseDin(list){
       </div>
       <div class="browse-din-item-btns">
         <button class="btn-preview-sug" onclick="previewDinById(${d.id},true)">👁</button>
-        <button class="btn-usar-sug" onclick="selecionarDinamica(${d.id})">Usar</button>
+        <button class="btn-usar-sug" onclick="selecionarDinamica(${d.id})">${t('browse.din.use')}</button>
       </div>
     </div>`).join('');
 }
@@ -581,9 +598,9 @@ function previewQGById(id, fromBrowse){
   document.getElementById('qg-titulo').textContent = q.titulo;
   document.getElementById('qg-tags').innerHTML = `<span class="tag">${q.categoria}</span><span class="tag sage">⏱ ${q.duracao}</span>`;
   document.getElementById('qg-body').innerHTML = `
-    <div class="detail-section"><h5>🎯 Objetivo</h5><p>${q.objetivo}</p></div>
-    <div class="detail-section"><h5>🧰 Como</h5><p>${q.como}</p></div>
-    <div class="detail-section" style="border-left:3px solid var(--gold)"><h5>💡 Dica</h5><p>${q.dica}</p></div>`;
+    <div class="detail-section"><h5>${t('qg.detail.objetivo')}</h5><p>${q.objetivo}</p></div>
+    <div class="detail-section"><h5>${t('qg.detail.como')}</h5><p>${q.como}</p></div>
+    <div class="detail-section" style="border-left:3px solid var(--gold)"><h5>${t('qg.detail.dica')}</h5><p>${q.dica}</p></div>`;
   document.getElementById('modal-qg-preview').classList.add('open');
 }
 function previewQGPlano(){ if(planoQGId) previewQGById(planoQGId, false); }
@@ -613,7 +630,7 @@ function renderBrowseQG(list){
       </div>
       <div class="browse-din-item-btns">
         <button class="btn-preview-sug" onclick="previewQGById(${q.id},true)">👁</button>
-        <button class="btn-usar-sug" onclick="selecionarQuebraGelo(${q.id})">Usar</button>
+        <button class="btn-usar-sug" onclick="selecionarQuebraGelo(${q.id})">${t('browse.qg.use')}</button>
       </div>
     </div>`).join('');
 }

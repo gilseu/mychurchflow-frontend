@@ -407,6 +407,23 @@ let historicoEnc = [];
 let encontrosGeradosSessao = [];
 let conjuntosEncontros = [];
 
+function syncAppCollectionsState(){
+  if(!window.appStore) return;
+  window.appStore.syncMany({
+    favorites,
+    planos,
+    historico,
+    historicoEnc,
+    conjuntosGerados,
+    conjuntosEncontros,
+    encontrosGeradosSessao,
+    geradasSessao: typeof geradasSessao !== 'undefined' ? geradasSessao : [],
+    currentGeradaId: typeof currentGeradaId !== 'undefined' ? currentGeradaId : null,
+    currentConjunto: typeof currentConjunto !== 'undefined' ? currentConjunto : null,
+    usuarioAtual
+  });
+}
+
 // ── PERSISTÊNCIA LOCAL ──
 const STORAGE_KEY_PLANOS    = ()=> `encontros_planos_v1_${usuarioAtual?.email || usuarioAtual?.nome || 'anon'}`;
 const STORAGE_KEY_FAVORITOS = ()=> `encontros_favoritos_v1_${usuarioAtual?.email || usuarioAtual?.nome || 'anon'}`;
@@ -419,7 +436,7 @@ function salvarStorage(){
     if(!usuarioAtual?.email && !usuarioAtual?.nome) return;
 
     const keyPlanos = STORAGE_KEY_PLANOS();
-    const rawAtualPlanos = localStorage.getItem(keyPlanos);
+    const rawAtualPlanos = storage.get(keyPlanos);
 
     if(Array.isArray(planos) && planos.length === 0 && rawAtualPlanos && rawAtualPlanos !== '[]'){
       console.warn('Bloqueado: tentativa de sobrescrever planos salvos com array vazio.');
@@ -427,38 +444,42 @@ function salvarStorage(){
       return;
     }
 
-    localStorage.setItem(keyPlanos, JSON.stringify(planos));
-    localStorage.setItem(STORAGE_KEY_FAVORITOS(), JSON.stringify(favorites));
-    localStorage.setItem(STORAGE_KEY_HIST_GER(), JSON.stringify(conjuntosGerados));
-    localStorage.setItem(STORAGE_KEY_HIST_ENC_GER(), JSON.stringify(conjuntosEncontros));
+    storage.setJSON(keyPlanos, planos);
+    storage.setJSON(STORAGE_KEY_FAVORITOS(), favorites);
+    storage.setJSON(STORAGE_KEY_HIST_GER(), conjuntosGerados);
+    storage.setJSON(STORAGE_KEY_HIST_ENC_GER(), conjuntosEncontros);
+    syncAppCollectionsState();
   }catch(e){
     console.warn('Storage indisponível', e);
   }
 }
 
+
 function carregarStorage(){
   try{
-    const p = localStorage.getItem(STORAGE_KEY_PLANOS());
+    const p = storage.get(STORAGE_KEY_PLANOS());
     planos = p ? JSON.parse(p) : [];
-    const f = localStorage.getItem(STORAGE_KEY_FAVORITOS());
+    const f = storage.get(STORAGE_KEY_FAVORITOS());
     favorites = f ? JSON.parse(f) : [];
-    const h = localStorage.getItem(STORAGE_KEY_HIST_GER());
+    const h = storage.get(STORAGE_KEY_HIST_GER());
     conjuntosGerados = h ? JSON.parse(h) : [];
-    const he = localStorage.getItem(STORAGE_KEY_HIST_ENC_GER());
+    const he = storage.get(STORAGE_KEY_HIST_ENC_GER());
     conjuntosEncontros = he ? JSON.parse(he) : [];
   }catch(e){ planos=[]; favorites=[]; conjuntosGerados=[]; conjuntosEncontros=[]; }
+  syncAppCollectionsState();
 }
+
 
 // ── THEME ──
 function toggleTheme(){
   const h=document.documentElement;
   const next=h.getAttribute('data-theme')==='dark'?'light':'dark';
   h.setAttribute('data-theme',next);
-  try{localStorage.setItem('tema',next);}catch(e){}
+  storage.set('tema', next); if(window.appStore) window.appStore.set('theme', next);
   toastMsg(next==='dark'?'🌙 Modo noturno ativado':'☀️ Modo claro ativado');
 }
 (function(){
-  try{const s=localStorage.getItem('tema');if(s){document.documentElement.setAttribute('data-theme',s);return;}}catch(e){}
+  const s = storage.get('tema'); if(s){ document.documentElement.setAttribute('data-theme', s); if(window.appStore) window.appStore.set('theme', s); return; }
   if(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)
     document.documentElement.setAttribute('data-theme','dark');
 })();
@@ -521,8 +542,8 @@ function nav(screenId, navId){
 }
 
 // ── DINÂMICAS ──
-function getUsoDin(id){ try{ const u=JSON.parse(localStorage.getItem(STORAGE_KEY_USO_DIN())||'{}'); return u[id]||0; }catch(e){return 0;} }
-function incrementarUsoDin(id){ try{ const k=STORAGE_KEY_USO_DIN(); const u=JSON.parse(localStorage.getItem(k)||'{}'); u[id]=(u[id]||0)+1; localStorage.setItem(k,JSON.stringify(u)); }catch(e){} }
+function getUsoDin(id){ const u = storage.getJSON(STORAGE_KEY_USO_DIN(), {}); return u[id] || 0; }
+function incrementarUsoDin(id){ const k = STORAGE_KEY_USO_DIN(); const u = storage.getJSON(k, {}); u[id] = (u[id] || 0) + 1; storage.setJSON(k, u); }
 
 function renderDinamicas(list){
   const c=document.getElementById('dinamicas-list');
@@ -682,17 +703,17 @@ function renderFavoritos(){
   const keyConj = 'fav_conjuntos_'+email;
   const keyEncGer = 'fav_encontros_ger_'+email;
   let favPergs=[],favEncs=[],favQGs=[],favConjuntos=[],favEncontrosGerados=[];
-  try{ favPergs=(JSON.parse(localStorage.getItem(keyP)||'[]')).map(id=>perguntas100.find(p=>p.id===id)).filter(Boolean); }catch(e){}
-  try{ favEncs=(JSON.parse(localStorage.getItem(keyE)||'[]')).map(id=>encontros50.find(x=>x.id===id)).filter(Boolean); }catch(e){}
-  try{ favQGs=(JSON.parse(localStorage.getItem(keyQ)||'[]')).map(id=>quebraGelos50.find(x=>x.id===id)).filter(Boolean); }catch(e){}
+  try{ favPergs=(storage.getJSON(keyP, [])).map(id=>perguntas100.find(p=>p.id===id)).filter(Boolean); }catch(e){}
+  try{ favEncs=(storage.getJSON(keyE, [])).map(id=>encontros50.find(x=>x.id===id)).filter(Boolean); }catch(e){}
+  try{ favQGs=(storage.getJSON(keyQ, [])).map(id=>quebraGelos50.find(x=>x.id===id)).filter(Boolean); }catch(e){}
   try{
-  favConjuntos = (JSON.parse(localStorage.getItem(keyConj) || '[]'))
+  favConjuntos = (storage.getJSON(keyConj, []))
     .map(id => conjuntosGerados.find(c => String(c.id) === String(id)))
     .filter(Boolean);
   }catch(e){}
 
   try{
-  favEncontrosGerados = (JSON.parse(localStorage.getItem(keyEncGer) || '[]'))
+  favEncontrosGerados = (storage.getJSON(keyEncGer, []))
     .map(id => conjuntosEncontros.find(c => String(c.id) === String(id)))
     .filter(Boolean);
   }catch(e){}
@@ -769,7 +790,7 @@ function renderFavoritos(){
           <button class="fav-btn" onclick="event.stopPropagation();(function(id){
             const email = usuarioAtual?.email || usuarioAtual?.nome || 'anon';
             const k='fav_qgelos_'+email;
-            confirmarDesfavoritar(()=>{let f=JSON.parse(localStorage.getItem(k)||'[]');f=f.filter(x=>x!==String(id));localStorage.setItem(k,JSON.stringify(f));toastMsg(t('toast.fav.rm'));renderFavoritos();});
+            confirmarDesfavoritar(()=>{let f=storage.getJSON(k, []);f=f.filter(x=>x!==String(id));storage.setJSON(k, f);toastMsg(t('toast.fav.rm'));renderFavoritos();});
           })(${q.id})">❤️</button>
         </div>
         <div class="content-card-meta"><span class="tag">${q.categoria}</span><span class="tag sage">⏱ ${q.duracao}</span></div>
@@ -784,7 +805,7 @@ function renderFavoritos(){
           <button class="fav-btn" onclick="event.stopPropagation();(function(id){
             const email = usuarioAtual?.email || usuarioAtual?.nome || 'anon';
             const k='fav_encontros_'+email;
-            confirmarDesfavoritar(()=>{let f=JSON.parse(localStorage.getItem(k)||'[]');f=f.filter(x=>x!==String(id));localStorage.setItem(k,JSON.stringify(f));toastMsg(t('toast.fav.rm'));renderFavoritos();});
+            confirmarDesfavoritar(()=>{let f=storage.getJSON(k, []);f=f.filter(x=>x!==String(id));storage.setJSON(k, f);toastMsg(t('toast.fav.rm'));renderFavoritos();});
           })(${e.id})">❤️</button>
         </div>
         <div class="content-card-meta"><span class="tag">${e.categoria}</span><span class="tag sage">📖 ${e.versiculo}</span></div>
@@ -799,7 +820,7 @@ function renderFavoritos(){
           <button class="fav-btn" onclick="event.stopPropagation();(function(id){
             const email = usuarioAtual?.email || usuarioAtual?.nome || 'anon';
             const k='fav_encontros_ger_'+email;
-            confirmarDesfavoritar(()=>{let f=JSON.parse(localStorage.getItem(k)||'[]');f=f.filter(x=>x!==String(id));localStorage.setItem(k,JSON.stringify(f));toastMsg(t('toast.fav.rm'));renderFavoritos();});
+            confirmarDesfavoritar(()=>{let f=storage.getJSON(k, []);f=f.filter(x=>x!==String(id));storage.setJSON(k, f);toastMsg(t('toast.fav.rm'));renderFavoritos();});
           })(${e.id})">❤️</button>
         </div>
         <div class="content-card-meta"><span class="tag">${e.enc.categoria}</span><span class="tag sage">📖 ${e.enc.versiculo}</span></div>
@@ -970,8 +991,10 @@ function gerarTudoJunto(){
   geradasSessao.push(raw.id);
   currentGeradaId = raw.id;
 
-  const est = m.estudos ? getEstudoPorTema(tema) : null;
-  const pg  = m.perguntas ? getPerguntaPorTema(tema) : null;
+  const estRaw = m.estudos ? getEstudoPorTema(tema) : null;
+  const pgRaw  = m.perguntas ? getPerguntaPorTema(tema) : null;
+  const est = estRaw ? getEstudo(estRaw) : null;
+  const pg  = pgRaw ? getPerguntaTrad(pgRaw) : null;
 
   currentConjunto = { din: d, estudo: est, pergunta: pg, tema: tema || 'Aleatório' };
 
@@ -1014,7 +1037,8 @@ function gerarSoDinamica(){
 
 function gerarSoEstudo(){
   const tema = getTemaSelecionado();
-  const est = getEstudoPorTema(tema);
+  const raw = getEstudoPorTema(tema);
+  const est = raw ? getEstudo(raw) : null;
   if(currentConjunto) currentConjunto.estudo = est;
   if(conjuntosGerados.length && currentConjunto) { conjuntosGerados[0].estudo = est; }
   const tEl = document.getElementById('gd-estudo-titulo');
@@ -1028,7 +1052,8 @@ function gerarSoEstudo(){
 
 function gerarSoPergunta(){
   const tema = getTemaSelecionado();
-  const pg = getPerguntaPorTema(tema);
+  const raw = getPerguntaPorTema(tema);
+  const pg = raw ? getPerguntaTrad(raw) : null;
   if(currentConjunto) currentConjunto.pergunta = pg;
   if(conjuntosGerados.length && currentConjunto) { conjuntosGerados[0].pergunta = pg; }
   const pEl = document.getElementById('gd-pergunta-txt');
@@ -1076,10 +1101,10 @@ function renderHistoricoConjuntos(){
           ${isFavConjunto(c.id) ? '❤️ Salvo' : '🤍 Favoritar'}
         </button>
         <button onclick="renomearConjunto(${c.id})" style="flex:1;background:none;border:1px solid var(--border);border-radius:50px;padding:6px 10px;font-size:12px;font-weight:600;color:var(--text-soft);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif">
-          ✏️ Renomear
+          ${t('gerar.hist.rename')}
         </button>
         <button onclick="abrirConjuntoPreview(${c.id})" style="flex:1;background:var(--gold);border:none;border-radius:50px;padding:6px 10px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif">
-          👁 Ver
+          ${t('gerar.hist.view')}
         </button>
       </div>
     </div>`).join('');
@@ -1167,20 +1192,20 @@ function fecharConjuntoPreview(e){
 function isFavConjunto(id){
   const email = usuarioAtual?.email || usuarioAtual?.nome || 'anon';
   const key = 'fav_conjuntos_'+email;
-  const favs = JSON.parse(localStorage.getItem(key)||'[]');
+  const favs = storage.getJSON(key, []);
   return favs.includes(String(id));
 }
 
 function toggleFavConjunto(id){
   const email = usuarioAtual?.email || usuarioAtual?.nome || 'anon';
   const key = 'fav_conjuntos_'+email;
-  let favs = JSON.parse(localStorage.getItem(key)||'[]');
+  let favs = storage.getJSON(key, []);
   const sid = String(id);
 
   if(favs.includes(sid)){
     confirmarDesfavoritar(()=>{
       favs = favs.filter(x=>x!==sid);
-      localStorage.setItem(key, JSON.stringify(favs));
+      storage.setJSON(key, favs);
       salvarStorage();
       toastMsg(t('toast.fav.rm'));
       renderFavoritos();
@@ -1189,7 +1214,7 @@ function toggleFavConjunto(id){
     return;
   } else {
     favs.push(sid);
-    localStorage.setItem(key, JSON.stringify(favs));
+    storage.setJSON(key, favs);
     salvarStorage();
     toastMsg(t('toast.fav.add'));
   }
@@ -1312,8 +1337,9 @@ function getEncontroPorTema(tema){
 
 function gerarEncontroCompleto(silent=false){
   const tema = getTemaSelecionado();
-  const enc = getEncontroPorTema(tema);
-  encontrosGeradosSessao.push(enc.id);
+  const raw = getEncontroPorTema(tema);
+  const enc = getEncontro(raw);
+  encontrosGeradosSessao.push(raw.id);
   const tEl = document.getElementById('ge-titulo');
   const vEl = document.getElementById('ge-versiculo');
   if(tEl) tEl.textContent = enc.titulo;
@@ -1358,9 +1384,9 @@ function renderHistoricoEncontros(){
         <span style="color:var(--text-soft);font-size:16px;flex-shrink:0">›</span>
       </div>
       <div style="display:flex;gap:8px;border-top:1px solid var(--border);padding-top:8px">
-        <button onclick="toggleFavEncontro(${c.id})" style="flex:1;background:none;border:1px solid var(--border);border-radius:50px;padding:6px 10px;font-size:12px;font-weight:600;color:${isFavEncontroGerado(c.id)?'var(--rose)':'var(--text-soft)'};cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif">${isFavEncontroGerado(c.id)?'❤️ Salvo':'🤍 Favoritar'}</button>
-        <button onclick="renomearEncontro(${c.id})" style="flex:1;background:none;border:1px solid var(--border);border-radius:50px;padding:6px 10px;font-size:12px;font-weight:600;color:var(--text-soft);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif">✏️ Renomear</button>
-        <button onclick="abrirEncontroPreviewGerado(${c.id})" style="flex:1;background:var(--gold);border:none;border-radius:50px;padding:6px 10px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif">👁 Ver</button>
+        <button onclick="toggleFavEncontro(${c.id})" style="flex:1;background:none;border:1px solid var(--border);border-radius:50px;padding:6px 10px;font-size:12px;font-weight:600;color:${isFavEncontroGerado(c.id)?'var(--rose)':'var(--text-soft)'};cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif">${isFavEncontroGerado(c.id)?t('gerar.hist.saved'):t('gerar.hist.favorite')}</button>
+        <button onclick="renomearEncontro(${c.id})" style="flex:1;background:none;border:1px solid var(--border);border-radius:50px;padding:6px 10px;font-size:12px;font-weight:600;color:var(--text-soft);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif">${t('gerar.hist.rename')}</button>
+        <button onclick="abrirEncontroPreviewGerado(${c.id})" style="flex:1;background:var(--gold);border:none;border-radius:50px;padding:6px 10px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif">${t('gerar.hist.view')}</button>
       </div>
     </div>`).join('');
 }
@@ -1368,20 +1394,20 @@ function renderHistoricoEncontros(){
 function isFavEncontroGerado(id){
   const email = usuarioAtual?.email || usuarioAtual?.nome || 'anon';
   const key = 'fav_encontros_ger_'+email;
-  const favs = JSON.parse(localStorage.getItem(key)||'[]');
+  const favs = storage.getJSON(key, []);
   return favs.includes(String(id));
 }
 
 function toggleFavEncontro(id){
   const email = usuarioAtual?.email || usuarioAtual?.nome || 'anon';
   const key = 'fav_encontros_ger_'+email;
-  let favs = JSON.parse(localStorage.getItem(key)||'[]');
+  let favs = storage.getJSON(key, []);
   const sid = String(id);
 
   if(favs.includes(sid)){
     confirmarDesfavoritar(()=>{
       favs = favs.filter(x=>x!==sid);
-      localStorage.setItem(key, JSON.stringify(favs));
+      storage.setJSON(key, favs);
       salvarStorage();
       toastMsg(t('toast.fav.rm'));
       renderFavoritos();
@@ -1390,7 +1416,7 @@ function toggleFavEncontro(id){
     return;
   } else {
     favs.push(sid);
-    localStorage.setItem(key, JSON.stringify(favs));
+    storage.setJSON(key, favs);
     salvarStorage();
     toastMsg(t('toast.fav.add'));
   }
@@ -1447,7 +1473,7 @@ function limparHistoricoEncontros(){
 function compartilharEncontroGeradoCompleto(){
   const enc = conjuntosEncontros[0]?.enc;
   if(!enc){ toastMsg(t('toast.enc.primeiro')); return; }
-  const texto = `🌸 *${enc.titulo}*\n\n📖 ${enc.versiculo}\n\n💭 ${enc.reflexao?.slice(0,200)}...\n\n_Via app Encontros de Mulheres_`;
+  const texto = `🌸 *${enc.titulo}*\n\n📖 ${enc.versiculo}\n\n💭 ${enc.reflexao?.slice(0,200)}...\n\n_${t('share.via')}_`;
   window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
 }
 
@@ -1488,10 +1514,13 @@ function filterEncontros(){
   if(clearBtn) clearBtn.style.display = (q||cat) ? 'inline-flex' : 'none';
   let r = encontros50;
   if(cat) r = r.filter(e => e.categoria === cat);
-  if(q) r = r.filter(e =>
-    e.titulo.toLowerCase().includes(q.toLowerCase()) ||
-    e.categoria.toLowerCase().includes(q.toLowerCase())
-  );
+  if(q) r = r.filter(raw => {
+    const e = getEncontro(raw);
+    const ql = q.toLowerCase();
+    return (e.titulo || '').toLowerCase().includes(ql) ||
+      (e.categoria || '').toLowerCase().includes(ql) ||
+      (raw.versiculo || '').toLowerCase().includes(ql);
+  });
   renderEncontros(r);
 }
 function limparEncontros(){
@@ -1550,8 +1579,8 @@ function openEncontroDetail(id){
 // ── ENCONTRO DETAIL — MARCAR COMO REALIZADO ──
 const STORAGE_KEY_HIST_ENC = ()=>`encontros_hist_enc_v1_${usuarioAtual?.email||'guest'}`;
 // historicoEnc — declarado no topo do script
-function carregarHistoricoEnc(){ try{ const h=localStorage.getItem(STORAGE_KEY_HIST_ENC()); historicoEnc=h?JSON.parse(h):[]; }catch(e){ historicoEnc=[]; } }
-function salvarHistoricoEnc(){ try{ localStorage.setItem(STORAGE_KEY_HIST_ENC(), JSON.stringify(historicoEnc)); }catch(e){} }
+function carregarHistoricoEnc(){ historicoEnc = storage.getJSON(STORAGE_KEY_HIST_ENC(), []); syncAppCollectionsState(); }
+function salvarHistoricoEnc(){ storage.setJSON(STORAGE_KEY_HIST_ENC(), historicoEnc); syncAppCollectionsState(); }
 
 function updateDoneBtnEnc(){
   const btn = document.getElementById('enc-done-btn');
@@ -1884,7 +1913,15 @@ function filterQuebraGelos(q){
   if(clear) clear.style.display = (q||cat) ? 'block' : 'none';
   let list = quebraGelos50;
   if(cat) list = list.filter(qg=>qg.categoria===cat);
-  if(q) list = list.filter(qg=>qg.titulo.toLowerCase().includes(q.toLowerCase())||qg.objetivo.toLowerCase().includes(q.toLowerCase()));
+  if(q) {
+    const ql = q.toLowerCase();
+    list = list.filter(raw => {
+      const qg = getQuebraGelo(raw);
+      return (qg.titulo || '').toLowerCase().includes(ql) ||
+        (qg.objetivo || '').toLowerCase().includes(ql) ||
+        (qg.categoria || '').toLowerCase().includes(ql);
+    });
+  }
   renderQuebraGelos(list);
 }
 function limparQuebraGelos(){
@@ -1977,10 +2014,13 @@ function renderEstudos(list){
     </div>`}).join('');
 }
 function filterEstudos(q){
-  const r = q ? estudos30.filter(e=>
-    e.titulo.toLowerCase().includes(q.toLowerCase()) ||
-    e.versiculo.toLowerCase().includes(q.toLowerCase())
-  ) : estudos30;
+  const r = q ? estudos30.filter(raw=>{
+    const e = getEstudo(raw);
+    const ql = q.toLowerCase();
+    return (e.titulo || '').toLowerCase().includes(ql) ||
+      (raw.versiculo || '').toLowerCase().includes(ql) ||
+      (e.reflexao || '').toLowerCase().includes(ql);
+  }) : estudos30;
   renderEstudos(r);
 }
 function openEstudoDetail(id){
@@ -2041,7 +2081,10 @@ function filtrarPerguntas(){
   const clear = document.getElementById('perg-clear');
   if(clear) clear.style.display = (q||cat)?'block':'none';
   let list = perguntas100;
-  if(q) list = list.filter(p=>p.pergunta.toLowerCase().includes(q)||p.categoriaLabel.toLowerCase().includes(q));
+  if(q) list = list.filter(raw=>{
+    const p = getPerguntaTrad(raw);
+    return (p.pergunta || '').toLowerCase().includes(q) || (p.categoriaLabel || '').toLowerCase().includes(q);
+  });
   if(cat) list = list.filter(p=>p.categoria===cat);
   renderPerguntas(list);
 }
@@ -2061,24 +2104,24 @@ function copiarPergunta(id){
 }
 
 // Favoritos de perguntas
-function isFavPergunta(id){ try{ const email = usuarioAtual?.email || usuarioAtual?.nome || 'anon'; const f=JSON.parse(localStorage.getItem('fav_perguntas_'+email)||'[]'); return f.includes(String(id)); }catch(e){return false;} }
+function isFavPergunta(id){ const email = usuarioAtual?.email || usuarioAtual?.nome || 'anon'; const f = storage.getJSON('fav_perguntas_' + email, []); return f.includes(String(id)); }
 function toggleFavPergunta(id){
   try{
     const email = usuarioAtual?.email || usuarioAtual?.nome || 'anon';
     const key='fav_perguntas_'+email;
-    let f=JSON.parse(localStorage.getItem(key)||'[]');
+    let f = storage.getJSON(key, []);
     const sid = String(id);
     if(f.includes(sid)){
       confirmarDesfavoritar(()=>{
         f=f.filter(x=>x!==sid);
-        localStorage.setItem(key,JSON.stringify(f));
+        storage.setJSON(key, f);
         toastMsg(t('toast.fav.rm'));
         const btn=document.getElementById('pfav-'+id);
         if(btn) btn.textContent='🤍';
       });
     } else {
       f.push(sid);
-      localStorage.setItem(key,JSON.stringify(f));
+      storage.setJSON(key, f);
       toastMsg(t('toast.fav.add'));
       const btn=document.getElementById('pfav-'+id);
       if(btn) btn.textContent='❤️';
@@ -2087,24 +2130,24 @@ function toggleFavPergunta(id){
 }
 
 // Favoritos de Encontros Completos
-function isFavEncontro(id){ try{ return JSON.parse(localStorage.getItem('fav_encontros_'+(usuarioAtual?.email||''))||'[]').includes(id); }catch(e){return false;} }
+function isFavEncontro(id){ return storage.getJSON('fav_encontros_' + (usuarioAtual?.email || ''), []).includes(id); }
 function toggleFavEncontroDetalhe(){
   if(!currentEncDetail) return;
   const id = currentEncDetail.id;
   const key = 'fav_encontros_'+(usuarioAtual?.email||'');
   try{
-    let f = JSON.parse(localStorage.getItem(key)||'[]');
+    let f = storage.getJSON(key, []);
     if(f.includes(id)){
       confirmarDesfavoritar(()=>{
         f = f.filter(x=>x!==id);
-        localStorage.setItem(key, JSON.stringify(f));
+        storage.setJSON(key, f);
         toastMsg(t('toast.fav.rm'));
         atualizarBtnFavEncontro(id);
         renderFavoritos();
       });
     } else {
       f.push(id);
-      localStorage.setItem(key, JSON.stringify(f));
+      storage.setJSON(key, f);
       toastMsg(t('toast.fav.add'));
       atualizarBtnFavEncontro(id);
       renderFavoritos();
@@ -2120,24 +2163,24 @@ function atualizarBtnFavEncontro(id){
 }
 
 // Favoritos de Quebra-Gelos
-function isFavQG(id){ try{ return JSON.parse(localStorage.getItem('fav_qgelos_'+(usuarioAtual?.email||''))||'[]').includes(id); }catch(e){return false;} }
+function isFavQG(id){ return storage.getJSON('fav_qgelos_' + (usuarioAtual?.email || ''), []).includes(id); }
 function toggleFavQGDetalhe(){
   if(!currentQGDetail) return;
   const id = currentQGDetail.id;
   const key = 'fav_qgelos_'+(usuarioAtual?.email||'');
   try{
-    let f = JSON.parse(localStorage.getItem(key)||'[]');
+    let f = storage.getJSON(key, []);
     if(f.includes(id)){
       confirmarDesfavoritar(()=>{
         f = f.filter(x=>x!==id);
-        localStorage.setItem(key, JSON.stringify(f));
+        storage.setJSON(key, f);
         toastMsg(t('toast.fav.rm'));
         atualizarBtnFavQG(id);
         renderFavoritos();
       });
     } else {
       f.push(id);
-      localStorage.setItem(key, JSON.stringify(f));
+      storage.setJSON(key, f);
       toastMsg(t('toast.fav.add'));
       atualizarBtnFavQG(id);
       renderFavoritos();
@@ -2295,7 +2338,7 @@ function sortPatchNotes(lista) {
 
 function carregarPatchNotes() {
   try {
-    const salvas = JSON.parse(localStorage.getItem(STORAGE_PATCH_ADMIN) || '[]');
+    const salvas = storage.getJSON(STORAGE_PATCH_ADMIN, []);
 
     const padrao = PATCH_NOTES_PADRAO.map(normalizarPatchNote);
     const admin = Array.isArray(salvas) ? salvas.map(normalizarPatchNote) : [];
@@ -2328,7 +2371,7 @@ function carregarPatchNotes() {
 
 function salvarPatchNotesNoStorage() {
   try {
-    localStorage.setItem(STORAGE_PATCH_ADMIN, JSON.stringify(PATCH_NOTES));
+    storage.setJSON(STORAGE_PATCH_ADMIN, PATCH_NOTES);
   } catch (e) {
     console.warn('Erro ao salvar patch notes:', e);
   }
@@ -2356,7 +2399,7 @@ function renderNovidadesList(){
 
   let adminNotes = [];
   try {
-    adminNotes = JSON.parse(localStorage.getItem('patch_notes_admin_v1') || '[]');
+    adminNotes = storage.getJSON('patch_notes_admin_v1', []);
   } catch(e) {
     adminNotes = [];
   }
@@ -2412,7 +2455,7 @@ function checkNovidadesModal(){
     const latest = getLatestPatchNote();
     if (!latest) return;
 
-    const ultimaVista = localStorage.getItem('patch_notes_last_seen');
+    const ultimaVista = storage.get('patch_notes_last_seen');
 
     if (ultimaVista !== latest.versao) {
       setTimeout(() => {
@@ -2485,7 +2528,7 @@ function fecharNovidades(){
 
   try {
     if (latest?.versao) {
-      localStorage.setItem('patch_notes_last_seen', latest.versao);
+      storage.set('patch_notes_last_seen', latest.versao);
     }
   } catch(e) {}
 
@@ -2510,34 +2553,49 @@ setTimeout(() => {
 }, 300);
 
 
-// 2. Tentar restaurar sessão
-(function(){
+// 2. Tentar restaurar sessão real do Supabase
+(async function(){
+  let restaurou = false;
+
   try{
-    const savedEmail = localStorage.getItem(STORAGE_KEY_AUTH);
-    if(savedEmail && USUARIOS[savedEmail]){
-      usuarioAtual = {...USUARIOS[savedEmail], email: savedEmail};
-      entrarNoApp();
-      return; // entrarNoApp() já faz carregarStorage, render, etc.
+    if (typeof restaurarSessaoSupabase === 'function') {
+      restaurou = await restaurarSessaoSupabase();
     }
-  }catch(e){}
+  }catch(e){
+    console.error('Erro ao restaurar sessão inicial:', e);
+  }
+
+  if (restaurou) return;
+
   // 3. Sem sessão — mostra login, esconde nav e FABs
-  document.getElementById('app').style.opacity = '0';
+  const appEl = document.getElementById('app');
+  if (appEl) appEl.style.opacity = '0';
+
   const nav = document.getElementById('bottom-nav');
-  if(nav) nav.style.display = 'none';
+  if (nav) nav.style.display = 'none';
+
   const wfab = document.getElementById('whatsapp-fab');
-  if(wfab) wfab.style.display = 'none';
+  if (wfab) wfab.style.display = 'none';
+
   // Render inicial para quando fizer login manual
   carregarStorage();
-  renderDinamicas(dinamicas);renderFavoritos();renderPlanos();
-  const _fcl=document.getElementById('fav-count-label'); if(_fcl) _fcl.textContent=`${favorites.length} salvos`;
-  document.getElementById('painel-dinamica').style.flexDirection='column';
+  renderDinamicas(dinamicas);
+  renderFavoritos();
+  renderPlanos();
+
+  const favCount = document.getElementById('fav-count-label');
+  if (favCount) favCount.textContent = `${favorites.length} salvos`;
+
+  const painelDinamica = document.getElementById('painel-dinamica');
+  if (painelDinamica) painelDinamica.style.flexDirection = 'column';
 })();
+
 aplicarIdioma();
 
 /* ===== MyChurchFlow UX Pack — melhorias fáceis ===== */
 function mcGetSafeJSON(key, fallback){
   try{
-    const raw = localStorage.getItem(key);
+    const raw = storage.get(key);
     return raw ? JSON.parse(raw) : fallback;
   }catch(e){
     return fallback;
@@ -2618,14 +2676,14 @@ function mcInjectPerfilProgressCard(){
         <div class="perfil-progress-badge" id="perfil-progress-badge">Começando</div>
       </div>
       <div class="perfil-progress-grid">
-        <div class="perfil-progress-stat"><strong id="perfil-stat-favoritos">0</strong><span>favoritos salvos</span></div>
-        <div class="perfil-progress-stat"><strong id="perfil-stat-planos">0</strong><span>encontros planejados</span></div>
-        <div class="perfil-progress-stat"><strong id="perfil-stat-historico">0</strong><span>encontros realizados</span></div>
-        <div class="perfil-progress-stat"><strong id="perfil-stat-gerador">0</strong><span>conjuntos gerados</span></div>
+        <div class="perfil-progress-stat"><strong id="perfil-stat-favoritos">0</strong><span>${t('perfil.progress.favorites')}</span></div>
+        <div class="perfil-progress-stat"><strong id="perfil-stat-planos">0</strong><span>${t('perfil.progress.plans')}</span></div>
+        <div class="perfil-progress-stat"><strong id="perfil-stat-historico">0</strong><span>${t('perfil.progress.history')}</span></div>
+        <div class="perfil-progress-stat"><strong id="perfil-stat-gerador">0</strong><span>${t('perfil.progress.generated')}</span></div>
       </div>
       <div class="perfil-progress-actions">
-        <button class="btn-ui-secondary" onclick="closePerfil();nav('screen-planejador','nav-home')">📝 Planejar agora</button>
-        <button class="btn-ui-soft" onclick="closePerfil();nav('screen-novidades','nav-home')">🆕 Ver novidades</button>
+        <button class="btn-ui-secondary" onclick="closePerfil();nav('screen-planejador','nav-home')">${t('perfil.progress.plan_now')}</button>
+        <button class="btn-ui-soft" onclick="closePerfil();nav('screen-novidades','nav-home')">${t('perfil.progress.see_updates')}</button>
       </div>
     </div>
   `);
@@ -2646,7 +2704,7 @@ function mcUpdateNovidadesBadge(){
   let hasNew = false;
   try{
     const latest = typeof getLatestPatchNote === 'function' ? getLatestPatchNote() : null;
-    const seen = localStorage.getItem('patch_notes_last_seen');
+    const seen = storage.get('patch_notes_last_seen');
     hasNew = !!(latest && latest.versao && latest.versao !== seen);
   }catch(e){}
   badge.style.display = hasNew ? 'inline-flex' : 'none';
@@ -2655,7 +2713,7 @@ function mcUpdateNovidadesBadge(){
 function mcEnhanceNovidadesHistory(){
   const list = document.getElementById('novidades-list');
   if(!list) return;
-  const seen = localStorage.getItem('patch_notes_last_seen');
+  const seen = storage.get('patch_notes_last_seen');
   list.querySelectorAll('.pn-version-card').forEach(card => card.classList.remove('pn-unseen'));
   const versionEls = list.querySelectorAll('.pn-version-num');
   versionEls.forEach((el, index)=>{
@@ -2712,8 +2770,8 @@ function mcEnhanceEmptyStates(){
   if(favList && favList.textContent.includes('favorit')){
     favList.innerHTML = mcCreateEmptyState(
       '🤍',
-      'Seus favoritos começam aqui',
-      'Salve dinâmicas, perguntas e encontros para montar sua própria biblioteca rápida.',
+      t('mc.empty.favorites.title'),
+      t('mc.empty.favorites.sub'),
       `
         <button class="btn-ui-primary" onclick="nav('screen-dinamicas','nav-dinamicas')">🎭 Explorar dinâmicas</button>
         <button class="btn-ui-secondary" onclick="nav('screen-gerar','nav-gerar')">✨ Gerar agora</button>
@@ -2725,8 +2783,8 @@ function mcEnhanceEmptyStates(){
   if(histList && histList.querySelector('.empty-state')){
     histList.innerHTML = mcCreateEmptyState(
       '📅',
-      'Seu histórico ainda está vazio',
-      'Quando você marcar uma dinâmica ou encontro como realizado, ele aparece aqui para não repetir depois.',
+      t('mc.empty.history.title'),
+      t('mc.empty.history.sub'),
       `
         <button class="btn-ui-primary" onclick="nav('screen-dinamicas','nav-dinamicas')">🎭 Ver dinâmicas</button>
         <button class="btn-ui-secondary" onclick="nav('screen-gerar','nav-gerar')">✨ Gerar encontro</button>
@@ -2738,8 +2796,8 @@ function mcEnhanceEmptyStates(){
   if(planosList && planosList.querySelector('.empty-state')){
     planosList.innerHTML = mcCreateEmptyState(
       '📝',
-      'Planeje seu próximo encontro',
-      'Guarde tema, dinâmica, versículo e observações em um só lugar para não improvisar em cima da hora.',
+      t('mc.empty.plans.title'),
+      t('mc.empty.plans.sub'),
       `
         <button class="btn-ui-primary" onclick="document.getElementById('plan-tema-select')?.focus()">🌸 Começar planejamento</button>
         <button class="btn-ui-secondary" onclick="nav('screen-gerar','nav-gerar')">✨ Buscar ideias</button>

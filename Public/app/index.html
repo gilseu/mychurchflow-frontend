@@ -1,66 +1,4 @@
 <!DOCTYPE html>
-<!--
-╔══════════════════════════════════════════════════════════════════╗
-║  ENCONTROS DE MULHERES — v1.5.2                                  ║
-║  Arquivo único HTML/CSS/JS. Sem backend. Tudo localStorage.      ║
-╠══════════════════════════════════════════════════════════════════╣
-║  CONTAS DE TESTE                                                  ║
-║    admin@encontros.com / admin2024       → Admin, acesso total   ║
-║    brenda@encontros.com / brenda123      → Brenda Full Access    ║
-║    brenda.combo@encontros.com / brenda456 → Brenda Only Combo   ║
-╠══════════════════════════════════════════════════════════════════╣
-║  MÓDULOS (bool por usuário, gerenciado via Admin Panel)          ║
-║    dinamicas · perguntas · quebraGelos · estudos                  ║
-║    encontros · devocional · planejador · guia · floresça         ║
-╠══════════════════════════════════════════════════════════════════╣
-║  CONTEÚDO (hardcoded em arrays JS)                               ║
-║    200 dinâmicas · 100 perguntas · 50 encontros completos        ║
-║    50 quebra-gelos · 30 estudos bíblicos · 7 dias devocional     ║
-╠══════════════════════════════════════════════════════════════════╣
-║  PRODUTOS / UPSELL                                               ║
-║    [1] 50 Encontros Completos  De R$47 → R$24,90                 ║
-║    [2] Devocional 7 Dias       De R$27 → R$12,90                 ║
-║    [3] Planejador de Encontros De R$27 → R$14,90                 ║
-║    Produto Principal (dinâmicas)        R$19,90                  ║
-║    Order Bump — 50 Quebra-Gelos         R$9,90                   ║
-║    Order Bump — 100 Perguntas           R$9,90                   ║
-║    Order Bump — 30 Estudos Bíblicos     R$9,90                   ║
-╠══════════════════════════════════════════════════════════════════╣
-║  PERSISTÊNCIA — localStorage (chaves por usuário)                ║
-║    encontros_auth_v1                   → email logado            ║
-║    encontros_planos_v1_{email}         → planejamentos           ║
-║    encontros_favoritos_v1_{email}      → IDs dinâmicas fav       ║
-║    fav_perguntas_{email}               → IDs perguntas fav       ║
-║    fav_encontros_{email}               → IDs encontros fav       ║
-║    fav_qgelos_{email}                  → IDs quebra-gelos fav    ║
-║    encontros_hist_v1_{email}           → histórico + avaliações  ║
-║    encontros_hist_enc_v1_{email}       → histórico encontros     ║
-║    encontros_hist_gerador_v1_{email}   → histórico gerador (20)  ║
-║    encontros_uso_din_v1_{email}        → contador uso dinâmicas  ║
-║    encontros_versao_v1_{email}         → versão vista            ║
-║    encontros_onboarding_v1_{email}     → tour completo           ║
-║    encontros_modulos_admin_v1          → módulos (global)        ║
-║    encontros_lang_v1                   → idioma PT/EN/ES         ║
-║    tema                                → light/dark              ║
-║    foto_{email}                        → foto perfil base64      ║
-║    perfil_{email}                      → nome customizado        ║
-╠══════════════════════════════════════════════════════════════════╣
-║  IDIOMAS: PT (base, 337 chaves) · EN (338) · ES (337)            ║
-║  TEMAS: light / dark                                             ║
-╠══════════════════════════════════════════════════════════════════╣
-║  APIs EXTERNAS                                                   ║
-║    bible-api.com  → versículos (GET /{ref}?translation=almeida)  ║
-║    wa.me          → compartilhar WhatsApp (link externo)         ║
-║    flagcdn.com    → bandeiras PT/EN/ES                           ║
-║    fonts.google   → Playfair Display + Nunito                    ║
-╠══════════════════════════════════════════════════════════════════╣
-║  ATENÇÃO PARA PRODUÇÃO                                           ║
-║    • Senhas em texto claro no JS — NUNCA expor em produção       ║
-║    • Módulos controlados pelo frontend — sem validação server    ║
-║    • Todos os dados somem se usuário limpar o cache              ║
-║    • Botão de compra só faz toast — sem checkout integrado       ║
-╚══════════════════════════════════════════════════════════════════╝
--->
 <html lang="pt-BR" data-theme="light">
 <head>
 <meta charset="UTF-8">
@@ -104,12 +42,12 @@
   <div class="login-card" style="padding:16px">
     <div class="login-field" style="margin-bottom:8px">
       <label data-i18n="login.email">E-mail</label>
-      <input class="login-input" id="login-email" type="email" placeholder="seu@email.com" autocomplete="email"
+      <input class="login-input" id="login-email" type="email" data-i18n-ph="login.email.placeholder" placeholder="seu@email.com" autocomplete="email"
         onkeydown="if(event.key==='Enter') document.getElementById('login-senha').focus()">
     </div>
     <div class="login-field" style="margin-bottom:8px">
       <label data-i18n="login.senha">Senha</label>
-      <input class="login-input" id="login-senha" type="password" placeholder="••••••••" autocomplete="current-password"
+      <input class="login-input" id="login-senha" type="password" data-i18n-ph="login.senha.placeholder" placeholder="••••••••" autocomplete="current-password"
         onkeydown="if(event.key==='Enter') fazerLogin()">
     </div>
     <label class="login-remember" style="margin-bottom:10px">
@@ -120,25 +58,6 @@
     <button class="login-btn" onclick="fazerLogin()" data-i18n="login.btn">Entrar ✦</button>
     <div class="login-error" id="login-error" data-i18n="login.erro">E-mail ou senha incorretos.</div>
   </div>
-
-  <div class="login-profiles" style="margin-top:10px">
-    <p class="login-profiles-label" data-i18n="login.acesso.rapido">Acesso rápido</p>
-    <div class="login-profiles-row" style="flex-wrap:wrap;">
-      <button class="login-profile-btn" id="profile-admin" onclick="loginRapido('admin@encontros.com','admin2024','profile-admin')">
-        <div class="login-profile-avatar" style="background:linear-gradient(135deg,#B8860B,#C9973A)">👑</div>
-        <span class="login-profile-name">Admin</span>
-        <span class="login-profile-plano">Acesso Total</span>
-      </button>
-      <button class="login-profile-btn" id="profile-brenda-full" onclick="loginRapido('brenda@encontros.com','brenda123','profile-brenda-full')">
-        <div class="login-profile-avatar" style="background:linear-gradient(135deg,#7B5EA7,#9B7CC7)">💜</div>
-        <span class="login-profile-name">Brenda</span>
-        <span class="login-profile-plano">Full Access</span>
-      </button>
-      <button class="login-profile-btn" id="profile-brenda-combo" onclick="loginRapido('brenda.combo@encontros.com','brenda456','profile-brenda-combo')">
-        <div class="login-profile-avatar" style="background:linear-gradient(135deg,#C9952A,#E8B84B)">🌸</div>
-        <span class="login-profile-name">Brenda</span>
-        <span class="login-profile-plano">Only Combo</span>
-      </button>
     </div>
   </div>
 </div>
@@ -330,7 +249,7 @@
     <div class="content-header">
       <button class="back-btn" onclick="nav('screen-home','nav-home')" data-i18n="btn.voltar">← Voltar</button>
       <div style="display:flex;align-items:center;gap:8px">
-        <h2>🎭 200 Dinâmicas</h2>
+        <h2 data-i18n="din.titulo">🎭 200 Dinâmicas</h2>
         <span id="din-count-badge" style="font-size:10px;font-weight:700;background:var(--rose);color:#fff;padding:2px 8px;border-radius:50px;flex-shrink:0">200</span>
       </div>
       <p data-i18n="din.sub">Atividades para seus encontros</p>
@@ -384,9 +303,9 @@
     <div class="share-row">
       <button class="done-btn" id="detail-done-btn" onclick="toggleDone()" data-i18n="din.marcar">✓ Marcar como realizada</button>
       <div style="display:flex;gap:8px;margin-top:8px">
-        <button class="detail-action-btn" onclick="timerToggleOpen()" id="detail-timer-btn" title="Timer">⏱ <span data-i18n="btn.timer.label">Timer</span></button>
-        <button class="detail-action-btn" onclick="abrirStories()" title="Stories">📸 <span data-i18n="btn.stories.label">Stories</span></button>
-        <button class="detail-action-btn" onclick="abrirAoVivo()" style="background:var(--rose);color:#fff;border-color:var(--rose)" title="Ao Vivo">🎙 <span data-i18n="btn.aovivo.label">Ao vivo</span></button>
+        <button class="detail-action-btn" onclick="timerToggleOpen()" id="detail-timer-btn" data-i18n-title="btn.timer.label" title="Timer">⏱ <span data-i18n="btn.timer.label">Timer</span></button>
+        <button class="detail-action-btn" onclick="abrirStories()" data-i18n-title="btn.stories.label" title="Stories">📸 <span data-i18n="btn.stories.label">Stories</span></button>
+        <button class="detail-action-btn" onclick="abrirAoVivo()" style="background:var(--rose);color:#fff;border-color:var(--rose)" data-i18n-title="btn.aovivo.label" title="Ao Vivo">🎙 <span data-i18n="btn.aovivo.label">Ao vivo</span></button>
         <button class="detail-action-btn detail-fav-action" id="detail-fav-btn" onclick="toggleFavDetail()" data-i18n="btn.salvar">🤍 <span data-i18n="btn.salvar.label">Salvar</span></button>
       </div>
     </div>
@@ -563,7 +482,7 @@
       <div class="plan-field" id="field-dinamica" style="display:none">
         <label><span data-i18n="plan.dinamica">Dinâmica escolhida</span> <span style="color:#C0392B">*</span></label>
         <div style="display:flex;gap:8px">
-          <input class="plan-input" id="plan-dinamica" type="text" placeholder="Ex: Toque de Gratidão" style="flex:1" oninput="clearError('field-dinamica','plan-dinamica')">
+          <input class="plan-input" id="plan-dinamica" type="text" data-i18n-ph="plan.dinamica.example" placeholder="Ex: Toque de Gratidão" style="flex:1" oninput="clearError('field-dinamica','plan-dinamica')">
           <button class="plan-browse-btn" onclick="abrirBrowseDinamica()">🔍</button>
         </div>
         <span class="plan-error-msg" data-i18n="plan.err.din">Por favor, informe a dinâmica escolhida.</span>
@@ -572,7 +491,7 @@
       <div class="plan-field" id="field-dinamica-free">
         <label><span data-i18n="plan.dinamica">Dinâmica escolhida</span> <span style="color:#C0392B">*</span></label>
         <div style="display:flex;gap:8px">
-          <input class="plan-input" id="plan-dinamica-free" type="text" placeholder="Digite ou busque nas 200 dinâmicas" style="flex:1" oninput="onDinFreeInput(this.value)">
+          <input class="plan-input" id="plan-dinamica-free" type="text" data-i18n-ph="plan.dinamica.free.placeholder" placeholder="Digite ou busque nas 200 dinâmicas" style="flex:1" oninput="onDinFreeInput(this.value)">
           <button class="plan-browse-btn" onclick="abrirBrowseDinamica()">🔍</button>
         </div>
         <span class="plan-error-msg" id="err-dinamica-free" data-i18n="plan.err.din">Por favor, informe a dinâmica escolhida.</span>
@@ -585,7 +504,7 @@
         <div class="dp-wrap" id="dp-wrap">
           <div class="dp-input-row" id="dp-input-row" onclick="dpToggle()">
             <span class="dp-icon">📅</span>
-            <input class="dp-text" id="dp-text-input" placeholder="DD/MM/AAAA" maxlength="10"
+            <input class="dp-text" id="dp-text-input" data-i18n-ph="dp.placeholder" placeholder="DD/MM/AAAA" maxlength="10"
               oninput="dpHandleTyping(this.value)"
               onkeydown="dpHandleKey(event)"
               onclick="event.stopPropagation();dpOpen()">
@@ -606,7 +525,7 @@
             <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none">⏰</span>
             <input class="plan-input" id="plan-hora" type="time" style="padding-left:42px;cursor:pointer">
           </div>
-          <button class="plan-notif-btn" id="plan-notif-btn" onclick="toggleNotificacao()" title="Ativar lembrete">
+          <button class="plan-notif-btn" id="plan-notif-btn" onclick="toggleNotificacao()" data-i18n-title="plan.notif.ativar" title="Ativar lembrete">
             🔔 <span id="plan-notif-label" data-i18n="plan.notif.ativar">Lembrete</span>
           </button>
         </div>
@@ -627,7 +546,7 @@
         <div style="display:flex;gap:8px;position:relative">
           <div style="flex:1;position:relative">
             <input class="plan-input" id="plan-versiculo-ref" type="text"
-              placeholder="Ex: Filipenses 4:6"
+              data-i18n-ph="plan.buscar.versiculo" placeholder="Ex: Filipenses 4:6"
               autocomplete="off"
               oninput="onVerseInput(this.value)"
               onkeydown="if(event.key==='Enter'){event.preventDefault();buscarVersiculo();}"
@@ -876,10 +795,10 @@
     <div class="share-row" style="flex-wrap:wrap;gap:8px;">
       <button class="done-btn" id="enc-done-btn" onclick="toggleDoneEnc()" style="flex:1;min-width:120px" data-i18n="din.marcar">✓ Marcar como realizada</button>
       <div style="display:flex;gap:8px;margin-top:8px">
-        <button class="detail-action-btn" onclick="encTimerToggleOpen()" id="enc-detail-timer-btn" title="Timer">⏱ <span data-i18n="btn.timer.label">Timer</span></button>
-        <button class="detail-action-btn" onclick="abrirStoriesEnc()" title="Stories">📸 <span data-i18n="btn.stories.label">Stories</span></button>
-        <button class="detail-action-btn" onclick="abrirAoVivoEnc()" style="background:var(--rose);color:#fff;border-color:var(--rose)" title="Ao Vivo">🎙 <span data-i18n="btn.aovivo.label">Ao vivo</span></button>
-        <button class="detail-action-btn" id="enc-detail-fav-btn" onclick="toggleFavEncontroDetalhe()" style="flex:1;min-width:80px">🤍 <span data-i18n="btn.salvar.label">Salvar</span></button>
+        <button class="detail-action-btn" onclick="encTimerToggleOpen()" id="enc-detail-timer-btn" data-i18n-title="btn.timer.label" title="Timer">⏱ <span data-i18n="btn.timer.label">Timer</span></button>
+        <button class="detail-action-btn" onclick="abrirStoriesEnc()" data-i18n-title="btn.stories.label" title="Stories">📸 <span data-i18n="btn.stories.label">Stories</span></button>
+        <button class="detail-action-btn" onclick="abrirAoVivoEnc()" style="background:var(--rose);color:#fff;border-color:var(--rose)" data-i18n-title="btn.aovivo.label" title="Ao Vivo">🎙 <span data-i18n="btn.aovivo.label">Ao vivo</span></button>
+        <button class="detail-action-btn" id="enc-detail-fav-btn" onclick="toggleFavEncontroDetalhe()" style="flex:1;min-width:80px" data-i18n="btn.salvar">🤍 <span data-i18n="btn.salvar.label">Salvar</span></button>
       </div>
     </div>
   </div>
@@ -929,7 +848,7 @@
     </div>
     <div class="detail-body" id="qg-detail-body"></div>
     <div class="share-row">
-      <button class="share-btn secondary" id="qg-detail-fav-btn" onclick="toggleFavQGDetalhe()" style="flex:1">🤍 Salvar</button>
+      <button class="share-btn secondary" id="qg-detail-fav-btn" onclick="toggleFavQGDetalhe()" style="flex:1" data-i18n="btn.salvar">🤍 Salvar</button>
     </div>
   </div>
 
@@ -942,7 +861,7 @@
       <div class="search-wrap" style="padding:12px 0 0">
         <div class="search-wrap-inner">
           <span class="search-icon">🔍</span>
-          <input class="search-box" type="text" placeholder="Buscar estudo..." oninput="filterEstudos(this.value)">
+          <input class="search-box" type="text" data-i18n-ph="estudos.busca" placeholder="Buscar estudo..." oninput="filterEstudos(this.value)">
         </div>
       </div>
     </div>
@@ -950,7 +869,7 @@
   </div>
   <div class="screen" id="screen-estudo-detail">
     <div class="detail-header">
-      <button class="back-btn" onclick="nav('screen-estudos','nav-home')">← Estudos</button>
+      <button class="back-btn" onclick="nav('screen-estudos','nav-home')" data-i18n="btn.voltar.est">← Estudos</button>
       <h2 id="est-detail-titulo"></h2>
     </div>
     <div class="detail-body" id="est-detail-body"></div>
@@ -1004,7 +923,7 @@
   </div>
 
   <!-- WhatsApp FAB -->
-  <button class="whatsapp-fab" id="whatsapp-fab" onclick="abrirWhatsApp()" title="Falar com suporte">
+  <button class="whatsapp-fab" id="whatsapp-fab" onclick="abrirWhatsApp()" data-i18n-title="support.title" title="Falar com suporte">
     💬
   </button>
 
@@ -1080,7 +999,7 @@
       <h3 id="modal-title">Conteúdo bloqueado</h3>
       <p id="modal-desc">Desbloqueie este conteúdo para acessar.</p>
       <div class="modal-code-row">
-        <input class="modal-code-input" type="text" id="modal-code" placeholder="Código de acesso...">
+        <input class="modal-code-input" type="text" id="modal-code" data-i18n-ph="locked.code" placeholder="Código de acesso...">
         <button class="modal-unlock-btn" onclick="tryUnlock()">Usar</button>
       </div>
       <div class="modal-divider">— ou —</div>
@@ -1273,11 +1192,11 @@
       <h3 style="font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--purple2);margin-bottom:6px" data-i18n="modal.renomear.titulo">Renomear conjunto</h3>
       <p style="font-size:13px;color:var(--text-soft);margin-bottom:16px" data-i18n="modal.renomear.desc">Dê um nome para identificar este conjunto depois</p>
       <input id="renomear-input" type="text" class="plan-input" style="width:100%;box-sizing:border-box;margin-bottom:16px"
-        placeholder="Ex: Encontro de Gratidão, Reunião de Oração..."
+        data-i18n-ph="modal.renomear.placeholder" placeholder="Ex: Encontro de Gratidão, Reunião de Oração..."
         onkeydown="if(event.key==='Enter') confirmarRenomear()">
       <div style="display:flex;gap:10px">
         <button class="share-btn secondary" style="flex:1" onclick="document.getElementById('modal-renomear').classList.remove('open')">Cancelar</button>
-        <button class="share-btn primary" style="flex:1" onclick="confirmarRenomear()">✏️ Renomear</button>
+        <button class="share-btn primary" style="flex:1" onclick="confirmarRenomear()" data-i18n="modal.renomear.confirm">✏️ Renomear</button>
       </div>
     </div>
   </div>
@@ -1344,9 +1263,9 @@
     </div>
     <!-- Seletor de fundo -->
     <div class="stories-bg-bar" onclick="event.stopPropagation()">
-      <button class="stories-bg-btn active" id="sbg-gradient" onclick="storiesBgSelect('gradient')" title="Gradiente padrão">🎨</button>
-      <button class="stories-bg-btn" id="sbg-camera" onclick="storiesBgCamera()" title="Câmera">📷</button>
-      <button class="stories-bg-btn" id="sbg-galeria" onclick="storiesBgGaleria()" title="Galeria">🖼️</button>
+      <button class="stories-bg-btn active" id="sbg-gradient" onclick="storiesBgSelect('gradient')" data-i18n-title="stories.bg.gradient" title="Gradiente padrão">🎨</button>
+      <button class="stories-bg-btn" id="sbg-camera" onclick="storiesBgCamera()" data-i18n-title="stories.bg.camera" title="Câmera">📷</button>
+      <button class="stories-bg-btn" id="sbg-galeria" onclick="storiesBgGaleria()" data-i18n-title="stories.bg.gallery" title="Galeria">🖼️</button>
       <input type="file" id="stories-bg-file" class="stories-bg-file" accept="image/*">
       <input type="file" id="stories-bg-camera-input" class="stories-bg-file" accept="image/*" capture="environment">
     </div>
@@ -1402,7 +1321,7 @@
         </div>
         <div class="search-wrap-inner">
           <span class="search-icon">🔍</span>
-          <input class="search-box" id="browse-qg-search" type="text" placeholder="Buscar quebra-gelo..." oninput="filterBrowseQG(this.value)">
+          <input class="search-box" id="browse-qg-search" type="text" data-i18n-ph="qg.busca" placeholder="Buscar quebra-gelo..." oninput="filterBrowseQG(this.value)">
         </div>
       </div>
       <div id="browse-qg-list" style="overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:8px;border-radius:0 0 24px 24px"></div>
@@ -1453,9 +1372,14 @@
       <div id="pv-body" style="overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:14px;border-radius:0 0 24px 24px"></div>
     </div>
   </div>
-  <script src="assets/js/i18n.js"></script>
-  <script src="assets/js/app-core.js"></script>
-  <script src="assets/js/app-planejador.js"></script>
-  <script src="assets/js/app-modulos.js"></script>
+  <script src="assets/js/storage.js" defer></script>
+  <script src="assets/js/store.js" defer></script>
+  <script src="assets/js/i18n.js" defer></script>
+  <script src="assets/js/supabase-config.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase-client.js" defer></script>
+  <script src="assets/js/app-core.js" defer></script>
+  <script src="assets/js/app-planejador.js" defer></script>
+  <script src="assets/js/app-modulos.js" defer></script>
 </body>
 </html>
