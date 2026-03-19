@@ -166,11 +166,18 @@ function handleModalClick(event) {
  * Atualiza o timer de oferta limitada
  */
 function updateTimer() {
-  let timeLeft = TIMER_DURATION;
+  const key = 'mychurchflow_offer_timer_v1';
+  let expiresAt = Number(localStorage.getItem(key) || 0);
+
+  if (!expiresAt || expiresAt < Date.now()) {
+    expiresAt = Date.now() + TIMER_DURATION * 1000;
+    localStorage.setItem(key, String(expiresAt));
+  }
 
   function tick() {
-    const minutes = Math.floor(timeLeft / 60);
-    const seconds = timeLeft % 60;
+    const diff = Math.max(0, Math.floor((expiresAt - Date.now()) / 1000));
+    const minutes = Math.floor(diff / 60);
+    const seconds = diff % 60;
     const formattedTime =
       (minutes < 10 ? '0' : '') +
       minutes +
@@ -182,8 +189,11 @@ function updateTimer() {
       timerEl.textContent = formattedTime;
     }
 
-    if (timeLeft > 0) {
-      timeLeft--;
+    if (diff > 0) {
+      timerInterval = setTimeout(tick, 1000);
+    } else {
+      expiresAt = Date.now() + TIMER_DURATION * 1000;
+      localStorage.setItem(key, String(expiresAt));
       timerInterval = setTimeout(tick, 1000);
     }
   }
@@ -253,13 +263,11 @@ function initializeEventListeners() {
   });
 
   // Modal - botão fechar
-  const closeBtn = document.querySelector('.modal-close');
-  if (closeBtn) {
-    closeBtn.addEventListener('click', closeModal);
-  }
+  const closeButtons = document.querySelectorAll('.modal-close, .modal-header .modal-close');
+  closeButtons.forEach(btn => btn.addEventListener('click', closeModal));
 
   // CTAs - abrir modal
-  const ctaButtons = document.querySelectorAll('.cta-primary, .offer-cta');
+  const ctaButtons = document.querySelectorAll('.cta-primary, .offer-cta, .sticky-bar-btn');
   ctaButtons.forEach(btn => {
     btn.addEventListener('click', function (e) {
       e.preventDefault();

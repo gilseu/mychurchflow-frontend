@@ -1548,3 +1548,47 @@ footer {
   opacity: 1;
   transform: translateY(0);
 }
+
+
+/* ===== Landing CTA clarity pack ===== */
+.cta-proof-strip{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:8px;
+  margin-top:14px;
+}
+.cta-proof-strip span,
+.offer-clarity span{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:7px 11px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:var(--bg3);
+  font-size:11px;
+  color:var(--text2);
+}
+.offer-clarity{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:8px;
+  margin-top:12px;
+}
+.hero .cta-primary,
+.sticky-bar-btn,
+.offer-cta{
+  box-shadow:0 10px 24px rgba(123,94,167,.18);
+}
+.hero .cta-primary{
+  max-width:340px;
+  margin-left:auto;
+  margin-right:auto;
+}
+.offer-head-sub{
+  max-width:320px;
+  margin-left:auto;
+  margin-right:auto;
+}

@@ -6800,8 +6800,25 @@ function normalizarPatchNote(patch) {
   };
 }
 
+function compareVersionsSemver(aVersao, bVersao) {
+  const a = String(aVersao || '0.0.0').split('.').map(n => Number(n) || 0);
+  const b = String(bVersao || '0.0.0').split('.').map(n => Number(n) || 0);
+
+  for (let i = 0; i < Math.max(a.length, b.length); i++) {
+    const av = a[i] || 0;
+    const bv = b[i] || 0;
+    if (bv !== av) return bv - av;
+  }
+
+  return 0;
+}
+
 function sortPatchNotes(lista) {
-  return [...lista].sort((a, b) => new Date(b.data) - new Date(a.data));
+  return [...lista].sort((a, b) => {
+    const diffData = new Date(b.data) - new Date(a.data);
+    if (diffData !== 0) return diffData;
+    return compareVersionsSemver(a.versao, b.versao);
+  });
 }
 
 function carregarPatchNotes() {
@@ -6880,7 +6897,7 @@ function renderNovidadesList(){
     mapa.set(id, p);
   });
 
-  const listaFinal = [...mapa.values()].sort((a, b) => new Date(b.data) - new Date(a.data));
+  const listaFinal = sortPatchNotes([...mapa.values()]);
 
   c.innerHTML = listaFinal.map((pn, i) => {
     const itens = Array.isArray(pn.itens) ? pn.itens : [];
@@ -7044,3 +7061,288 @@ setTimeout(() => {
   document.getElementById('painel-dinamica').style.flexDirection='column';
 })();
 aplicarIdioma();
+
+/* ===== MyChurchFlow UX Pack — melhorias fáceis ===== */
+function mcGetSafeJSON(key, fallback){
+  try{
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  }catch(e){
+    return fallback;
+  }
+}
+function mcPatchBtnStyles(scope){
+  if(!scope) return;
+  scope.querySelectorAll('.btn-ui-primary,.btn-ui-secondary,.btn-ui-soft').forEach(btn=>{
+    btn.setAttribute('type','button');
+  });
+}
+function mcCreateEmptyState(icon, title, text, actionsHtml){
+  return `
+    <div class="enhanced-empty-state">
+      <div class="empty-state">
+        <div class="empty-icon">${icon}</div>
+        <h4>${title}</h4>
+        <p>${text}</p>
+        <div class="empty-actions">${actionsHtml || ''}</div>
+      </div>
+    </div>
+  `;
+}
+function mcInjectHomeQuickActions(){
+  const banner = document.querySelector('#screen-home .home-banner');
+  if(!banner || document.getElementById('home-quick-actions')) return;
+  banner.insertAdjacentHTML('afterend', `
+    <div class="home-quick-actions" id="home-quick-actions">
+      <button class="quick-action-btn" onclick="nav('screen-planejador','nav-home')">
+        <span class="quick-action-icon">📝</span>
+        <span class="quick-action-title">Planejar encontro</span>
+        <span class="quick-action-sub">Monte o próximo encontro com calma</span>
+      </button>
+      <button class="quick-action-btn" onclick="nav('screen-favoritos','nav-favoritos')">
+        <span class="quick-action-icon">🤍</span>
+        <span class="quick-action-title">Ver favoritos</span>
+        <span class="quick-action-sub">Acesse o que você salvou mais rápido</span>
+      </button>
+      <button class="quick-action-btn" id="home-quick-novidades" onclick="nav('screen-novidades','nav-home')">
+        <span class="quick-action-icon">🆕</span>
+        <span class="quick-action-title">Novidades do app</span>
+        <span class="quick-action-sub">Veja o que mudou e o que entrou</span>
+      </button>
+    </div>
+  `);
+}
+function mcInjectGerarHelperActions(){
+  const target = document.querySelector('#painel-dinamica > div[style*="padding-top:4px"]');
+  if(target && !document.getElementById('gerar-helper-actions')){
+    target.insertAdjacentHTML('beforeend', `
+      <div class="gerar-helper-actions" id="gerar-helper-actions">
+        <button class="btn-ui-secondary" onclick="nav('screen-planejador','nav-home')">📝 Salvar no planejador</button>
+        <button class="btn-ui-soft" onclick="nav('screen-favoritos','nav-favoritos')">🤍 Ver favoritos</button>
+      </div>
+    `);
+  }
+  const targetEnc = document.querySelector('#painel-encontro > div[style*="padding-top:4px"]');
+  if(targetEnc && !document.getElementById('gerar-helper-actions-enc')){
+    targetEnc.insertAdjacentHTML('beforeend', `
+      <div class="gerar-helper-actions" id="gerar-helper-actions-enc">
+        <button class="btn-ui-secondary" onclick="nav('screen-planejador','nav-home')">📝 Levar para o planejador</button>
+        <button class="btn-ui-soft" onclick="nav('screen-historico','nav-home')">📅 Ver histórico</button>
+      </div>
+    `);
+  }
+}
+function mcInjectPerfilProgressCard(){
+  const body = document.querySelector('#perfil-overlay .perfil-sheet-body');
+  if(!body || document.getElementById('perfil-progress-card')) return;
+  body.insertAdjacentHTML('afterbegin', `
+    <div class="perfil-progress-card" id="perfil-progress-card">
+      <div class="perfil-progress-top">
+        <div>
+          <div class="perfil-progress-eyebrow">Seu progresso</div>
+          <div class="perfil-progress-title">Seu ministério em movimento</div>
+          <div class="perfil-progress-sub">Acompanhe o que você já salvou, planejou e colocou em prática.</div>
+        </div>
+        <div class="perfil-progress-badge" id="perfil-progress-badge">Começando</div>
+      </div>
+      <div class="perfil-progress-grid">
+        <div class="perfil-progress-stat"><strong id="perfil-stat-favoritos">0</strong><span>favoritos salvos</span></div>
+        <div class="perfil-progress-stat"><strong id="perfil-stat-planos">0</strong><span>encontros planejados</span></div>
+        <div class="perfil-progress-stat"><strong id="perfil-stat-historico">0</strong><span>encontros realizados</span></div>
+        <div class="perfil-progress-stat"><strong id="perfil-stat-gerador">0</strong><span>conjuntos gerados</span></div>
+      </div>
+      <div class="perfil-progress-actions">
+        <button class="btn-ui-secondary" onclick="closePerfil();nav('screen-planejador','nav-home')">📝 Planejar agora</button>
+        <button class="btn-ui-soft" onclick="closePerfil();nav('screen-novidades','nav-home')">🆕 Ver novidades</button>
+      </div>
+    </div>
+  `);
+}
+function mcInjectNovidadesBadge(){
+  const patchBtn = document.getElementById('pmenu-patchnotes');
+  if(patchBtn && !document.getElementById('novidades-menu-badge')){
+    const arrow = patchBtn.querySelector('.pmi-arrow');
+    if(arrow){
+      arrow.insertAdjacentHTML('beforebegin', '<span class="novidades-menu-badge" id="novidades-menu-badge" style="display:none">1</span>');
+    }
+  }
+}
+function mcUpdateNovidadesBadge(){
+  const badge = document.getElementById('novidades-menu-badge');
+  const quick = document.getElementById('home-quick-novidades');
+  if(!badge) return;
+  let hasNew = false;
+  try{
+    const latest = typeof getLatestPatchNote === 'function' ? getLatestPatchNote() : null;
+    const seen = localStorage.getItem('patch_notes_last_seen');
+    hasNew = !!(latest && latest.versao && latest.versao !== seen);
+  }catch(e){}
+  badge.style.display = hasNew ? 'inline-flex' : 'none';
+  if(quick) quick.classList.toggle('is-new', hasNew);
+}
+function mcEnhanceNovidadesHistory(){
+  const list = document.getElementById('novidades-list');
+  if(!list) return;
+  const seen = localStorage.getItem('patch_notes_last_seen');
+  list.querySelectorAll('.pn-version-card').forEach(card => card.classList.remove('pn-unseen'));
+  const versionEls = list.querySelectorAll('.pn-version-num');
+  versionEls.forEach((el, index)=>{
+    const version = el.textContent.replace(/^v/i,'').trim();
+    const card = el.closest('.pn-version-card');
+    if(card && seen && compareVersionsSemver(version, seen) < 0){
+      return;
+    }
+    if(card && version !== seen){
+      const header = card.querySelector('.pn-version-header');
+      if(header && !header.querySelector('.inline-badge-new')){
+        header.insertAdjacentHTML('beforeend', '<span class="inline-badge-new">NOVO</span>');
+      }
+      card.classList.add('pn-unseen');
+    }
+  });
+}
+function mcUpdatePerfilProgress(){
+  if(!usuarioAtual) return;
+  const email = usuarioAtual?.email || usuarioAtual?.nome || 'anon';
+  const favoritosTotal =
+    (Array.isArray(favorites) ? favorites.length : 0) +
+    (mcGetSafeJSON('fav_perguntas_'+email, []).length) +
+    (mcGetSafeJSON('fav_encontros_'+email, []).length) +
+    (mcGetSafeJSON('fav_qgelos_'+email, []).length) +
+    (mcGetSafeJSON('fav_conjuntos_'+email, []).length) +
+    (mcGetSafeJSON('fav_encontros_ger_'+email, []).length);
+
+  const histTotal = (Array.isArray(historico) ? historico.length : 0) + (Array.isArray(historicoEnc) ? historicoEnc.length : 0);
+  const planosTotal = Array.isArray(planos) ? planos.length : 0;
+  const geradorTotal = mcGetSafeJSON('encontros_hist_gerador_v1_'+email, []).length;
+
+  const setText = (id, value)=>{
+    const el = document.getElementById(id);
+    if(el) el.textContent = String(value);
+  };
+  setText('perfil-stat-favoritos', favoritosTotal);
+  setText('perfil-stat-planos', planosTotal);
+  setText('perfil-stat-historico', histTotal);
+  setText('perfil-stat-gerador', geradorTotal);
+
+  const badge = document.getElementById('perfil-progress-badge');
+  if(badge){
+    const total = favoritosTotal + planosTotal + histTotal + geradorTotal;
+    badge.textContent =
+      total >= 20 ? 'Em ritmo forte' :
+      total >= 8 ? 'Avançando bem' :
+      total >= 1 ? 'Progresso real' :
+      'Começando';
+  }
+}
+function mcEnhanceEmptyStates(){
+  const favList = document.getElementById('favoritos-list');
+  if(favList && favList.textContent.includes('favorit')){
+    favList.innerHTML = mcCreateEmptyState(
+      '🤍',
+      'Seus favoritos começam aqui',
+      'Salve dinâmicas, perguntas e encontros para montar sua própria biblioteca rápida.',
+      `
+        <button class="btn-ui-primary" onclick="nav('screen-dinamicas','nav-dinamicas')">🎭 Explorar dinâmicas</button>
+        <button class="btn-ui-secondary" onclick="nav('screen-gerar','nav-gerar')">✨ Gerar agora</button>
+      `
+    );
+  }
+
+  const histList = document.getElementById('historico-list');
+  if(histList && histList.querySelector('.empty-state')){
+    histList.innerHTML = mcCreateEmptyState(
+      '📅',
+      'Seu histórico ainda está vazio',
+      'Quando você marcar uma dinâmica ou encontro como realizado, ele aparece aqui para não repetir depois.',
+      `
+        <button class="btn-ui-primary" onclick="nav('screen-dinamicas','nav-dinamicas')">🎭 Ver dinâmicas</button>
+        <button class="btn-ui-secondary" onclick="nav('screen-gerar','nav-gerar')">✨ Gerar encontro</button>
+      `
+    );
+  }
+
+  const planosList = document.getElementById('planos-lista');
+  if(planosList && planosList.querySelector('.empty-state')){
+    planosList.innerHTML = mcCreateEmptyState(
+      '📝',
+      'Planeje seu próximo encontro',
+      'Guarde tema, dinâmica, versículo e observações em um só lugar para não improvisar em cima da hora.',
+      `
+        <button class="btn-ui-primary" onclick="document.getElementById('plan-tema-select')?.focus()">🌸 Começar planejamento</button>
+        <button class="btn-ui-secondary" onclick="nav('screen-gerar','nav-gerar')">✨ Buscar ideias</button>
+      `
+    );
+  }
+
+  mcPatchBtnStyles(document);
+}
+function mcRunUiPack(){
+  mcInjectHomeQuickActions();
+  mcInjectGerarHelperActions();
+  mcInjectPerfilProgressCard();
+  mcInjectNovidadesBadge();
+  mcUpdateNovidadesBadge();
+  mcUpdatePerfilProgress();
+  mcEnhanceEmptyStates();
+  mcEnhanceNovidadesHistory();
+}
+(function(){
+  const _renderFavoritos = typeof renderFavoritos === 'function' ? renderFavoritos : null;
+  if(_renderFavoritos){
+    renderFavoritos = function(){
+      const result = _renderFavoritos.apply(this, arguments);
+      mcRunUiPack();
+      return result;
+    };
+  }
+
+  const _renderHistorico = typeof renderHistorico === 'function' ? renderHistorico : null;
+  if(_renderHistorico){
+    renderHistorico = function(){
+      const result = _renderHistorico.apply(this, arguments);
+      mcRunUiPack();
+      return result;
+    };
+  }
+
+  const _renderPlanos = typeof renderPlanos === 'function' ? renderPlanos : null;
+  if(_renderPlanos){
+    renderPlanos = function(){
+      const result = _renderPlanos.apply(this, arguments);
+      mcRunUiPack();
+      return result;
+    };
+  }
+
+  const _renderNovidadesList = typeof renderNovidadesList === 'function' ? renderNovidadesList : null;
+  if(_renderNovidadesList){
+    renderNovidadesList = function(){
+      const result = _renderNovidadesList.apply(this, arguments);
+      mcRunUiPack();
+      return result;
+    };
+  }
+
+  const _abrirPerfilTela = typeof abrirPerfilTela === 'function' ? abrirPerfilTela : null;
+  if(_abrirPerfilTela){
+    abrirPerfilTela = function(){
+      const result = _abrirPerfilTela.apply(this, arguments);
+      setTimeout(mcRunUiPack, 0);
+      return result;
+    };
+  }
+
+  const _fecharNovidades = typeof fecharNovidades === 'function' ? fecharNovidades : null;
+  if(_fecharNovidades){
+    fecharNovidades = function(){
+      const result = _fecharNovidades.apply(this, arguments);
+      setTimeout(mcRunUiPack, 30);
+      return result;
+    };
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    setTimeout(mcRunUiPack, 120);
+  });
+})();
